@@ -4,4 +4,6 @@
 typedef struct player Player;
 
 Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height);
+void drawPlayer(Player *pPlayer);
+void destroyPlayer(Player *pPlayer);
 #endif

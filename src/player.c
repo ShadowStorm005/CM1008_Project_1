@@ -39,3 +39,12 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->y_cord=y-pPlayer->playerRect.h/2;
     return pPlayer;
 }
+
+void drawPlayer(Player *pPlayer){
+    SDL_RenderCopy(pPlayer->pRenderer,pPlayer->pTexture,NULL,&(pPlayer->playerRect));
+}
+
+void destroyPlayer(Player *pPlayer){
+    SDL_DestroyTexture(pPlayer->pTexture);
+    free(pPlayer);
+}
