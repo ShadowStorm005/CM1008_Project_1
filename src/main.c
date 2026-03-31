@@ -3,10 +3,23 @@
 #include <SDL.h>
 #include "player.h"
 
+
+#define WINDOW_WIDTH 1980
+#define WINDOW_HEIGHT 1080
+
+
+/*typedef struct{
+    SDL_Window *pWindow;
+    SDL_Renderer *pRenderer;
+    Player *pPlayer;
+} Game;*/
+
+
 int main(int argv, char** args){
     SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, 0);
+    SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+    Player *player = createPlayer(WINDOW_WIDTH/2, WINDOW_HEIGHT/2, renderer, );
 
     
 

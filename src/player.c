@@ -13,7 +13,7 @@ struct player {
 };
 
 
-Player *createPlayer(int x, int y, SDL_Renderer *pRenderer, int window_width, int window_height)
+Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height)
 {
     Player *pPlayer = malloc(sizeof(struct player));
     pPlayer->window_width = window_width;
