@@ -4,9 +4,8 @@
 typedef struct platformImage PlatformImage;
 typedef struct platform Platform;
 
-PlatformImage *createPlatformImage(SDL_Renderer *pRenderer);
-Platform *createPlatform(PlatformImage *pPlatformImage, int window_width, int window_height);
+Platform *createPlatform(SDL_Renderer *pRenderer, int window_width, int window_height);
+void drawPlatform(Platform *pPlatform);
 void destroyPlatform(Platform *pflatform);
-void destroyPlatformImage(PlatformImage *pPlatformImage);
 
 #endif

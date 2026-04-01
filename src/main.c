@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include "player.h"
+#include "map.h"
 
 
 #define WINDOW_WIDTH 1280
@@ -12,6 +13,7 @@ typedef struct{
     SDL_Window *pWindow;
     SDL_Renderer *pRenderer;
     Player *pPlayer;
+    Platform *pPlatform;
 } Game;
 
 
@@ -55,24 +57,35 @@ int initiate(Game *pGame)
         printf("Error: %s\n",SDL_GetError());
         return 0;
     }
+
     pGame->pWindow = SDL_CreateWindow("Tank Turtles", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     if(!pGame->pWindow){
         printf("Error: %s\n",SDL_GetError());
         close(pGame);
         return 0;
     }
+
     pGame->pRenderer = SDL_CreateRenderer(pGame->pWindow, -1, 0);
     if(!pGame->pRenderer){
         printf("Error: %s\n",SDL_GetError());
         close(pGame);
         return 0;    
     }
+
     pGame->pPlayer = createPlayer(WINDOW_WIDTH/2, WINDOW_HEIGHT/2, pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     if(!pGame->pPlayer){
         printf("Error: %s\n",SDL_GetError());
         close(pGame);
         return 0;
     }
+
+    pGame->pPlatform = createPlatform(pGame->pRenderer,WINDOW_WIDTH,WINDOW_HEIGHT);
+    if(!pGame->pPlatform){
+        printf("Error: %s\n",SDL_GetError());
+        close(pGame);
+        return 0;
+    }
+
     return 1;
 }
 
@@ -92,6 +105,7 @@ void run(Game *pGame)
         SDL_RenderClear(pGame->pRenderer);
         SDL_SetRenderDrawColor(pGame->pRenderer, 70, 70, 70, 255);
         drawPlayer(pGame->pPlayer);
+        drawPlatform(pGame->pPlatform);
         SDL_RenderPresent(pGame->pRenderer);
         SDL_Delay(1000/60-15);
     }
@@ -102,5 +116,6 @@ void close(Game *pGame)
     if(pGame->pPlayer) destroyPlayer(pGame->pPlayer);
     if(pGame->pRenderer) SDL_DestroyRenderer(pGame->pRenderer);
     if(pGame->pWindow) SDL_DestroyWindow(pGame->pWindow);
+    if(pGame->pPlatform) destroyPlatform(pGame->pPlatform);
     SDL_Quit();
 }
