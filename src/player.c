@@ -16,8 +16,8 @@ struct player {
 Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height)
 {
     Player *pPlayer = malloc(sizeof(struct player));
-    pPlayer->window_width = window_width;
-    pPlayer->window_height = window_height;
+    pPlayer->window_width = window_width/2;
+    pPlayer->window_height = window_height/2;
     SDL_Surface *pSurface = IMG_Load("Resources/tank.png");
     if(!pSurface){
         printf("Error: %s\n",SDL_GetError());

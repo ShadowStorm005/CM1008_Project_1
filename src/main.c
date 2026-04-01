@@ -67,7 +67,7 @@ int initiate(Game *pGame)
         close(pGame);
         return 0;    
     }
-    pGame->pPlayer = createPlayer(WINDOW_WIDTH/2, WINDOW_HEIGHT/2, pGame->pRenderer, WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+    pGame->pPlayer = createPlayer(WINDOW_WIDTH/2, WINDOW_HEIGHT/2, pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     if(!pGame->pPlayer){
         printf("Error: %s\n",SDL_GetError());
         close(pGame);

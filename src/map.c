@@ -11,7 +11,7 @@ struct platformImage{
 
 struct platform{ 
     float x, y;
-    int window_width,window_height,renderAngle;
+    int window_width,window_height;
     SDL_Renderer *pRenderer;
     SDL_Texture *pTexture;
     SDL_Rect rect;
@@ -48,37 +48,25 @@ Platform *createPlatform(PlatformImage *pPlatformImage, int window_width, int wi
     Platform *pPlatform = malloc(sizeof(struct platform));
     pPlatform->pRenderer = pPlatformImage->pRenderer;
     pPlatform->pTexture = pPlatformImage->pTexture;
-    pPlatform->window_width = window_width;
-    pPlatform->window_height = window_height;
+    pPlatform->window_width = window_width/2;                           //  Appers in the middle of the screen
+    pPlatform->window_height = window_height - window_height*3/4;       
+
     SDL_QueryTexture(pPlatformImage->pTexture,NULL,NULL,&(pPlatform->rect.w),&(pPlatform->rect.h));
-    int sizeFactor = rand()%8+1;
-    pPlatform->rect.w/=sizeFactor;
-    pPlatform->rect.h/=sizeFactor;
-    getStartValues(pPlatform);
-    pPlatform->renderAngle = 0;
+
+    
+    pPlatform->rect.w/=window_width/2;
+    pPlatform->rect.h/=window_height/4;
+    //getStartValues(pPlatform);
+    
 
     return pPlatform;
 }
 /*
-static void getStartValues(Asteroid *pAsteroid){
-    int angle;
-    if(rand()%2){
-        pAsteroid->x=rand()%pAsteroid->window_width-pAsteroid->rect.w/2;
-        pAsteroid->y=-pAsteroid->rect.h;
-        angle=rand()%90-45;
-    }else{
-        pAsteroid->y=rand()%pAsteroid->window_height-pAsteroid->rect.h/2;
-        pAsteroid->x=-pAsteroid->rect.w;
-        angle=rand()%90;
-    }
-    int v=rand()%8+5;
-    pAsteroid->vx=v*sin(angle*2*M_PI/360);
-    pAsteroid->vy=v*cos(angle*2*M_PI/360);
-    pAsteroid->rect.x=pAsteroid->x;
-    pAsteroid->rect.y=pAsteroid->y;
+static void getStartValues(Platform *pPlatform){
+    
 }
 
-SDL_Rect getRectAsteroid(Asteroid *pAsteroid){
+SDL_Rect getRectAsteroid(Platform *pPlatform){
     return pAsteroid->rect;
 }
 */
