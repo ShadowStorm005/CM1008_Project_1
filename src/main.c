@@ -67,7 +67,7 @@ int initiate(Game *pGame)
         close(pGame);
         return 0;    
     }
-    pGame->pPlayer = createPlayer(WINDOW_WIDTH/2, WINDOW_HEIGHT/2, pGame->pRenderer, 500, 200);
+    pGame->pPlayer = createPlayer(WINDOW_WIDTH/2, WINDOW_HEIGHT/2, pGame->pRenderer, WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
     if(!pGame->pPlayer){
         printf("Error: %s\n",SDL_GetError());
         close(pGame);
@@ -87,8 +87,10 @@ void run(Game *pGame)
             if(event.type==SDL_QUIT) close_requested = 1;
             //else handleInput(pGame,&event);
         }
+        
+
         SDL_RenderClear(pGame->pRenderer);
-        SDL_SetRenderDrawColor(pGame->pRenderer, 255, 0, 0, 255);
+        SDL_SetRenderDrawColor(pGame->pRenderer, 70, 70, 70, 255);
         drawPlayer(pGame->pPlayer);
         SDL_RenderPresent(pGame->pRenderer);
         SDL_Delay(1000/60-15);

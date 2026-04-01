@@ -18,7 +18,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     Player *pPlayer = malloc(sizeof(struct player));
     pPlayer->window_width = window_width;
     pPlayer->window_height = window_height;
-    SDL_Surface *pSurface = IMG_Load("resources/PrimitivPlayerProdjekt.png");
+    SDL_Surface *pSurface = IMG_Load("Resources/tank.png");
     if(!pSurface){
         printf("Error: %s\n",SDL_GetError());
         return NULL;
@@ -33,10 +33,12 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     }
 
     SDL_QueryTexture(pPlayer->pTexture,NULL,NULL,&(pPlayer->playerRect.w),&(pPlayer->playerRect.h));
-    pPlayer->playerRect.w /=4;
-    pPlayer->playerRect.h /=4;
-    pPlayer->x_cord=x-pPlayer->playerRect.w/2;
-    pPlayer->y_cord=y-pPlayer->playerRect.h/2;
+    pPlayer->playerRect.w /=1;
+    pPlayer->playerRect.h /=1;                                                  // size of player
+    //pPlayer->x_cord=x-pPlayer->playerRect.w/2;
+    //pPlayer->y_cord=y-pPlayer->playerRect.h/2;
+    pPlayer->playerRect.x = pPlayer->window_width;                            // where the player will start
+    pPlayer->playerRect.y = pPlayer->window_height;
     return pPlayer;
 }
 
