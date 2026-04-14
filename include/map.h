@@ -1,11 +1,13 @@
-#ifndef map_h
-#define map_h
+#ifndef MAP_H
+#define MAP_H
 
-typedef struct platformImage PlatformImage;
+#include <SDL.h>
+
 typedef struct platform Platform;
 
-Platform *createPlatform(SDL_Renderer *pRenderer, int window_width, int window_height);
-void drawPlatform(Platform *pPlatform);
-void destroyPlatform(Platform *pflatform);
+Platform *createPlatforms(SDL_Renderer *pRenderer, int window_width, int window_height, int *platformCount);
+void drawPlatforms(Platform *platforms, int platformCount);
+SDL_Rect getPlatformRect(Platform *platforms, int index);
+void destroyPlatforms(Platform *platforms, int platformCount);
 
 #endif
