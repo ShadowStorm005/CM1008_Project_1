@@ -158,6 +158,7 @@ void updatePlayer(Player *pPlayer, const Uint8 *keystate, Platform *platforms, i
 
     updatePlayerRects(pPlayer);
 }
+
 void drawPlayer(Player *pPlayer)
 {
     SDL_RenderCopy(pPlayer->pRenderer, pPlayer->pTexture, NULL, &pPlayer->playerRect);
@@ -177,3 +178,4 @@ void destroyPlayer(Player *pPlayer)
     if (pPlayer->pTexture) SDL_DestroyTexture(pPlayer->pTexture);
     free(pPlayer);
 }
+
