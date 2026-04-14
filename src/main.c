@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include "player.h"
+#include "map.h"
+
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 960
+
+typedef struct {
+    SDL_Window *pWindow;
+    SDL_Renderer *pRenderer;
+    Player *pPlayer;
+    Platform *pPlatforms;
+    int platformCount;
+} Game;
+
+int initiate(Game *pGame);
+void run(Game *pGame);
+void closeGame(Game *pGame);
+
+int main(int argc, char **argv)
+{
+    Game game = {0};
+
+    if (!initiate(&game)) {
+        return 1;
+    }
+
+    run(&game);
+    closeGame(&game);
+    return 0;
+}
+
+int initiate(Game *pGame)
+{
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+        printf("SDL Init Error: %s\n", SDL_GetError());
+        return 0;
+    }
+
+    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+        printf("SDL_image Init Error: %s\n", IMG_GetError());
+        SDL_Quit();
+        return 0;
+    }
+
+    pGame->pWindow = SDL_CreateWindow(
+        "Tank Turtles",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
+        0
+    );
+
+    if (!pGame->pWindow) {
+        printf("Window Error: %s\n", SDL_GetError());
+        closeGame(pGame);
+        return 0;
+    }
+
+    pGame->pRenderer = SDL_CreateRenderer(pGame->pWindow, -1, SDL_RENDERER_ACCELERATED);
+    if (!pGame->pRenderer) {
+        printf("Renderer Error: %s\n", SDL_GetError());
+        closeGame(pGame);
+        return 0;
+    }
+
+    pGame->pPlayer = createPlayer(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+    if (!pGame->pPlayer) {
+        printf("Player creation failed\n");
+        closeGame(pGame);
+        return 0;
+    }
+
+    pGame->pPlatforms = createPlatforms(pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT, &pGame->platformCount);
+    if (!pGame->pPlatforms) {
+        printf("Platform creation failed\n");
+        closeGame(pGame);
+        return 0;
+    }
+
+    return 1;
+}
+
+void run(Game *pGame)
+{
+    int close_requested = 0;
+    SDL_Event event;
+
+    while (!close_requested) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                close_requested = 1;
+            }
+        }
+
+        const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+        updatePlayer(pGame->pPlayer, keystate, pGame->pPlatforms, pGame->platformCount);
+
+        SDL_SetRenderDrawColor(pGame->pRenderer, 70, 70, 70, 255);
+        SDL_RenderClear(pGame->pRenderer);
+
+        drawPlatforms(pGame->pPlatforms, pGame->platformCount);
+        drawPlayer(pGame->pPlayer);
+
+        SDL_RenderPresent(pGame->pRenderer);
+        SDL_Delay(16);
+    }
+}
+
+void closeGame(Game *pGame)
+{
+    if (pGame->pPlayer) destroyPlayer(pGame->pPlayer);
+    if (pGame->pPlatforms) destroyPlatforms(pGame->pPlatforms, pGame->platformCount);
+    if (pGame->pRenderer) SDL_DestroyRenderer(pGame->pRenderer);
+    if (pGame->pWindow) SDL_DestroyWindow(pGame->pWindow);
+
+    IMG_Quit();
+    SDL_Quit();
+}
