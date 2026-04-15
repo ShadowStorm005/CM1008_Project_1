@@ -136,6 +136,7 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
         SDL_Rect platformRect = getPlatformRect(platforms, i);
 
         if (SDL_HasIntersection(&pPlayer->hitbox, &platformRect)) {
+            checkForCollisions(pPlayer, platforms, platformCount, pPlayer->pRenderer);
             int overlapLeft = (pPlayer->hitbox.x + pPlayer->hitbox.w) - platformRect.x;
             int overlapRight = (platformRect.x + platformRect.w) - pPlayer->hitbox.x;
             int overlapTop = (pPlayer->hitbox.y + pPlayer->hitbox.h) - platformRect.y;
