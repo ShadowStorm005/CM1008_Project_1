@@ -120,7 +120,7 @@ void run(Game *pGame)
 
         updatePlayer(pGame->pPlayer, pGame->pPlatforms, pGame->platformCount);
 
-        SDL_SetRenderDrawColor(pGame->pRenderer, 70, 70, 70, 255);
+        SDL_SetRenderDrawColor(pGame->pRenderer, 0, 0, 0, 255);
         SDL_RenderClear(pGame->pRenderer);
 
         SDL_RenderCopy(pGame->pRenderer, pGame->pbackground, NULL, NULL);
