@@ -49,11 +49,11 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->velX = 0.0f;
     pPlayer->velY = 0.0f;
     pPlayer->moveSpeed = 5.0f;
-    pPlayer->jumpForce = 14.0f;
+    pPlayer->jumpForce = 18.0f;
     pPlayer->gravity = 0.7f;
     pPlayer->isGrounded = 0;
 
-    SDL_Surface *pSurface = IMG_Load("Resources/tank.png");
+    SDL_Surface *pSurface = IMG_Load("Resources/firsttank.png");
     if (!pSurface) {
         printf("Error loading tank.png: %s\n", IMG_GetError());
         free(pPlayer);
