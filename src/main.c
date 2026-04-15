@@ -19,6 +19,7 @@ typedef struct {
 int initiate(Game *pGame);
 void run(Game *pGame);
 void closeGame(Game *pGame);
+void handleInput(Game *pGame, const Uint8 *keystate);
 
 int main(int argc, char **argv)
 {
@@ -92,13 +93,15 @@ void run(Game *pGame)
 
     while (!close_requested) {
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
+            if (event.type == SDL_QUIT) 
+            {
                 close_requested = 1;
-            }
+            } 
         }
-
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
-        updatePlayer(pGame->pPlayer, keystate, pGame->pPlatforms, pGame->platformCount);
+        handleInput(pGame, keystate);
+
+        updatePlayer(pGame->pPlayer, pGame->pPlatforms, pGame->platformCount);
 
         SDL_SetRenderDrawColor(pGame->pRenderer, 70, 70, 70, 255);
         SDL_RenderClear(pGame->pRenderer);
@@ -108,6 +111,22 @@ void run(Game *pGame)
 
         SDL_RenderPresent(pGame->pRenderer);
         SDL_Delay(16);
+    }
+}
+
+void handleInput(Game *pGame, const Uint8 *keystate)
+{
+    if(keystate[SDL_SCANCODE_LEFT] || keystate[SDL_SCANCODE_A])
+    {
+        moveLeft(pGame->pPlayer);
+    }
+    if(keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D])
+    {
+        moveRight(pGame->pPlayer);
+    }
+    if(keystate[SDL_SCANCODE_UP] || keystate[SDL_SCANCODE_W])
+    {
+        jump(pGame->pPlayer);
     }
 }
 

@@ -48,7 +48,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     pPlayer->velX = 0.0f;
     pPlayer->velY = 0.0f;
-    pPlayer->moveSpeed = 5.0f;
+    pPlayer->moveSpeed = 1.2f;
     pPlayer->jumpForce = 14.0f;
     pPlayer->gravity = 0.7f;
     pPlayer->isGrounded = 0;
@@ -82,19 +82,36 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     return pPlayer;
 }
 
-void updatePlayer(Player *pPlayer, const Uint8 *keystate, Platform *platforms, int platformCount)
+void moveLeft(Player *pPlayer)
 {
-    SDL_Rect previousHitbox = pPlayer->hitbox;
+    pPlayer->velX += -pPlayer->moveSpeed;
+}
 
-    pPlayer->velX = 0.0f;
+void moveRight(Player *pPlayer)
+{
+    pPlayer->velX += pPlayer->moveSpeed;
+}
 
-    if (keystate[SDL_SCANCODE_A]) pPlayer->velX = -pPlayer->moveSpeed;
-    if (keystate[SDL_SCANCODE_D]) pPlayer->velX = pPlayer->moveSpeed;
-
-    if (keystate[SDL_SCANCODE_W] && pPlayer->isGrounded) {
+void jump(Player *pPlayer)
+{   
+    if(pPlayer->isGrounded)
+    {
         pPlayer->velY = -pPlayer->jumpForce;
         pPlayer->isGrounded = 0;
     }
+}
+
+void deaccelerate(Player *pPlayer)
+{
+    pPlayer->velX *= 0.8f;
+    if(fabs(pPlayer->velX) < 0.1f) pPlayer->velX = 0;
+}
+
+void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
+{
+    SDL_Rect previousHitbox = pPlayer->hitbox;
+
+    deaccelerate(pPlayer);
 
     pPlayer->velY += pPlayer->gravity;
 
