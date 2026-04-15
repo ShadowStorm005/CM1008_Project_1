@@ -24,6 +24,8 @@ struct player {
 
     SDL_Rect playerRect;
     SDL_Rect hitbox;
+
+    SDL_RendererFlip flip;
 };
 
 static void updatePlayerRects(Player *pPlayer)
@@ -55,7 +57,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     SDL_Surface *pSurface = IMG_Load("Resources/firsttank.png");
     if (!pSurface) {
-        printf("Error loading tank.png: %s\n", IMG_GetError());
+        printf("Error loading firsttank.png: %s\n", IMG_GetError());
         free(pPlayer);
         return NULL;
     }
@@ -78,6 +80,8 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->x = x - pPlayer->playerRect.w / 2.0f;
     pPlayer->y = y - pPlayer->playerRect.h / 2.0f;
 
+    pPlayer->flip = SDL_FLIP_NONE;
+
     updatePlayerRects(pPlayer);
     return pPlayer;
 }
@@ -85,11 +89,13 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 void moveLeft(Player *pPlayer)
 {
     pPlayer->velX += -pPlayer->moveSpeed;
+    pPlayer->flip = SDL_FLIP_HORIZONTAL;
 }
 
 void moveRight(Player *pPlayer)
 {
     pPlayer->velX += pPlayer->moveSpeed;
+    pPlayer->flip = SDL_FLIP_NONE;
 }
 
 void jump(Player *pPlayer)
@@ -178,7 +184,7 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
 
 void drawPlayer(Player *pPlayer)
 {
-    SDL_RenderCopy(pPlayer->pRenderer, pPlayer->pTexture, NULL, &pPlayer->playerRect);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTexture, NULL, &pPlayer->playerRect, 0.0, NULL, pPlayer->flip);
 
     SDL_SetRenderDrawColor(pPlayer->pRenderer, 255, 0, 0, 255);
     SDL_RenderDrawRect(pPlayer->pRenderer, &pPlayer->hitbox);
