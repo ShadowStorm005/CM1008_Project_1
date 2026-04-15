@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "player.h"
 #include "map.h"
+#include "physics.h"
 
 struct player {
     int health;
@@ -108,7 +109,8 @@ void updatePlayer(Player *pPlayer, const Uint8 *keystate, Platform *platforms, i
         SDL_Rect platformRect = getPlatformRect(platforms, i);
 
         if (SDL_HasIntersection(&pPlayer->hitbox, &platformRect)) {
-            int overlapLeft = (pPlayer->hitbox.x + pPlayer->hitbox.w) - platformRect.x;
+            checkForCollisions(pPlayer, platforms, platformCount, pPlayer->pRenderer);
+            /*int overlapLeft = (pPlayer->hitbox.x + pPlayer->hitbox.w) - platformRect.x;
             int overlapRight = (platformRect.x + platformRect.w) - pPlayer->hitbox.x;
             int overlapTop = (pPlayer->hitbox.y + pPlayer->hitbox.h) - platformRect.y;
             int overlapBottom = (platformRect.y + platformRect.h) - pPlayer->hitbox.y;
@@ -137,7 +139,7 @@ void updatePlayer(Player *pPlayer, const Uint8 *keystate, Platform *platforms, i
                     pPlayer->x += minOverlapX;
                     updatePlayerRects(pPlayer);
                 }
-            }
+            }*/
         }
     }
 
@@ -170,6 +172,11 @@ void drawPlayer(Player *pPlayer)
 SDL_Rect getPlayerHitbox(Player *pPlayer)
 {
     return pPlayer->hitbox;
+}
+
+SDL_Rect getPlayerRect(Player *pPlayer)
+{
+    return pPlayer->playerRect;
 }
 
 void destroyPlayer(Player *pPlayer)

@@ -4,6 +4,7 @@
 #include <SDL_image.h>
 #include "player.h"
 #include "map.h"
+#include "physics.h"
 
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 960
@@ -99,7 +100,7 @@ void run(Game *pGame)
 
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
         updatePlayer(pGame->pPlayer, keystate, pGame->pPlatforms, pGame->platformCount);
-
+        SDL_Delay(1000);
         SDL_SetRenderDrawColor(pGame->pRenderer, 70, 70, 70, 255);
         SDL_RenderClear(pGame->pRenderer);
 
