@@ -82,6 +82,7 @@ int initiate(Game *pGame)
 
     if (!pGame->pbackground) {
         printf("Error creating texture: %s\n", SDL_GetError());
+        closeGame(pGame);
         return 0;
     }
 
