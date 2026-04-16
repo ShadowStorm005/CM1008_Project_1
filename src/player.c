@@ -74,8 +74,8 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     SDL_QueryTexture(pPlayer->pTexture, NULL, NULL, &pPlayer->playerRect.w, &pPlayer->playerRect.h);
 
-    pPlayer->playerRect.w = 110;
-    pPlayer->playerRect.h = 60;
+    pPlayer->playerRect.w = 65;
+    pPlayer->playerRect.h = 30;
 
     pPlayer->x = x - pPlayer->playerRect.w / 2.0f;
     pPlayer->y = y - pPlayer->playerRect.h / 2.0f;
