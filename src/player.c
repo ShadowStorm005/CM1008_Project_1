@@ -105,7 +105,7 @@ void updatePlayer(Player *pPlayer, const Uint8 *keystate, Platform *platforms, i
     updatePlayerRects(pPlayer);
     pPlayer->isGrounded = 0;
     
-    checkForCollisions(pPlayer, platforms, platformCount, pPlayer->pRenderer);
+    checkForCollisions(pPlayer, platforms, platformCount);
 
     /*for (int i = 0; i < platformCount; i++) {
         SDL_Rect platformRect = getPlatformRect(platforms, i);
