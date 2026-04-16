@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "player.h"
+#include "weapon.h"
 #include "map.h"
 
 struct player {
@@ -14,7 +15,7 @@ struct player {
     float moveSpeed;
     float jumpForce;
     float gravity;
-
+    int canFire;
     int isGrounded;
 
     int window_width, window_height;
@@ -45,6 +46,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->window_width = window_width;
     pPlayer->window_height = window_height;
     pPlayer->health = 100;
+    pPlayer->canFire = 1;
 
     pPlayer->velX = 0.0f;
     pPlayer->velY = 0.0f;
@@ -101,10 +103,37 @@ void jump(Player *pPlayer)
     }
 }
 
+float getXCord(Player *pPlayer)
+{
+    return pPlayer->x;
+}
+
+float getYCord(Player *pPlayer)
+{
+    return pPlayer->y;
+}
+
 void deaccelerate(Player *pPlayer)
 {
     pPlayer->velX *= 0.8f;
     if(fabs(pPlayer->velX) < 0.1f) pPlayer->velX = 0;
+}
+
+int canShoot(Player *pPlayer)
+{
+    return pPlayer->canFire;
+}
+
+void enableTrigger(Player *pPlayer, int enable)
+{
+    if(enable)
+    {
+        pPlayer->canFire = 1;
+    }
+    else
+    {
+        pPlayer->canFire = 0;
+    }
 }
 
 void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
@@ -162,13 +191,15 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
     if (pPlayer->x + pPlayer->playerRect.w > pPlayer->window_width)
         pPlayer->x = pPlayer->window_width - pPlayer->playerRect.w;
 
-    if (pPlayer->y + pPlayer->playerRect.h > pPlayer->window_height) {
+    if (pPlayer->y + pPlayer->playerRect.h > pPlayer->window_height) 
+    {
         pPlayer->y = pPlayer->window_height - pPlayer->playerRect.h;
         pPlayer->velY = 0.0f;
         pPlayer->isGrounded = 1;
     }
 
-    if (pPlayer->y < 0) {
+    if (pPlayer->y < 0) 
+    {
         pPlayer->y = 0;
         pPlayer->velY = 0.0f;
     }
@@ -195,4 +226,3 @@ void destroyPlayer(Player *pPlayer)
     if (pPlayer->pTexture) SDL_DestroyTexture(pPlayer->pTexture);
     free(pPlayer);
 }
-
