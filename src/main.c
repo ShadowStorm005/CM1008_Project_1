@@ -79,7 +79,7 @@ int initiate(Game *pGame)
     }
 
     pGame->pbackground = SDL_CreateTextureFromSurface(pGame->pRenderer, pbackground);
-    SDL_FreeSurface(pbackground);
+    free(pbackground);
 
     if (!pGame->pbackground) {
         printf("Error creating texture: %s\n", SDL_GetError());

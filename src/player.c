@@ -67,7 +67,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     pPlayer->pRenderer = pRenderer;
     pPlayer->pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
-    SDL_FreeSurface(pSurface);
+    free(pSurface);
 
     if (!pPlayer->pTexture) {
         printf("Error creating player texture: %s\n", SDL_GetError());
