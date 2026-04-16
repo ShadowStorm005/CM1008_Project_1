@@ -5,6 +5,6 @@
 #include "player.h"
 #include "map.h"
 
-void checkForCollisions(Player *pPlayer, Platform *pPlatforms, int platformCount, SDL_Renderer *pRenderer);
+void checkForCollisions(Player *pPlayer, Platform *pPlatforms, int platformCount);
 
 #endif

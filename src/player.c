@@ -192,6 +192,11 @@ void setPlayerGrounded(Player *pPlayer)
     pPlayer->isGrounded = 1;
 }
 
+void stopVelY(Player *pPlayer)
+{
+    pPlayer->velY = 0.0f;
+}
+
 void destroyPlayer(Player *pPlayer)
 {
     if (!pPlayer) return;

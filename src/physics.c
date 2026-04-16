@@ -4,7 +4,7 @@
 #include "player.h"
 #include "map.h"
 
-void checkForCollisions(Player *pPlayer, Platform *pPlatforms, int platformCount, SDL_Renderer *pRenderer)
+void checkForCollisions(Player *pPlayer, Platform *pPlatforms, int platformCount)
 {
     SDL_Rect playerRect = getPlayerRect(pPlayer);
     SDL_Rect collisionResult;
@@ -12,9 +12,10 @@ void checkForCollisions(Player *pPlayer, Platform *pPlatforms, int platformCount
         SDL_Rect platformRect = getPlatformRect(pPlatforms, i);
         if (SDL_IntersectRect(&playerRect, &platformRect, &collisionResult)){
             if (collisionResult.w > collisionResult.h){
-                if (collisionResult.x==playerRect.x && collisionResult.y==playerRect.y){
+                if (collisionResult.y > platformRect.y + (platformRect.h / 2)){
                     // Player colliding from bottom
                     playerRect.y += collisionResult.h;
+                    stopVelY(pPlayer);
                     setPlayerRect(pPlayer, playerRect.x, playerRect.y);
                     updatePlayerRects(pPlayer);
                 }
@@ -27,7 +28,7 @@ void checkForCollisions(Player *pPlayer, Platform *pPlatforms, int platformCount
                 }
             }
             else if (collisionResult.h > collisionResult.w){
-                if (collisionResult.x==playerRect.x && collisionResult.y==playerRect.y){
+                if (collisionResult.x > platformRect.x + (platformRect.w / 2)){
                     // Player colliding from right
                     playerRect.x += collisionResult.w;
                     setPlayerRect(pPlayer, playerRect.x, playerRect.y);
