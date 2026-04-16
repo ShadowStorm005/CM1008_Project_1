@@ -100,7 +100,6 @@ void run(Game *pGame)
 
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
         updatePlayer(pGame->pPlayer, keystate, pGame->pPlatforms, pGame->platformCount);
-        SDL_Delay(1000);
         SDL_SetRenderDrawColor(pGame->pRenderer, 70, 70, 70, 255);
         SDL_RenderClear(pGame->pRenderer);
 

@@ -6,13 +6,40 @@
 
 void checkForCollisions(Player *pPlayer, Platform *pPlatforms, int platformCount, SDL_Renderer *pRenderer)
 {
-    SDL_Rect playerHitbox = getPlayerHitbox(pPlayer);
+    SDL_Rect playerRect = getPlayerRect(pPlayer);
     SDL_Rect collisionResult;
-    for (int i=0; i<platformCount; i++){
-        SDL_Rect platformRect = getPlatformRect(pPlatforms, platformCount);
-        if (SDL_IntersectRect(&playerHitbox, &platformRect, &collisionResult) == SDL_TRUE){
-            SDL_SetRenderDrawColor(pRenderer, 0, 0, 255, 255);
-            SDL_RenderDrawRect(pRenderer, &collisionResult);
+    for (int i = 0; i < platformCount; i++){
+        SDL_Rect platformRect = getPlatformRect(pPlatforms, i);
+        if (SDL_IntersectRect(&playerRect, &platformRect, &collisionResult)){
+            if (collisionResult.w > collisionResult.h){
+                if (collisionResult.x==playerRect.x && collisionResult.y==playerRect.y){
+                    // Player colliding from bottom
+                    playerRect.y += collisionResult.h;
+                    setPlayerRect(pPlayer, playerRect.x, playerRect.y);
+                    updatePlayerRects(pPlayer);
+                }
+                else{
+                    // Player colliding from top
+                    playerRect.y -= collisionResult.h;
+                    setPlayerGrounded(pPlayer);
+                    setPlayerRect(pPlayer, playerRect.x, playerRect.y);
+                    updatePlayerRects(pPlayer);
+                }
+            }
+            else if (collisionResult.h > collisionResult.w){
+                if (collisionResult.x==playerRect.x && collisionResult.y==playerRect.y){
+                    // Player colliding from right
+                    playerRect.x += collisionResult.w;
+                    setPlayerRect(pPlayer, playerRect.x, playerRect.y);
+                    updatePlayerRects(pPlayer);
+                }
+                else{
+                    // Player colliding from left
+                    playerRect.x -= collisionResult.w;
+                    setPlayerRect(pPlayer, playerRect.x, playerRect.y);
+                    updatePlayerRects(pPlayer);
+                }
+            }
         }
     }
 }

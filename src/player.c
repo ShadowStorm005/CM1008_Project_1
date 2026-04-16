@@ -27,7 +27,7 @@ struct player {
     SDL_Rect hitbox;
 };
 
-static void updatePlayerRects(Player *pPlayer)
+void updatePlayerRects(Player *pPlayer)
 {
     pPlayer->playerRect.x = (int)pPlayer->x;
     pPlayer->playerRect.y = (int)pPlayer->y;
@@ -104,13 +104,14 @@ void updatePlayer(Player *pPlayer, const Uint8 *keystate, Platform *platforms, i
 
     updatePlayerRects(pPlayer);
     pPlayer->isGrounded = 0;
+    
+    checkForCollisions(pPlayer, platforms, platformCount, pPlayer->pRenderer);
 
-    for (int i = 0; i < platformCount; i++) {
+    /*for (int i = 0; i < platformCount; i++) {
         SDL_Rect platformRect = getPlatformRect(platforms, i);
 
         if (SDL_HasIntersection(&pPlayer->hitbox, &platformRect)) {
-            checkForCollisions(pPlayer, platforms, platformCount, pPlayer->pRenderer);
-            /*int overlapLeft = (pPlayer->hitbox.x + pPlayer->hitbox.w) - platformRect.x;
+            int overlapLeft = (pPlayer->hitbox.x + pPlayer->hitbox.w) - platformRect.x;
             int overlapRight = (platformRect.x + platformRect.w) - pPlayer->hitbox.x;
             int overlapTop = (pPlayer->hitbox.y + pPlayer->hitbox.h) - platformRect.y;
             int overlapBottom = (platformRect.y + platformRect.h) - pPlayer->hitbox.y;
@@ -139,9 +140,9 @@ void updatePlayer(Player *pPlayer, const Uint8 *keystate, Platform *platforms, i
                     pPlayer->x += minOverlapX;
                     updatePlayerRects(pPlayer);
                 }
-            }*/
+            }
         }
-    }
+    }*/
 
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->playerRect.w > pPlayer->window_width)
@@ -177,6 +178,18 @@ SDL_Rect getPlayerHitbox(Player *pPlayer)
 SDL_Rect getPlayerRect(Player *pPlayer)
 {
     return pPlayer->playerRect;
+}
+
+void setPlayerRect(Player *pPlayer, int x, int y)
+{
+    pPlayer->x = x;
+    pPlayer->y = y;
+}
+
+void setPlayerGrounded(Player *pPlayer)
+{
+    pPlayer->velY = 0.0f;
+    pPlayer->isGrounded = 1;
 }
 
 void destroyPlayer(Player *pPlayer)
