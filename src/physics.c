@@ -31,12 +31,14 @@ void checkForCollisions(Player *pPlayer, Platform *pPlatforms, int platformCount
                 if (collisionResult.x > platformRect.x + (platformRect.w / 2)){
                     // Player colliding from right
                     playerRect.x += collisionResult.w;
+                    touchingWall(pPlayer);
                     setPlayerRect(pPlayer, playerRect.x, playerRect.y);
                     updatePlayerRects(pPlayer);
                 }
                 else{
                     // Player colliding from left
                     playerRect.x -= collisionResult.w;
+                    touchingWall(pPlayer);
                     setPlayerRect(pPlayer, playerRect.x, playerRect.y);
                     updatePlayerRects(pPlayer);
                 }

@@ -17,6 +17,7 @@ struct player {
     float gravity;
 
     int isGrounded;
+    int isTouchingWall;
 
     int window_width, window_height;
 
@@ -53,6 +54,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->jumpForce = 14.0f;
     pPlayer->gravity = 0.7f;
     pPlayer->isGrounded = 0;
+    pPlayer->isTouchingWall = 0;
 
     SDL_Surface *pSurface = IMG_Load("Resources/tank.png");
     if (!pSurface) {
@@ -190,11 +192,18 @@ void setPlayerGrounded(Player *pPlayer)
 {
     pPlayer->velY = 0.0f;
     pPlayer->isGrounded = 1;
+    pPlayer->isTouchingWall = 0;
 }
 
 void stopVelY(Player *pPlayer)
 {
     pPlayer->velY = 0.0f;
+}
+
+void touchingWall(Player *pPlayer)
+{
+    if (pPlayer->velY < 0) pPlayer->velY /= 1.5f;
+    pPlayer->isTouchingWall = 1;
 }
 
 void destroyPlayer(Player *pPlayer)
