@@ -68,8 +68,8 @@ void updateProjectile(Projectile *pProjectile)
 {
     pProjectile->x += pProjectile->velX;
     pProjectile->y += pProjectile->velY;
-    pProjectile->projectile_rect.x = (int)pProjectile->x;
-    pProjectile->projectile_rect.y = (int)pProjectile->y;
+    pProjectile->projectile_rect.x = (int)(pProjectile->x);
+    pProjectile->projectile_rect.y = (int)(pProjectile->y - pProjectile->projectile_rect.h / 2);
 
     if ((pProjectile->x+pProjectile->projectile_rect.w) < 0 || pProjectile->x > WINDOW_WIDTH || pProjectile->y > WINDOW_HEIGHT)
     {
@@ -80,7 +80,8 @@ void updateProjectile(Projectile *pProjectile)
 void drawProjectile(Projectile *pProjectile)
 {
     if(!pProjectile->active) return;
-    SDL_RenderCopyEx(pProjectile->pRenderer, pProjectile->pTexture, NULL /**/, &pProjectile->projectile_rect, pProjectile->angle*180/3.141f, NULL, SDL_FLIP_NONE);
+    SDL_Point center = {0, pProjectile->projectile_rect.h / 2};
+    SDL_RenderCopyEx(pProjectile->pRenderer, pProjectile->pTexture, NULL /**/, &pProjectile->projectile_rect, pProjectile->angle*180/3.141f, &center, SDL_FLIP_NONE);
 }
 
 void shoot(Projectile *pProjectile[], float x, float y, int mousePosx, int mousePosy)
@@ -93,8 +94,7 @@ void shoot(Projectile *pProjectile[], float x, float y, int mousePosx, int mouse
             pProjectile[i]->x = x;
             pProjectile[i]->y = y;
 
-            //absolute speed is equal to 8.0f for no ig
-            float dx = mousePosx - (pProjectile[i]->projectile_rect.w)/2 - x;
+            float dx = mousePosx - x;
             float dy = mousePosy - y;
 
             pProjectile[i]->angle = atan2(dy, dx);
