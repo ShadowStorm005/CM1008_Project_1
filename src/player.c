@@ -107,7 +107,7 @@ void deaccelerate(Player *pPlayer)
     if(fabs(pPlayer->velX) < 0.1f) pPlayer->velX = 0;
 }
 
-void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
+void updatePlayer(Player *pPlayer, Map *platforms, int platformCount)
 {
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
@@ -122,35 +122,35 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
     pPlayer->isGrounded = 0;
 
     for (int i = 0; i < platformCount; i++) {
-        SDL_Rect platformRect = getPlatformRect(platforms, i);
+        SDL_Rect tileRect = getTileRect(platforms, i);
 
-        if (SDL_HasIntersection(&pPlayer->hitbox, &platformRect)) {
-            int overlapLeft = (pPlayer->hitbox.x + pPlayer->hitbox.w) - platformRect.x;
-            int overlapRight = (platformRect.x + platformRect.w) - pPlayer->hitbox.x;
-            int overlapTop = (pPlayer->hitbox.y + pPlayer->hitbox.h) - platformRect.y;
-            int overlapBottom = (platformRect.y + platformRect.h) - pPlayer->hitbox.y;
+        if (SDL_HasIntersection(&pPlayer->hitbox, &tileRect)) {
+            int overlapLeft = (pPlayer->hitbox.x + pPlayer->hitbox.w) - tileRect.x;
+            int overlapRight = (tileRect.x + tileRect.w) - pPlayer->hitbox.x;
+            int overlapTop = (pPlayer->hitbox.y + pPlayer->hitbox.h) - tileRect.y;
+            int overlapBottom = (tileRect.y + tileRect.h) - pPlayer->hitbox.y;
 
             int minOverlapX = overlapLeft < overlapRight ? overlapLeft : overlapRight;
             int minOverlapY = overlapTop < overlapBottom ? overlapTop : overlapBottom;
 
             if (minOverlapY < minOverlapX) {
-                if (previousHitbox.y + previousHitbox.h <= platformRect.y) {
-                    pPlayer->y = platformRect.y - pPlayer->playerRect.h + 4;
+                if (previousHitbox.y + previousHitbox.h <= tileRect.y) {
+                    pPlayer->y = tileRect.y - pPlayer->playerRect.h + 4;
                     pPlayer->velY = 0.0f;
                     pPlayer->isGrounded = 1;
                     updatePlayerRects(pPlayer);
                 }
-                else if (previousHitbox.y >= platformRect.y + platformRect.h) {
-                    pPlayer->y = platformRect.y + platformRect.h - 14;
+                else if (previousHitbox.y >= tileRect.y + tileRect.h) {
+                    pPlayer->y = tileRect.y + tileRect.h - 14;
                     pPlayer->velY = 0.0f;
                     updatePlayerRects(pPlayer);
                 }
             } else {
-                if (previousHitbox.x + previousHitbox.w <= platformRect.x) {
+                if (previousHitbox.x + previousHitbox.w <= tileRect.x) {
                     pPlayer->x -= minOverlapX;
                     updatePlayerRects(pPlayer);
                 }
-                else if (previousHitbox.x >= platformRect.x + platformRect.w) {
+                else if (previousHitbox.x >= tileRect.x + tileRect.w) {
                     pPlayer->x += minOverlapX;
                     updatePlayerRects(pPlayer);
                 }

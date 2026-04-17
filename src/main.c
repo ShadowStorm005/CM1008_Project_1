@@ -12,8 +12,8 @@ typedef struct {
     SDL_Window *pWindow;
     SDL_Renderer *pRenderer;
     Player *pPlayer;
-    Platform *pPlatforms;
-    int platformCount;
+    Map *pMap;
+    int tilecount;
 } Game;
 
 int initiate(Game *pGame);
@@ -76,8 +76,8 @@ int initiate(Game *pGame)
         return 0;
     }
 
-    pGame->pPlatforms = createPlatforms(pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT, &pGame->platformCount);
-    if (!pGame->pPlatforms) {
+    pGame->pMap = createMap(pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+    if (!pGame->pMap) {
         printf("Platform creation failed\n");
         closeGame(pGame);
         return 0;
@@ -101,16 +101,19 @@ void run(Game *pGame)
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
         handleInput(pGame, keystate);
 
-        updatePlayer(pGame->pPlayer, pGame->pPlatforms, pGame->platformCount);
+        updatePlayer(pGame->pPlayer, pGame->pMap, pGame->tilecount);
 
         SDL_SetRenderDrawColor(pGame->pRenderer, 70, 70, 70, 255);
         SDL_RenderClear(pGame->pRenderer);
 
-        drawPlatforms(pGame->pPlatforms, pGame->platformCount);
+        drawTiles(pGame->pMap);
         drawPlayer(pGame->pPlayer);
 
         SDL_RenderPresent(pGame->pRenderer);
         SDL_Delay(16);
+
+        
+
     }
 }
 
@@ -133,7 +136,7 @@ void handleInput(Game *pGame, const Uint8 *keystate)
 void closeGame(Game *pGame)
 {
     if (pGame->pPlayer) destroyPlayer(pGame->pPlayer);
-    if (pGame->pPlatforms) destroyPlatforms(pGame->pPlatforms, pGame->platformCount);
+    if (pGame->pMap) destroyPlatforms(pGame->pMap, pGame->tilecount);
     if (pGame->pRenderer) SDL_DestroyRenderer(pGame->pRenderer);
     if (pGame->pWindow) SDL_DestroyWindow(pGame->pWindow);
 
