@@ -145,7 +145,24 @@ void enableTrigger(Player *pPlayer, int enable)
     }
 }
 
-void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
+int canShoot(Player *pPlayer)
+{
+    return pPlayer->canFire;
+}
+
+void enableTrigger(Player *pPlayer, int enable)
+{
+    if(enable)
+    {
+        pPlayer->canFire = 1;
+    }
+    else
+    {
+        pPlayer->canFire = 0;
+    }
+}
+
+void updatePlayer(Player *pPlayer, Map *platforms, int platformCount)
 {
     SDL_Rect previousHitbox = pPlayer->hitbox;
 

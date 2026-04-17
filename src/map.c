@@ -4,89 +4,109 @@
 #include <stdio.h>
 #include "map.h"
 
-struct platform {
+
+struct map
+{
     SDL_Renderer *pRenderer;
     SDL_Texture *pTexture;
     SDL_Rect rect;
-    int active;
+    int tileMap[40][30];
+    int tileSize;
 };
 
-Platform *createPlatforms(SDL_Renderer *pRenderer, int window_width, int window_height, int *platformCount)
-{
-    *platformCount = 4;
 
-    Platform *platforms = malloc(sizeof(Platform) * (*platformCount));
-    if (!platforms) return NULL;
+Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
+{
+    Map *map = malloc(sizeof(Map));
+    if(!map) return NULL;
+
+    map->pRenderer = pRenderer;
+    map->tileSize = 32;
 
     SDL_Surface *surface = IMG_Load("Resources/foundation.png");
     if (!surface) {
         printf("Error loading foundation.png: %s\n", IMG_GetError());
-        free(platforms);
+        free(map);
         return NULL;
     }
 
-    SDL_Texture *sharedTexture = SDL_CreateTextureFromSurface(pRenderer, surface);
+    map->pTexture = SDL_CreateTextureFromSurface(pRenderer, surface);
     SDL_FreeSurface(surface);
 
-    if (!sharedTexture) {
+    if (!map->pTexture) {
         printf("Error creating platform texture: %s\n", SDL_GetError());
-        free(platforms);
+        free(map);
         return NULL;
     }
 
-    for (int i = 0; i < *platformCount; i++) {
-        platforms[i].pRenderer = pRenderer;
-        platforms[i].pTexture = sharedTexture;
-        platforms[i].active = 1;
-    }
+    for (int x = 0; x < 40; x++) 
+    {
+        for (int y = 0; y < 30; y++) 
+        {
 
-    platforms[0].rect.x = 120;
-    platforms[0].rect.y = window_height - 180;
-    platforms[0].rect.w = 350;
-    platforms[0].rect.h = 40;
+            if (y >= 20)                                        // bestämmer "hur kartan ska se ut"
+            {                              
+                map->tileMap[x][y] = 1; 
+                
+            } else {
+                map->tileMap[x][y] = 0;                     // arghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh (detta var svårt)
+            }
+            
 
-    platforms[1].rect.x = 520;
-    platforms[1].rect.y = window_height - 300;
-    platforms[1].rect.w = 250;
-    platforms[1].rect.h = 40;
-
-    platforms[2].rect.x = 850;
-    platforms[2].rect.y = window_height - 430;
-    platforms[2].rect.w = 220;
-    platforms[2].rect.h = 40;
-
-    platforms[3].rect.x = 300;
-    platforms[3].rect.y = window_height - 520;
-    platforms[3].rect.w = 200;
-    platforms[3].rect.h = 40;
-
-    return platforms;
-}
-
-void drawPlatforms(Platform *platforms, int platformCount)
-{
-    for (int i = 0; i < platformCount; i++) {
-        if (platforms[i].active) {
-            SDL_RenderCopy(platforms[i].pRenderer, platforms[i].pTexture, NULL, &platforms[i].rect);
-
-            SDL_SetRenderDrawColor(platforms[i].pRenderer, 0, 255, 0, 255);
-            SDL_RenderDrawRect(platforms[i].pRenderer, &platforms[i].rect);
         }
     }
+    return map;
 }
 
-SDL_Rect getPlatformRect(Platform *platforms, int index)
+void drawTiles(Map *tiles)
 {
-    return platforms[index].rect;;
-}
+    SDL_Rect Select_Tile_1;
+    Select_Tile_1.x = 0;
+    Select_Tile_1.y = 0;
+    Select_Tile_1.w = 32;
+    Select_Tile_1.h = 32;
 
-void destroyPlatforms(Platform *platforms, int platformCount)
-{
-    if (!platforms) return;
-
-    if (platformCount > 0 && platforms[0].pTexture) {
-        SDL_DestroyTexture(platforms[0].pTexture);
+    SDL_Rect tile[40][30];
+    for (int x = 0; x < 40; x++)
+    {
+        for(int y = 0; y < 30; y++)
+        {
+            tile[x][y].x = x*32;
+            tile[x][y].y = y*32;
+            tile[x][y].w = 32;
+            tile[x][y].h = 32;
+        }
     }
 
-    free(platforms);
+    for (int x = 0; x < 40; x++)
+    {
+        
+        for(int y = 0; y < 30; y++)
+        {
+            switch (tiles->tileMap[x][y])
+            {
+            case 1:
+                SDL_RenderCopy(tiles->pRenderer, tiles->pTexture, &Select_Tile_1, &tile[x][y] );
+                break;
+            }
+        }
+        
+    
+    }
+}
+
+SDL_Rect getTileRect(Map *tiles, int index)
+{
+    return tiles[index].rect;
+}
+
+void destroyPlatforms(Map *tiles, int tilecount)
+{
+    if (!tiles) return;
+
+    if (tilecount > 0 && tiles[0].pTexture) {
+        SDL_DestroyTexture(tiles[0].pTexture);
+    }
+
+    free(tiles);
 }

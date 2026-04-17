@@ -17,7 +17,7 @@ void moveLeft(Player *pPlayer);
 void moveRight(Player *pPlayer);
 void jump(Player *pPlayer);
 void deaccelerate(Player *pPlayer);
-void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount);
+void updatePlayer(Player *pPlayer, Map *tiles, int tilecount);
 void drawPlayer(Player *pPlayer);
 SDL_Rect getPlayerHitbox(Player *pPlayer);
 SDL_Rect getPlayerRect(Player *pPlayer);

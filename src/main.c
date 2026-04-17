@@ -13,8 +13,8 @@ typedef struct {
     SDL_Window *pWindow;
     SDL_Renderer *pRenderer;
     Player *pPlayer;
-    Platform *pPlatforms;
-    int platformCount;
+    Map *pMap;
+    int tilecount;
     SDL_Texture *pbackground;
     Projectile *pProjectile[MAX_BULLETS];
 } Game;
@@ -101,9 +101,8 @@ int initiate(Game *pGame)
         return 0;
     }
 
-    pGame->pPlatforms = createPlatforms(pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT, &pGame->platformCount);
-    if (!pGame->pPlatforms) 
-    {
+    pGame->pMap = createMap(pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+    if (!pGame->pMap) {
         printf("Platform creation failed\n");
         closeGame(pGame);
         return 0;
@@ -139,7 +138,7 @@ void run(Game *pGame)
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
         handleInput(pGame, keystate);
 
-        updatePlayer(pGame->pPlayer, pGame->pPlatforms, pGame->platformCount);
+        updatePlayer(pGame->pPlayer, pGame->pMap, pGame->tilecount);
         for(int i = 0; i < MAX_BULLETS; i++)
         {
             if(isActive(pGame->pProjectile[i]))
@@ -153,7 +152,7 @@ void run(Game *pGame)
 
         SDL_RenderCopy(pGame->pRenderer, pGame->pbackground, NULL, NULL);
 
-        drawPlatforms(pGame->pPlatforms, pGame->platformCount);
+        drawTiles(pGame->pMap);
         drawPlayer(pGame->pPlayer);
         for(int i = 0; i < MAX_BULLETS; i++)
         { 
@@ -164,6 +163,9 @@ void run(Game *pGame)
         }
         SDL_RenderPresent(pGame->pRenderer);
         SDL_Delay(16);
+
+        
+
     }
 }
 
@@ -208,7 +210,7 @@ void handleInput(Game *pGame, const Uint8 *keystate)
 void closeGame(Game *pGame)
 {
     if (pGame->pPlayer) destroyPlayer(pGame->pPlayer);
-    if (pGame->pPlatforms) destroyPlatforms(pGame->pPlatforms, pGame->platformCount);
+    if (pGame->pMap) destroyPlatforms(pGame->pMap, pGame->tilecount);
     if (pGame->pbackground)SDL_DestroyTexture(pGame->pbackground); 
     for(int i = 0; i < MAX_BULLETS; i++)
     {
