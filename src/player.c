@@ -114,7 +114,7 @@ void jump(Player *pPlayer)
 
 float getXCord(Player *pPlayer)
 {
-    return pPlayer->x;
+    return pPlayer->x + (pPlayer->playerRect.w) / 2;
 }
 
 float getYCord(Player *pPlayer)
