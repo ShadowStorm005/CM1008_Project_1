@@ -92,7 +92,7 @@ int initiate(Game *pGame)
     }
     for(int i = 0; i < MAX_BULLETS; i++)
     {
-        pGame->pProjectile[i] = createProjectile(pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+        pGame->pProjectile[i] = createProjectile(pGame->pRenderer);
         if (!pGame->pProjectile[i])
         {
             printf("Projectile creation failed\n");
@@ -161,16 +161,22 @@ void handleInput(Game *pGame, const Uint8 *keystate)
     {
         jump(pGame->pPlayer);
     }
+    /* The future functionality to change gun/canon needs function and stuff from player.c
+    if(keystate[SDL_SCANCODE_1])
+    {
+
+    }
+    if(keystate[SDL_SCANCODE_2])
+    {
+
+    }
+    */
     if(keystate[SDL_SCANCODE_SPACE] || SDL_GetMouseState(NULL,NULL)&SDL_BUTTON(1))
     {
         if(canShoot(pGame->pPlayer))
         {
             enableTrigger(pGame->pPlayer, 0);
-            float x = getXCord(pGame->pPlayer);
-            float y = getYCord(pGame->pPlayer);
-            int mousePosx, mousePosy;
-            Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
-            shoot(pGame->pProjectile, x, y, mousePosx, mousePosy);
+            shoot(pGame->pProjectile, getXCord(pGame->pPlayer), getYCord(pGame->pPlayer));
         }
     }
     else

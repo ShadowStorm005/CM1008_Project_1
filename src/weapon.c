@@ -16,6 +16,8 @@ typedef struct projectile
     float angle;
     int window_width, window_height;
     int active;
+    float speed;
+    float gravity;
 
     SDL_Texture *pTexture;
     SDL_Renderer *pRenderer;
@@ -23,7 +25,7 @@ typedef struct projectile
     SDL_Rect projectile_rect;
 } Projectile;
 
-Projectile *createProjectile(SDL_Renderer *pRenderer, int window_width, int window_height)
+Projectile *createProjectile(SDL_Renderer *pRenderer)
 {
     Projectile *pProjectile = malloc(sizeof(Projectile));
     if(!pProjectile) return NULL;
@@ -31,9 +33,7 @@ Projectile *createProjectile(SDL_Renderer *pRenderer, int window_width, int wind
     pProjectile->projectile_rect.x = (int)pProjectile->x;
     pProjectile->projectile_rect.y = (int)pProjectile->y;
     pProjectile->active = 0;
-
-    pProjectile->window_height = window_height/5.0f;
-    pProjectile->window_width = window_width/5.0f;
+    pProjectile->gravity = 0.3f;
 
     SDL_Surface *pSurface = IMG_Load("Resources/bullets.png");
     if (!pSurface) {
@@ -53,9 +53,6 @@ Projectile *createProjectile(SDL_Renderer *pRenderer, int window_width, int wind
     }
     SDL_QueryTexture(pProjectile->pTexture, NULL, NULL, &pProjectile->projectile_rect.w, &pProjectile->projectile_rect.h);
 
-    pProjectile->projectile_rect.w = 20*BULLET_ASPECT;
-    pProjectile->projectile_rect.h = 20;
-
     return pProjectile;
 }
 
@@ -66,10 +63,15 @@ int isActive(Projectile *pProjectile)
 
 void updateProjectile(Projectile *pProjectile)
 {
+    pProjectile->velY += pProjectile->gravity;
+
     pProjectile->x += pProjectile->velX;
     pProjectile->y += pProjectile->velY;
+
     pProjectile->projectile_rect.x = (int)(pProjectile->x);
     pProjectile->projectile_rect.y = (int)(pProjectile->y - pProjectile->projectile_rect.h / 2);
+
+    pProjectile->angle = atan2(pProjectile->velY, pProjectile->velX);
 
     if ((pProjectile->x+pProjectile->projectile_rect.w) < 0 || pProjectile->x > WINDOW_WIDTH || pProjectile->y > WINDOW_HEIGHT)
     {
@@ -84,12 +86,18 @@ void drawProjectile(Projectile *pProjectile)
     SDL_RenderCopyEx(pProjectile->pRenderer, pProjectile->pTexture, NULL /**/, &pProjectile->projectile_rect, pProjectile->angle*180/3.141f, &center, SDL_FLIP_NONE);
 }
 
-void shoot(Projectile *pProjectile[], float x, float y, int mousePosx, int mousePosy)
+void shoot(Projectile *pProjectile[], float x, float y)
 {
+    int mousePosx, mousePosy;
+    Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
     for(int i = 0; i < MAX_BULLETS; i++)
     {
         if(!pProjectile[i]->active)
         {
+            //bullet size
+            pProjectile[i]->projectile_rect.w = 20*BULLET_ASPECT;
+            pProjectile[i]->projectile_rect.h = 20;
+
             pProjectile[i]->active = 1;
             pProjectile[i]->x = x;
             pProjectile[i]->y = y;
@@ -98,8 +106,9 @@ void shoot(Projectile *pProjectile[], float x, float y, int mousePosx, int mouse
             float dy = mousePosy - y;
 
             pProjectile[i]->angle = atan2(dy, dx);
-            pProjectile[i]->velX = 8.0f * cos(pProjectile[i]->angle);
-            pProjectile[i]->velY = 8.0f * sin(pProjectile[i]->angle);
+            pProjectile[i]->speed = 16.0f;
+            pProjectile[i]->velX = pProjectile[i]->speed * cos(pProjectile[i]->angle);
+            pProjectile[i]->velY = pProjectile[i]->speed * sin(pProjectile[i]->angle);
 
             break;
         }
