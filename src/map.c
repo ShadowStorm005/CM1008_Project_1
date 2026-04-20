@@ -3,15 +3,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "map.h"
-
+#define AMOUNT_OF_TILES_HORIZONTAL 80
+#define AMOUNT_OF_TILES_VERTICAL 60
+#define TILESIZE_PIXELS 16
 
 struct map
 {
     SDL_Renderer *pRenderer;
     SDL_Texture *pTexture;
     SDL_Rect rect;
-    int tileMap[40][30];
-    int tileSize;
+    int tileMap[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL];
 };
 
 
@@ -21,7 +22,6 @@ Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
     if(!map) return NULL;
 
     map->pRenderer = pRenderer;
-    map->tileSize = 32;
 
     SDL_Surface *surface = IMG_Load("Resources/foundation.png");
     if (!surface) {
@@ -39,12 +39,12 @@ Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
         return NULL;
     }
 
-    for (int x = 0; x < 40; x++) 
+    for (int x = 0; x < AMOUNT_OF_TILES_HORIZONTAL; x++) 
     {
-        for (int y = 0; y < 30; y++) 
+        for (int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++) 
         {
 
-            if (y >= 20)                                        // bestämmer "hur kartan ska se ut"
+            if (y >= 40)                                        // bestämmer "hur kartan ska se ut"
             {                              
                 map->tileMap[x][y] = 1; 
                 
@@ -63,25 +63,25 @@ void drawTiles(Map *tiles)
     SDL_Rect Select_Tile_1;
     Select_Tile_1.x = 0;
     Select_Tile_1.y = 0;
-    Select_Tile_1.w = 32;
-    Select_Tile_1.h = 32;
+    Select_Tile_1.w = TILESIZE_PIXELS;
+    Select_Tile_1.h = TILESIZE_PIXELS;
 
-    SDL_Rect tile[40][30];
-    for (int x = 0; x < 40; x++)
+    SDL_Rect tile[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL];
+    for (int x = 0; x < AMOUNT_OF_TILES_HORIZONTAL; x++)
     {
-        for(int y = 0; y < 30; y++)
+        for(int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++)
         {
-            tile[x][y].x = x*32;
-            tile[x][y].y = y*32;
-            tile[x][y].w = 32;
-            tile[x][y].h = 32;
+            tile[x][y].x = x*TILESIZE_PIXELS;
+            tile[x][y].y = y*TILESIZE_PIXELS;
+            tile[x][y].w = TILESIZE_PIXELS;
+            tile[x][y].h = TILESIZE_PIXELS;
         }
     }
 
-    for (int x = 0; x < 40; x++)
+    for (int x = 0; x < AMOUNT_OF_TILES_HORIZONTAL; x++)
     {
         
-        for(int y = 0; y < 30; y++)
+        for(int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++)
         {
             switch (tiles->tileMap[x][y])
             {
