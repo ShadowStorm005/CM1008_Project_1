@@ -44,7 +44,7 @@ Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
         for (int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++) 
         {
 
-            if (y >= 40)                                        // bestämmer "hur kartan ska se ut"
+            if (y >= 30)                                        // bestämmer "hur kartan ska se ut"
             {                              
                 map->tileMap[x][y] = 1; 
                 
