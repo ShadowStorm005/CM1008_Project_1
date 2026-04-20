@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "player.h"
 #include "map.h"
+#include "physics.h"
 
 struct player {
     int health;
@@ -16,6 +17,7 @@ struct player {
     float gravity;
 
     int isGrounded;
+    int isTouchingWall;
 
     int window_width, window_height;
 
@@ -28,7 +30,7 @@ struct player {
     SDL_RendererFlip flip;
 };
 
-static void updatePlayerRects(Player *pPlayer)
+void updatePlayerRects(Player *pPlayer)
 {
     pPlayer->playerRect.x = (int)pPlayer->x;
     pPlayer->playerRect.y = (int)pPlayer->y;
@@ -54,6 +56,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->jumpForce = 16.0f;
     pPlayer->gravity = 0.7f;
     pPlayer->isGrounded = 0;
+    pPlayer->isTouchingWall = 0;
 
     SDL_Surface *pSurface = IMG_Load("Resources/firsttank.png");
     if (!pSurface) {
@@ -126,11 +129,14 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
 
     updatePlayerRects(pPlayer);
     pPlayer->isGrounded = 0;
+    
+    checkForCollisions(pPlayer, platforms, platformCount);
 
-    for (int i = 0; i < platformCount; i++) {
+    /*for (int i = 0; i < platformCount; i++) {
         SDL_Rect platformRect = getPlatformRect(platforms, i);
 
         if (SDL_HasIntersection(&pPlayer->hitbox, &platformRect)) {
+            checkForCollisions(pPlayer, platforms, platformCount, pPlayer->pRenderer);
             int overlapLeft = (pPlayer->hitbox.x + pPlayer->hitbox.w) - platformRect.x;
             int overlapRight = (platformRect.x + platformRect.w) - pPlayer->hitbox.x;
             int overlapTop = (pPlayer->hitbox.y + pPlayer->hitbox.h) - platformRect.y;
@@ -162,7 +168,7 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
                 }
             }
         }
-    }
+    }*/
 
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->playerRect.w > pPlayer->window_width)
@@ -193,6 +199,35 @@ void drawPlayer(Player *pPlayer)
 SDL_Rect getPlayerHitbox(Player *pPlayer)
 {
     return pPlayer->hitbox;
+}
+
+SDL_Rect getPlayerRect(Player *pPlayer)
+{
+    return pPlayer->playerRect;
+}
+
+void setPlayerRect(Player *pPlayer, int x, int y)
+{
+    pPlayer->x = x;
+    pPlayer->y = y;
+}
+
+void setPlayerGrounded(Player *pPlayer)
+{
+    pPlayer->velY = 0.0f;
+    pPlayer->isGrounded = 1;
+    pPlayer->isTouchingWall = 0;
+}
+
+void stopVelY(Player *pPlayer)
+{
+    pPlayer->velY = 0.0f;
+}
+
+void touchingWall(Player *pPlayer)
+{
+    if (pPlayer->velY < 0) pPlayer->velY /= 1.5f;
+    pPlayer->isTouchingWall = 1;
 }
 
 void destroyPlayer(Player *pPlayer)

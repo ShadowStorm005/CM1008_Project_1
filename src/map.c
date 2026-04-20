@@ -77,7 +77,7 @@ void drawPlatforms(Platform *platforms, int platformCount)
 
 SDL_Rect getPlatformRect(Platform *platforms, int index)
 {
-    return platforms[index].rect;
+    return platforms[index].rect;;
 }
 
 void destroyPlatforms(Platform *platforms, int platformCount)

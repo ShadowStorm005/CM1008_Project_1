@@ -4,6 +4,7 @@
 #include <SDL_image.h>
 #include "player.h"
 #include "map.h"
+#include "physics.h"
 
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 960
