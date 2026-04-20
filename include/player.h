@@ -7,9 +7,9 @@
 typedef struct player Player;
 
 Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height);
-void jump(Player *pPlayer);
 void moveLeft(Player *pPlayer);
 void moveRight(Player *pPlayer);
+void jump(Player *pPlayer);
 void deaccelerate(Player *pPlayer);
 void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount);
 void drawPlayer(Player *pPlayer);

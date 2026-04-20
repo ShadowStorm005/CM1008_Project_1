@@ -14,6 +14,7 @@ typedef struct {
     Player *pPlayer;
     Platform *pPlatforms;
     int platformCount;
+    SDL_Texture *pbackground;
 } Game;
 
 int initiate(Game *pGame);
@@ -69,6 +70,22 @@ int initiate(Game *pGame)
         return 0;
     }
 
+    SDL_Surface *pbackground = IMG_Load("Resources/skybackground.png");
+    if (!pbackground) {
+        printf("Error loading skybackground.png: %s\n", IMG_GetError());
+        free(pbackground);
+        return 0;
+    }
+
+    pGame->pbackground = SDL_CreateTextureFromSurface(pGame->pRenderer, pbackground);
+    free(pbackground);
+
+    if (!pGame->pbackground) {
+        printf("Error creating texture: %s\n", SDL_GetError());
+        closeGame(pGame);
+        return 0;
+    }
+
     pGame->pPlayer = createPlayer(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     if (!pGame->pPlayer) {
         printf("Player creation failed\n");
@@ -103,8 +120,10 @@ void run(Game *pGame)
 
         updatePlayer(pGame->pPlayer, pGame->pPlatforms, pGame->platformCount);
 
-        SDL_SetRenderDrawColor(pGame->pRenderer, 70, 70, 70, 255);
+        SDL_SetRenderDrawColor(pGame->pRenderer, 0, 0, 0, 255);
         SDL_RenderClear(pGame->pRenderer);
+
+        SDL_RenderCopy(pGame->pRenderer, pGame->pbackground, NULL, NULL);
 
         drawPlatforms(pGame->pPlatforms, pGame->platformCount);
         drawPlayer(pGame->pPlayer);
@@ -134,6 +153,7 @@ void closeGame(Game *pGame)
 {
     if (pGame->pPlayer) destroyPlayer(pGame->pPlayer);
     if (pGame->pPlatforms) destroyPlatforms(pGame->pPlatforms, pGame->platformCount);
+    if (pGame->pbackground)SDL_DestroyTexture(pGame->pbackground); 
     if (pGame->pRenderer) SDL_DestroyRenderer(pGame->pRenderer);
     if (pGame->pWindow) SDL_DestroyWindow(pGame->pWindow);
 

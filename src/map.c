@@ -18,9 +18,9 @@ Platform *createPlatforms(SDL_Renderer *pRenderer, int window_width, int window_
     Platform *platforms = malloc(sizeof(Platform) * (*platformCount));
     if (!platforms) return NULL;
 
-    SDL_Surface *surface = IMG_Load("Resources/PrimitivPlatform.png");
+    SDL_Surface *surface = IMG_Load("Resources/foundation.png");
     if (!surface) {
-        printf("Error loading PrimitivPlatform.png: %s\n", IMG_GetError());
+        printf("Error loading foundation.png: %s\n", IMG_GetError());
         free(platforms);
         return NULL;
     }
