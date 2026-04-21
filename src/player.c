@@ -27,6 +27,8 @@ struct player {
     int window_width, window_height;
 
     float canonAngle;
+
+    float canonAngle;
     float targetAngle;
 
     SDL_Texture *pHullTx;
@@ -34,6 +36,9 @@ struct player {
     SDL_Texture *pTurretTx;
 
     SDL_Renderer *pRenderer;
+
+    SDL_Texture *pCanonTx;
+    SDL_Renderer *pCanonRn;
 
     SDL_Texture *pCanonTx;
     SDL_Renderer *pCanonRn;
@@ -145,6 +150,13 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     if (!pPlayer->pHullTx) 
     {
         printf("Error creating player texture: %s\n", SDL_GetError());
+        free(pPlayer);
+        return NULL;
+    }
+    
+    if (!pPlayer->pCanonTx) 
+    {
+        printf("Error creating canon texture: %s\n", SDL_GetError());
         free(pPlayer);
         return NULL;
     }
