@@ -35,6 +35,9 @@ struct player {
 
     SDL_Renderer *pRenderer;
 
+    SDL_Texture *pCanonTx;
+    SDL_Renderer *pCanonRn;
+
     SDL_Rect hullRect;
     SDL_Rect hitbox;
     SDL_Rect canonRect;
@@ -142,6 +145,13 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     if (!pPlayer->pHullTx) 
     {
         printf("Error creating player texture: %s\n", SDL_GetError());
+        free(pPlayer);
+        return NULL;
+    }
+    
+    if (!pPlayer->pCanonTx) 
+    {
+        printf("Error creating canon texture: %s\n", SDL_GetError());
         free(pPlayer);
         return NULL;
     }
@@ -467,6 +477,33 @@ void updatePlayer(Player *pPlayer, Map *pMap)
 
 void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
 {
+    float diffAngle;
+    float dx = mousePosX - pPlayer->x - (pPlayer->hullRect.w)/2;
+    float dy = mousePosY - pPlayer->y + (pPlayer->hullRect.h)/2;
+
+    pPlayer->targetAngle = atan2(dy, dx);
+
+    flipCanon(pPlayer);
+
+    if(pPlayer->turretFlip == SDL_FLIP_HORIZONTAL)
+    {
+        if(pPlayer->targetAngle < 0) pPlayer->targetAngle += 2*PI;
+    }
+    diffAngle = pPlayer->targetAngle - pPlayer->canonAngle;
+
+    if(fabs(diffAngle) > 0.05f)
+    {
+        if(diffAngle > 0) pPlayer->canonAngle += 0.05f;
+        else pPlayer->canonAngle += -0.05f;
+    }
+    else pPlayer->canonAngle = pPlayer->targetAngle;
+    restrictCanonAngle(pPlayer);
+}
+
+void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
+{
+    int mousePosx, mousePosy;
+    Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
     deaccelerate(pPlayer);
