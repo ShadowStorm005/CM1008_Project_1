@@ -22,11 +22,17 @@ struct player {
 
     int window_width, window_height;
 
+    float canonAngle;
+
     SDL_Texture *pTexture;
     SDL_Renderer *pRenderer;
 
+    SDL_Texture *pCanonTx;
+    SDL_Renderer *pCanonRn;
+
     SDL_Rect playerRect;
     SDL_Rect hitbox;
+    SDL_Rect canonRect;
 
     SDL_RendererFlip flip;
 };
@@ -61,7 +67,8 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->isTouchingWall = 0;
 
     SDL_Surface *pSurface = IMG_Load("Resources/firsttank.png");
-    if (!pSurface) {
+    if (!pSurface) 
+    {
         printf("Error loading firsttank.png: %s\n", IMG_GetError());
         free(pPlayer);
         return NULL;
@@ -69,18 +76,40 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     pPlayer->pRenderer = pRenderer;
     pPlayer->pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
+
+    pSurface = IMG_Load("Resources/primitivplatform.png");
+    if (!pSurface)
+    {
+        printf("Error loading primitivplatform.png: %s\n", IMG_GetError());
+        free(pPlayer);
+        return NULL;
+    }
+
+    pPlayer->pCanonTx = SDL_CreateTextureFromSurface(pRenderer, pSurface);
     free(pSurface);
 
-    if (!pPlayer->pTexture) {
+    if (!pPlayer->pTexture) 
+    {
         printf("Error creating player texture: %s\n", SDL_GetError());
+        free(pPlayer);
+        return NULL;
+    }
+    
+    if (!pPlayer->pCanonTx) 
+    {
+        printf("Error creating canon texture: %s\n", SDL_GetError());
         free(pPlayer);
         return NULL;
     }
 
     SDL_QueryTexture(pPlayer->pTexture, NULL, NULL, &pPlayer->playerRect.w, &pPlayer->playerRect.h);
+    SDL_QueryTexture(pPlayer->pCanonTx, NULL, NULL, &pPlayer->canonRect.w, &pPlayer->canonRect.h);
 
     pPlayer->playerRect.w = 65;
     pPlayer->playerRect.h = 30;
+
+    pPlayer->canonRect.w = 65;
+    pPlayer->canonRect.h = 30;
 
     pPlayer->x = x - pPlayer->playerRect.w / 2.0f;
     pPlayer->y = y - pPlayer->playerRect.h / 2.0f;
@@ -147,6 +176,8 @@ void enableTrigger(Player *pPlayer, int enable)
 
 void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
 {
+    int mousePosx, mousePosy;
+    Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
     deaccelerate(pPlayer);
@@ -160,6 +191,11 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
     pPlayer->isGrounded = 0;
     
     checkForCollisions(pPlayer, platforms, platformCount);
+
+    float dx = mousePosx - pPlayer->x;
+    float dy = mousePosy - pPlayer->y;
+
+    pPlayer->canonAngle = atan2(dy, dx);
 
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->playerRect.w > pPlayer->window_width)
@@ -183,8 +219,11 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
 
 void drawPlayer(Player *pPlayer)
 {
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTexture, NULL, &pPlayer->playerRect, 0.0, NULL, pPlayer->flip);
+    SDL_Point canonCenter = {0, pPlayer->canonRect.h / 2};
 
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTexture, NULL, &pPlayer->playerRect, 0.0, NULL, pPlayer->flip);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pCanonTx, NULL, &pPlayer->playerRect, pPlayer->canonAngle*180/3.141f, &canonCenter, pPlayer->flip);
+    
     SDL_SetRenderDrawColor(pPlayer->pRenderer, 255, 0, 0, 255);
     SDL_RenderDrawRect(pPlayer->pRenderer, &pPlayer->hitbox);
 }
