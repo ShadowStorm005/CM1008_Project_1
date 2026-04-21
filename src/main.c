@@ -4,9 +4,11 @@
 #include <SDL_image.h>
 #include "player.h"
 #include "weapon.h"
+#include "weapon.h"
 #include "map.h"
 #include "physics.h"
 
+//window width & height moved to map.h
 //window width & height moved to map.h
 
 typedef struct {
@@ -16,6 +18,7 @@ typedef struct {
     Platform *pPlatforms;
     int platformCount;
     SDL_Texture *pbackground;
+    Projectile *pProjectile[MAX_BULLETS];
     Projectile *pProjectile[MAX_BULLETS];
 } Game;
 
