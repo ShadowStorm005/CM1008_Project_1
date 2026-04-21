@@ -174,7 +174,6 @@ struct map
 {
     SDL_Renderer *pRenderer;
     SDL_Texture *pTexture;
-    SDL_Rect rect;
     Tile *tileMap[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL];
 };
 
@@ -234,7 +233,7 @@ void drawTiles(Map *tiles)
             switch (tiles->tileMap[x][y]->selectedTile)
             {
             case 1:
-                SDL_RenderCopy(tiles->pRenderer, tiles->pTexture, &Select_Tile_1, &tiles->tileMap[x][y]);
+                SDL_RenderCopy(tiles->pRenderer, tiles->pTexture, &Select_Tile_1, &tiles->tileMap[x][y]->tileRect);
                 break;
             }
         }
