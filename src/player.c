@@ -161,44 +161,6 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
     
     checkForCollisions(pPlayer, platforms, platformCount);
 
-    /*for (int i = 0; i < platformCount; i++) {
-        SDL_Rect platformRect = getPlatformRect(platforms, i);
-
-        if (SDL_HasIntersection(&pPlayer->hitbox, &platformRect)) {
-            checkForCollisions(pPlayer, platforms, platformCount, pPlayer->pRenderer);
-            int overlapLeft = (pPlayer->hitbox.x + pPlayer->hitbox.w) - platformRect.x;
-            int overlapRight = (platformRect.x + platformRect.w) - pPlayer->hitbox.x;
-            int overlapTop = (pPlayer->hitbox.y + pPlayer->hitbox.h) - platformRect.y;
-            int overlapBottom = (platformRect.y + platformRect.h) - pPlayer->hitbox.y;
-
-            int minOverlapX = overlapLeft < overlapRight ? overlapLeft : overlapRight;
-            int minOverlapY = overlapTop < overlapBottom ? overlapTop : overlapBottom;
-
-            if (minOverlapY < minOverlapX) {
-                if (previousHitbox.y + previousHitbox.h <= platformRect.y) {
-                    pPlayer->y = platformRect.y - pPlayer->playerRect.h + 4;
-                    pPlayer->velY = 0.0f;
-                    pPlayer->isGrounded = 1;
-                    updatePlayerRects(pPlayer);
-                }
-                else if (previousHitbox.y >= platformRect.y + platformRect.h) {
-                    pPlayer->y = platformRect.y + platformRect.h - 14;
-                    pPlayer->velY = 0.0f;
-                    updatePlayerRects(pPlayer);
-                }
-            } else {
-                if (previousHitbox.x + previousHitbox.w <= platformRect.x) {
-                    pPlayer->x -= minOverlapX;
-                    updatePlayerRects(pPlayer);
-                }
-                else if (previousHitbox.x >= platformRect.x + platformRect.w) {
-                    pPlayer->x += minOverlapX;
-                    updatePlayerRects(pPlayer);
-                }
-            }
-        }
-    }*/
-
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->playerRect.w > pPlayer->window_width)
         pPlayer->x = pPlayer->window_width - pPlayer->playerRect.w;
