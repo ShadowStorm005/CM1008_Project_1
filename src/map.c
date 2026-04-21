@@ -3,9 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "map.h"
-#define AMOUNT_OF_TILES_HORIZONTAL 80
-#define AMOUNT_OF_TILES_VERTICAL 60
-#define TILESIZE_PIXELS 16
 
 const int mapTemplate1[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL] = {
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0},
@@ -178,7 +175,14 @@ struct map
     SDL_Renderer *pRenderer;
     SDL_Texture *pTexture;
     SDL_Rect rect;
-    int tileMap[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL];
+    Tile *tileMap[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL];
+};
+
+struct tile
+{
+    SDL_Rect tileRect;
+    int isActive;
+    int selectedTile;
 };
 
 Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
@@ -208,7 +212,7 @@ Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
     {
         for (int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++) 
         {
-            map->tileMap[x][y] = mapTemplate2[x][y]; 
+            *map->tileMap[x][y] = createTile(x*TILESIZE_PIXELS, y*TILESIZE_PIXELS, mapTemplate2[x][y]);
         }
     }
     return map;
@@ -222,41 +226,32 @@ void drawTiles(Map *tiles)
     Select_Tile_1.w = TILESIZE_PIXELS;
     Select_Tile_1.h = TILESIZE_PIXELS;
 
-    SDL_Rect tile[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL];
     for (int x = 0; x < AMOUNT_OF_TILES_HORIZONTAL; x++)
     {
         for(int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++)
         {
-            tile[x][y].x = x*TILESIZE_PIXELS;
-            tile[x][y].y = y*TILESIZE_PIXELS;
-            tile[x][y].w = TILESIZE_PIXELS;
-            tile[x][y].h = TILESIZE_PIXELS;
-        }
-    }
-
-    for (int x = 0; x < AMOUNT_OF_TILES_HORIZONTAL; x++)
-    {
-        
-        for(int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++)
-        {
-            switch (tiles->tileMap[x][y])
+            if (!tiles->tileMap[x][y]->isActive) continue;
+            switch (tiles->tileMap[x][y]->selectedTile)
             {
             case 1:
-                SDL_RenderCopy(tiles->pRenderer, tiles->pTexture, &Select_Tile_1, &tile[x][y] );
+                SDL_RenderCopy(tiles->pRenderer, tiles->pTexture, &Select_Tile_1, &tiles->tileMap[x][y]);
                 break;
             }
         }
-        
-    
     }
 }
 
-SDL_Rect getTileRect(Map *tiles, int index)
+SDL_Rect getTileRect(Map *tiles, int x, int y)
 {
-    return tiles[index].rect;
+    return tiles->tileMap[x][y]->tileRect;
 }
 
-void destroyPlatforms(Map *tiles, int tilecount)
+int isTileAktive(Map *tiles, int x, int y)
+{
+    return tiles->tileMap[x][y]->isActive;
+}
+
+void destroyTiles(Map *tiles, int tilecount)
 {
     if (!tiles) return;
 
@@ -265,4 +260,28 @@ void destroyPlatforms(Map *tiles, int tilecount)
     }
 
     free(tiles);
+}
+
+Tile createTile(int x, int y, int selectedTile)
+{
+    Tile tile;
+
+    tile.tileRect.x = x;
+    tile.tileRect.y = y;
+    tile.tileRect.h = TILESIZE_PIXELS;
+    tile.tileRect.w = TILESIZE_PIXELS;
+    tile.selectedTile = selectedTile;
+    switch (selectedTile){
+        case 0:
+            tile.isActive = 0;
+            break;
+        case 1:
+            tile.isActive = 1;
+            break;
+        default:
+            tile.isActive = 0;
+            break;
+    }
+
+    return tile;
 }

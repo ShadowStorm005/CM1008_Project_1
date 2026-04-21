@@ -145,24 +145,7 @@ void enableTrigger(Player *pPlayer, int enable)
     }
 }
 
-int canShoot(Player *pPlayer)
-{
-    return pPlayer->canFire;
-}
-
-void enableTrigger(Player *pPlayer, int enable)
-{
-    if(enable)
-    {
-        pPlayer->canFire = 1;
-    }
-    else
-    {
-        pPlayer->canFire = 0;
-    }
-}
-
-void updatePlayer(Player *pPlayer, Map *platforms, int platformCount)
+void updatePlayer(Player *pPlayer, Map *pMap)
 {
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
@@ -176,7 +159,7 @@ void updatePlayer(Player *pPlayer, Map *platforms, int platformCount)
     updatePlayerRects(pPlayer);
     pPlayer->isGrounded = 0;
     
-    checkForCollisions(pPlayer, platforms, platformCount);
+    checkForCollisions(pPlayer, pMap);
 
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->playerRect.w > pPlayer->window_width)

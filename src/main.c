@@ -138,7 +138,7 @@ void run(Game *pGame)
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
         handleInput(pGame, keystate);
 
-        updatePlayer(pGame->pPlayer, pGame->pMap, pGame->tilecount);
+        updatePlayer(pGame->pPlayer, pGame->pMap);
         for(int i = 0; i < MAX_BULLETS; i++)
         {
             if(isActive(pGame->pProjectile[i]))
@@ -210,7 +210,7 @@ void handleInput(Game *pGame, const Uint8 *keystate)
 void closeGame(Game *pGame)
 {
     if (pGame->pPlayer) destroyPlayer(pGame->pPlayer);
-    if (pGame->pMap) destroyPlatforms(pGame->pMap, pGame->tilecount);
+    if (pGame->pMap) destroyTiles(pGame->pMap, pGame->tilecount);
     if (pGame->pbackground)SDL_DestroyTexture(pGame->pbackground); 
     for(int i = 0; i < MAX_BULLETS; i++)
     {
