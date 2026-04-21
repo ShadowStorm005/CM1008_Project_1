@@ -170,18 +170,19 @@ const int mapTemplate2[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL] = {
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0}
 };
 
-struct map
-{
-    SDL_Renderer *pRenderer;
-    SDL_Texture *pTexture;
-    Tile *tileMap[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL];
-};
-
 struct tile
 {
     SDL_Rect tileRect;
     int isActive;
     int selectedTile;
+};
+
+struct map
+{
+    SDL_Renderer *pRenderer;
+    SDL_Texture *pTexture;
+    SDL_Rect rect;
+    Tile tileMap[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL];
 };
 
 Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
@@ -211,7 +212,7 @@ Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
     {
         for (int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++) 
         {
-            *map->tileMap[x][y] = createTile(x*TILESIZE_PIXELS, y*TILESIZE_PIXELS, mapTemplate2[x][y]);
+            map->tileMap[x][y] = createTile(x*TILESIZE_PIXELS, y*TILESIZE_PIXELS, mapTemplate2[x][y]);
         }
     }
     return map;
@@ -229,11 +230,11 @@ void drawTiles(Map *tiles)
     {
         for(int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++)
         {
-            if (!tiles->tileMap[x][y]->isActive) continue;
-            switch (tiles->tileMap[x][y]->selectedTile)
+            if (!tiles->tileMap[x][y].isActive) continue;
+            switch (tiles->tileMap[x][y].selectedTile)
             {
             case 1:
-                SDL_RenderCopy(tiles->pRenderer, tiles->pTexture, &Select_Tile_1, &tiles->tileMap[x][y]->tileRect);
+                SDL_RenderCopy(tiles->pRenderer, tiles->pTexture, &Select_Tile_1, &tiles->tileMap[x][y].tileRect);
                 break;
             }
         }
@@ -242,12 +243,12 @@ void drawTiles(Map *tiles)
 
 SDL_Rect getTileRect(Map *tiles, int x, int y)
 {
-    return tiles->tileMap[x][y]->tileRect;
+    return tiles->tileMap[x][y].tileRect;
 }
 
 int isTileAktive(Map *tiles, int x, int y)
 {
-    return tiles->tileMap[x][y]->isActive;
+    return tiles->tileMap[x][y].isActive;
 }
 
 void destroyTiles(Map *tiles, int tilecount)

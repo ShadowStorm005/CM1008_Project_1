@@ -9,8 +9,8 @@
 #include <SDL.h>
 
 
-typedef struct map Map;
 typedef struct tile Tile;
+typedef struct map Map;
 
 Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height);
 void drawTiles(Map *map);
