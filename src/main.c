@@ -101,6 +101,11 @@ int initiate(Game *pGame)
         return 0;
     }
 
+    Button playButton, settingsButton, exitButton;
+    playButton = createButton(pGame->pRenderer, "Resources/foundation.png", "Resources/firsttank.png", 350, 200, 100, 50);
+    settingsButton = createButton(pGame->pRenderer, "Resources/foundation.png", "Resources/firsttank.png", 350, 300, 100, 50);
+    exitButton = createButton(pGame->pRenderer, "Resources/foundation.png", "Resources/firsttank.png", 350, 400, 100, 50);
+
     pGame->pPlayer = createPlayer(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     if (!pGame->pPlayer) 
     {
