@@ -40,9 +40,6 @@ struct player {
     SDL_Texture *pCanonTx;
     SDL_Renderer *pCanonRn;
 
-    SDL_Texture *pCanonTx;
-    SDL_Renderer *pCanonRn;
-
     SDL_Rect hullRect;
     SDL_Rect hitbox;
     SDL_Rect canonRect;
