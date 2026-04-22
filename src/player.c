@@ -24,11 +24,9 @@ struct player {
 
     float canonAngle;
 
+    SDL_Texture *pCanonTx;
     SDL_Texture *pTexture;
     SDL_Renderer *pRenderer;
-
-    SDL_Texture *pCanonTx;
-    SDL_Renderer *pCanonRn;
 
     SDL_Rect playerRect;
     SDL_Rect hitbox;
@@ -42,10 +40,21 @@ void updatePlayerRects(Player *pPlayer)
     pPlayer->playerRect.x = (int)pPlayer->x;
     pPlayer->playerRect.y = (int)pPlayer->y;
 
-    pPlayer->hitbox.x = pPlayer->playerRect.x + 12;
-    pPlayer->hitbox.y = pPlayer->playerRect.y + 14;
-    pPlayer->hitbox.w = pPlayer->playerRect.w - 24;
-    pPlayer->hitbox.h = pPlayer->playerRect.h - 18;
+    if(pPlayer->flip == SDL_FLIP_NONE)
+    {
+        pPlayer->canonRect.x = (int)pPlayer->x + 2*(pPlayer->playerRect.w)/3;
+        pPlayer->canonRect.y = (int)pPlayer->y + 2*(pPlayer->playerRect.h)/5;
+    }
+    else
+    {
+        pPlayer->canonRect.x = (int)pPlayer->x + (pPlayer->playerRect.w)/3;
+        pPlayer->canonRect.y = (int)pPlayer->y + 2*(pPlayer->playerRect.h)/5;
+    }
+
+    pPlayer->hitbox.x = pPlayer->playerRect.x;
+    pPlayer->hitbox.y = pPlayer->playerRect.y;
+    pPlayer->hitbox.w = pPlayer->playerRect.w;
+    pPlayer->hitbox.h = pPlayer->playerRect.h;
 }
 
 Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height)
@@ -108,8 +117,8 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->playerRect.w = 65;
     pPlayer->playerRect.h = 30;
 
-    pPlayer->canonRect.w = 65;
-    pPlayer->canonRect.h = 30;
+    pPlayer->canonRect.w = 40;
+    pPlayer->canonRect.h = 15;
 
     pPlayer->x = x - pPlayer->playerRect.w / 2.0f;
     pPlayer->y = y - pPlayer->playerRect.h / 2.0f;
@@ -192,10 +201,24 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
     
     checkForCollisions(pPlayer, platforms, platformCount);
 
-    float dx = mousePosx - pPlayer->x;
+    float dx = mousePosx - pPlayer->x - (pPlayer->playerRect.w)/2;
     float dy = mousePosy - pPlayer->y;
 
     pPlayer->canonAngle = atan2(dy, dx);
+
+    if(pPlayer->canonAngle > -1.5f && pPlayer->canonAngle < 1.5f) pPlayer->flip = SDL_FLIP_NONE;
+    else pPlayer->flip = SDL_FLIP_HORIZONTAL;
+
+    if(pPlayer->flip == SDL_FLIP_NONE)
+    {
+        if(pPlayer->canonAngle < -1.2f) pPlayer->canonAngle = -1.2f;
+        else if(pPlayer->canonAngle > 0.7f) pPlayer->canonAngle = 0.7f;
+    }
+    else if(pPlayer->flip == SDL_FLIP_HORIZONTAL)
+    {
+        if(pPlayer->canonAngle > -2.0f && !(pPlayer->canonAngle > 0.0f)) pPlayer->canonAngle = -2.0f;
+        else if(pPlayer->canonAngle < 2.5f && (pPlayer->canonAngle > 0.0f)) pPlayer->canonAngle = 2.5f;
+    }
 
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->playerRect.w > pPlayer->window_width)
@@ -222,7 +245,7 @@ void drawPlayer(Player *pPlayer)
     SDL_Point canonCenter = {0, pPlayer->canonRect.h / 2};
 
     SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTexture, NULL, &pPlayer->playerRect, 0.0, NULL, pPlayer->flip);
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pCanonTx, NULL, &pPlayer->playerRect, pPlayer->canonAngle*180/3.141f, &canonCenter, pPlayer->flip);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pCanonTx, NULL, &pPlayer->canonRect, pPlayer->canonAngle*180/3.141f, &canonCenter, pPlayer->flip);
     
     SDL_SetRenderDrawColor(pPlayer->pRenderer, 255, 0, 0, 255);
     SDL_RenderDrawRect(pPlayer->pRenderer, &pPlayer->hitbox);

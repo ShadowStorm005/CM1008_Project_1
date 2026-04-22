@@ -7,7 +7,7 @@
 #include "weapon.h"
 #include "map.h"
 
-#define BULLET_ASPECT 11
+#define BULLET_ASPECT 1
 
 typedef struct projectile
 {
@@ -35,7 +35,7 @@ Projectile *createProjectile(SDL_Renderer *pRenderer)
     pProjectile->active = 0;
     pProjectile->gravity = 0.3f;
 
-    SDL_Surface *pSurface = IMG_Load("Resources/bullets.png");
+    SDL_Surface *pSurface = IMG_Load("Resources/bullet.png");
     if (!pSurface) {
         printf("Error loading bullets.png: %s\n", IMG_GetError());
         free(pProjectile);
