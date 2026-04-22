@@ -7,6 +7,9 @@
 #include "map.h"
 #include "physics.h"
 
+#define FPS 60
+#define frameDelay 1000/FPS
+
 //window width & height moved to map.h
 
 typedef struct {
@@ -125,9 +128,12 @@ void run(Game *pGame)
 {
     int close_requested = 0;
     SDL_Event event;
+    Uint32 frameStart;
+    Uint32 frameTime;
 
     while (!close_requested) 
     {
+        frameStart = SDL_GetTicks();
         while (SDL_PollEvent(&event)) 
         {
             if (event.type == SDL_QUIT) 
@@ -138,7 +144,7 @@ void run(Game *pGame)
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
         handleInput(pGame, keystate);
 
-        updatePlayer(pGame->pPlayer, pGame->pMap, pGame->tilecount);
+        updatePlayer(pGame->pPlayer, pGame->pMap);
         for(int i = 0; i < MAX_BULLETS; i++)
         {
             if(isActive(pGame->pProjectile[i]))
@@ -162,7 +168,9 @@ void run(Game *pGame)
             }
         }
         SDL_RenderPresent(pGame->pRenderer);
-        SDL_Delay(16);
+
+        frameTime = SDL_GetTicks() - frameStart;
+        if (frameDelay > frameTime) SDL_Delay(frameDelay - frameTime);
 
         
 
@@ -210,7 +218,7 @@ void handleInput(Game *pGame, const Uint8 *keystate)
 void closeGame(Game *pGame)
 {
     if (pGame->pPlayer) destroyPlayer(pGame->pPlayer);
-    if (pGame->pMap) destroyPlatforms(pGame->pMap, pGame->tilecount);
+    if (pGame->pMap) destroyTiles(pGame->pMap, pGame->tilecount);
     if (pGame->pbackground)SDL_DestroyTexture(pGame->pbackground); 
     for(int i = 0; i < MAX_BULLETS; i++)
     {
