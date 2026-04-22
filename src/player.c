@@ -7,6 +7,8 @@
 #include "map.h"
 #include "physics.h"
 
+#define MAX_FALLING_SPEED 16.0f
+
 struct player {
     int health;
 
@@ -54,8 +56,8 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     pPlayer->velX = 0.0f;
     pPlayer->velY = 0.0f;
-    pPlayer->moveSpeed = 3.0f;
-    pPlayer->jumpForce = 16.0f;
+    pPlayer->moveSpeed = 2.0f;
+    pPlayer->jumpForce = 12.0f;
     pPlayer->gravity = 0.7f;
     pPlayer->isGrounded = 0;
     pPlayer->isTouchingWall = 0;
@@ -79,8 +81,8 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     SDL_QueryTexture(pPlayer->pTexture, NULL, NULL, &pPlayer->playerRect.w, &pPlayer->playerRect.h);
 
-    pPlayer->playerRect.w = 65;
-    pPlayer->playerRect.h = 30;
+    pPlayer->playerRect.w = 32*1.5f;
+    pPlayer->playerRect.h = 31*1.5f;
 
     pPlayer->x = x - pPlayer->playerRect.w / 2.0f;
     pPlayer->y = y - pPlayer->playerRect.h / 2.0f;
@@ -152,6 +154,7 @@ void updatePlayer(Player *pPlayer, Map *pMap)
     deaccelerate(pPlayer);
 
     pPlayer->velY += pPlayer->gravity;
+    if (pPlayer->velY > MAX_FALLING_SPEED) pPlayer->velY = MAX_FALLING_SPEED;
 
     pPlayer->x += pPlayer->velX;
     pPlayer->y += pPlayer->velY;
@@ -217,10 +220,16 @@ void stopVelY(Player *pPlayer)
     pPlayer->velY = 0.0f;
 }
 
+void stopVelX(Player *pPlayer)
+{
+    pPlayer->velX = 0.0f;
+}
+
 void touchingWall(Player *pPlayer)
 {
     if (pPlayer->velY < 0) pPlayer->velY /= 1.5f;
     pPlayer->isTouchingWall = 1;
+    pPlayer->velX = 0.0f;
 }
 
 void destroyPlayer(Player *pPlayer)

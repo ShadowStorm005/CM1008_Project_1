@@ -7,6 +7,9 @@
 #include "map.h"
 #include "physics.h"
 
+#define FPS 60
+#define frameDelay 1000/FPS
+
 //window width & height moved to map.h
 
 typedef struct {
@@ -125,9 +128,12 @@ void run(Game *pGame)
 {
     int close_requested = 0;
     SDL_Event event;
+    Uint32 frameStart;
+    Uint32 frameTime;
 
     while (!close_requested) 
     {
+        frameStart = SDL_GetTicks();
         while (SDL_PollEvent(&event)) 
         {
             if (event.type == SDL_QUIT) 
@@ -162,7 +168,9 @@ void run(Game *pGame)
             }
         }
         SDL_RenderPresent(pGame->pRenderer);
-        SDL_Delay(16);
+
+        frameTime = SDL_GetTicks() - frameStart;
+        if (frameDelay > frameTime) SDL_Delay(frameDelay - frameTime);
 
         
 

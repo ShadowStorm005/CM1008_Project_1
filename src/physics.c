@@ -11,6 +11,7 @@ void checkForCollisions(Player *pPlayer, Map *pMap)
     for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++){
         for (int j = 0; j < AMOUNT_OF_TILES_VERTICAL; j++){
             SDL_Rect platformRect = getTileRect(pMap, i, j);
+            if (!isTileAktive(pMap, i, j)) continue;
             if (SDL_IntersectRect(&playerRect, &platformRect, &collisionResult)){
                 if (collisionResult.w > collisionResult.h){
                     if (collisionResult.y > platformRect.y + (platformRect.h / 2)){
