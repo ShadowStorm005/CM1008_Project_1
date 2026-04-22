@@ -241,7 +241,27 @@ float getPlayerX(Player *pPlayer)
 
 float getPlayerY(Player *pPlayer)
 {
-    return pPlayer->y;
+    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2;
+}
+
+float getAngle(Player *pPlayer)
+{
+    return pPlayer->canonAngle;
+}
+
+float getCanonX(Player *pPlayer)
+{
+    return pPlayer->canonRect.x + (pPlayer->canonRect.w-5)*cos(pPlayer->canonAngle);
+}
+
+float getCanonY(Player *pPlayer)
+{
+    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2 + (pPlayer->canonRect.w-5)*sin(pPlayer->canonAngle);
+}
+
+float getAngle(Player *pPlayer)
+{
+    return pPlayer->canonAngle;
 }
 
 float getCanonX(Player *pPlayer)
