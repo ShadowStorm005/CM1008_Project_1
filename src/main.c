@@ -154,14 +154,11 @@ void run(Game *pGame)
         SDL_RenderCopy(pGame->pRenderer, pGame->pbackground, NULL, NULL);
 
         drawPlatforms(pGame->pPlatforms, pGame->platformCount);
-        drawPlayer(pGame->pPlayer);
         for(int i = 0; i < MAX_BULLETS; i++)
         { 
-            if(isActive(pGame->pProjectile[i]))
-            {
-                drawProjectile(pGame->pProjectile[i]);
-            }
+            if(isActive(pGame->pProjectile[i])) drawProjectile(pGame->pProjectile[i]);
         }
+        drawPlayer(pGame->pPlayer);
         SDL_RenderPresent(pGame->pRenderer);
         SDL_Delay(16);
     }
@@ -196,7 +193,7 @@ void handleInput(Game *pGame, const Uint8 *keystate)
         if(canShoot(pGame->pPlayer))
         {
             enableTrigger(pGame->pPlayer, 0);
-            shoot(pGame->pProjectile, getXCord(pGame->pPlayer), getYCord(pGame->pPlayer));
+            shoot(pGame->pProjectile, getXCord(pGame->pPlayer), getYCord(pGame->pPlayer), getAngle(pGame->pPlayer));
         }
     }
     else
