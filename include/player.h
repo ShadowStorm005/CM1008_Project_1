@@ -11,6 +11,7 @@ void updatePlayerRects(Player *pPlayer);
 Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height);
 float getXCord(Player *pPlayer);
 float getYCord(Player *pPlayer);
+float getAngle(Player *pPlayer);
 int canShoot(Player *pPlayer);
 void enableTrigger(Player *pPlayer, int enable);
 void moveLeft(Player *pPlayer);
