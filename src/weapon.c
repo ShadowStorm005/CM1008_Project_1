@@ -94,10 +94,10 @@ void drawProjectile(Projectile *pProjectile)
     SDL_RenderCopyEx(pProjectile->pRenderer, pProjectile->pTexture, NULL /**/, &pProjectile->projectile_rect, pProjectile->angle*180/3.141f, &center, SDL_FLIP_NONE);
 }
 
-void shoot(Projectile *pProjectile[], float x, float y)
+void shoot(Projectile *pProjectile[], float x, float y, float angle)
 {
     int mousePosx, mousePosy;
-    Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
+    //Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
     for(int i = 0; i < MAX_BULLETS; i++)
     {
         if(!pProjectile[i]->active)
@@ -112,11 +112,12 @@ void shoot(Projectile *pProjectile[], float x, float y)
 
             updateProjectileRect(pProjectile[i]);
 
-            float dx = mousePosx - x;
-            float dy = mousePosy - y;
+            //float dx = mousePosx - x;
+            //float dy = mousePosy - y;
 
-            pProjectile[i]->angle = atan2(dy, dx);
-            pProjectile[i]->speed = 10.0f;
+            //pProjectile[i]->angle = atan2(dy, dx);
+            pProjectile[i]->angle = angle;
+            pProjectile[i]->speed = 16.0f;
             pProjectile[i]->velX = pProjectile[i]->speed * cos(pProjectile[i]->angle);
             pProjectile[i]->velY = pProjectile[i]->speed * sin(pProjectile[i]->angle);
 

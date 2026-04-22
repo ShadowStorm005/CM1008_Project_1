@@ -154,12 +154,17 @@ void jump(Player *pPlayer)
 
 float getXCord(Player *pPlayer)
 {
-    return pPlayer->x + (pPlayer->playerRect.w) / 2;
+    return pPlayer->canonRect.x;
 }
 
 float getYCord(Player *pPlayer)
 {
-    return pPlayer->y;
+    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2;
+}
+
+float getAngle(Player *pPlayer)
+{
+    return pPlayer->canonAngle;
 }
 
 void deaccelerate(Player *pPlayer)

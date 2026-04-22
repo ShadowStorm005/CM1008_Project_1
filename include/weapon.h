@@ -11,7 +11,7 @@ int isActive(Projectile *pProjectile);
 void updateProjectileRect(Projectile *pProjectile);
 void updateProjectile(Projectile *pProjectile, Map *pMap);
 void drawProjectile(Projectile *pProjectile);
-void shoot(Projectile *pProjectile[], float x, float y);
+void shoot(Projectile *pProjectile[], float x, float y, float angle);
 void inactivateBullet(Projectile *pProjectile);
 SDL_Rect getBulletRect(Projectile *pProjectile);
 void destroyProjectile(Projectile *pProjectile);

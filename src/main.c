@@ -240,7 +240,6 @@ void run(Game *pGame)
                 drawProjectile(pGame->pProjectile[i]);
             }
         }
-
         SDL_RenderPresent(pGame->pRenderer);
 
         frameTime = SDL_GetTicks() - frameStart;
@@ -288,7 +287,7 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
         if(canShoot(pGame->pPlayer))
         {
             enableTrigger(pGame->pPlayer, 0);
-            shoot(pGame->pProjectile, getXCord(pGame->pPlayer), getYCord(pGame->pPlayer));
+            shoot(pGame->pProjectile, getXCord(pGame->pPlayer), getYCord(pGame->pPlayer), getAngle(pGame->pPlayer));
             playSound(pGame->sounds.explodenear);
         }
     }
