@@ -162,7 +162,7 @@ void updatePlayer(Player *pPlayer, Map *pMap)
     updatePlayerRects(pPlayer);
     pPlayer->isGrounded = 0;
     
-    checkForCollisions(pPlayer, pMap);
+    checkForPlayerCollision(pPlayer, pMap);
 
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->playerRect.w > pPlayer->window_width)
