@@ -262,12 +262,8 @@ void setCanonMode(Player *pPlayer, int mode)
 
 int getCanonMode(Player *pPlayer)
 {
-    return pPlayer->canonMode;
-}
-
-float getPlayerX(Player *pPlayer)
-{
-    return pPlayer->x;
+    return pPlayer->canonRect.x;
+    return pPlayer->canonRect.x;
 }
 
 float getPlayerY(Player *pPlayer)
