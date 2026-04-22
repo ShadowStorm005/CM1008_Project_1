@@ -103,8 +103,8 @@ void shoot(Projectile *pProjectile[], float x, float y, float angle)
         if(!pProjectile[i]->active)
         {
             //bullet size
-            pProjectile[i]->projectile_rect.w = 20*BULLET_ASPECT;
-            pProjectile[i]->projectile_rect.h = 20;
+            pProjectile[i]->projectile_rect.w = 30*BULLET_ASPECT;
+            pProjectile[i]->projectile_rect.h = 30;
 
             pProjectile[i]->active = 1;
             pProjectile[i]->x = x;
