@@ -75,7 +75,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->isGrounded = 0;
     pPlayer->isTouchingWall = 0;
 
-    SDL_Surface *pSurface = IMG_Load("Resources/firsttank.png");
+    SDL_Surface *pSurface = IMG_Load("Resources/Sprite-tankHull.png");
     if (!pSurface) 
     {
         printf("Error loading firsttank.png: %s\n", IMG_GetError());
@@ -114,8 +114,8 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     SDL_QueryTexture(pPlayer->pTexture, NULL, NULL, &pPlayer->playerRect.w, &pPlayer->playerRect.h);
     SDL_QueryTexture(pPlayer->pCanonTx, NULL, NULL, &pPlayer->canonRect.w, &pPlayer->canonRect.h);
 
-    pPlayer->playerRect.w = 65;
-    pPlayer->playerRect.h = 30;
+    pPlayer->playerRect.w = 60;
+    pPlayer->playerRect.h = 60;
 
     pPlayer->canonRect.w = 40;
     pPlayer->canonRect.h = 15;
@@ -207,7 +207,7 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
     checkForCollisions(pPlayer, platforms, platformCount);
 
     float dx = mousePosx - pPlayer->x - (pPlayer->playerRect.w)/2;
-    float dy = mousePosy - pPlayer->y;
+    float dy = mousePosy - pPlayer->y - (pPlayer->playerRect.h)/2;
 
     pPlayer->canonAngle = atan2(dy, dx);
 
@@ -221,8 +221,8 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
     }
     else if(pPlayer->flip == SDL_FLIP_HORIZONTAL)
     {
-        if(pPlayer->canonAngle > -2.0f && !(pPlayer->canonAngle > 0.0f)) pPlayer->canonAngle = -2.0f;
-        else if(pPlayer->canonAngle < 2.5f && (pPlayer->canonAngle > 0.0f)) pPlayer->canonAngle = 2.5f;
+        if(pPlayer->canonAngle > -1.95f && !(pPlayer->canonAngle > 0.0f)) pPlayer->canonAngle = -1.95f;
+        else if(pPlayer->canonAngle < 2.4f && (pPlayer->canonAngle > 0.0f)) pPlayer->canonAngle = 2.4f;
     }
 
     if (pPlayer->x < 0) pPlayer->x = 0;
