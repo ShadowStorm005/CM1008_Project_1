@@ -192,7 +192,7 @@ Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
 
     map->pRenderer = pRenderer;
 
-    SDL_Surface *surface = IMG_Load("Resources/Sprite-dirt.png");
+    SDL_Surface *surface = IMG_Load("Resources/Sprite-all.png");
     if (!surface) {
         printf("Error loading foundation.png: %s\n", IMG_GetError());
         free(map);

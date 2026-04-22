@@ -61,7 +61,26 @@ void checkForBulletCollision(Projectile *pProjectile, Map *pMap)
             if (SDL_HasIntersection(&bulletRect, &tileRect)){
                 inactivateBullet(pProjectile);
                 inactivateTile(pMap, i, j);
+                triggerBulletExplosion(pMap, i, j);
                 return;
+            }
+        }
+    }
+}
+
+void triggerBulletExplosion(Map *pMap, int x, int y)
+{
+    int minX = x - 5;
+    int maxX = x + 5;
+    for (int i = minX; i <= maxX; i++){
+        if (i <= x){
+            for (int j = y - (i-minX); j <= y + (i-minX); j++){
+                inactivateTile(pMap, i, j);
+            }
+        }
+        else{
+            for (int j = y - (maxX-i); j <= y + (maxX-i); j++){
+                inactivateTile(pMap, i, j);
             }
         }
     }
