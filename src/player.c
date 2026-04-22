@@ -198,6 +198,7 @@ int getCanonMode(Player *pPlayer)
 float getXCord(Player *pPlayer)
 {
     return pPlayer->canonRect.x;
+    return pPlayer->canonRect.x;
 }
 
 float getYCord(Player *pPlayer)
