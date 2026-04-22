@@ -251,6 +251,11 @@ int isTileAktive(Map *tiles, int x, int y)
     return tiles->tileMap[x][y].isActive;
 }
 
+void inactivateTile(Map *tiles, int x, int y)
+{
+    tiles->tileMap[x][y].isActive = 0;
+}
+
 void destroyTiles(Map *tiles, int tilecount)
 {
     if (!tiles) return;

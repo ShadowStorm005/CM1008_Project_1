@@ -17,6 +17,7 @@ void drawTiles(Map *map);
 SDL_Rect getSelectedTile(int tileNr);
 SDL_Rect getTileRect(Map *map, int x, int y);
 int isTileAktive(Map *tiles, int x, int y);
+void inactivateTile(Map *tiles, int x, int y);
 void destroyTiles(Map *map, int tilecount);
 
 Tile createTile(int x, int y, int selectedTile);

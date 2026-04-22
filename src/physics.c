@@ -60,6 +60,7 @@ void checkForBulletCollision(Projectile *pProjectile, Map *pMap)
             if (!isTileAktive(pMap, i, j)) continue;
             if (SDL_HasIntersection(&bulletRect, &tileRect)){
                 inactivateBullet(pProjectile);
+                inactivateTile(pMap, i, j);
                 return;
             }
         }
