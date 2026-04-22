@@ -8,12 +8,6 @@
 #include "physics.h"
 
 //window width & height moved to map.h
-typedef struct{
-    SDL_Rect rect;
-    SDL_Texture *normaltexture;
-    SDL_Texture *selectedTexture;
-    SDL_bool isSelected;
-} Button;
 
 typedef struct {
     SDL_Window *pWindow;
@@ -23,8 +17,6 @@ typedef struct {
     int platformCount;
     SDL_Texture *pbackground;
     Projectile *pProjectile[MAX_BULLETS];
-    Button *pButtons;
-    int buttonCount;
 } Game;
 
 int initiate(Game *pGame);
@@ -100,11 +92,6 @@ int initiate(Game *pGame)
         closeGame(pGame);
         return 0;
     }
-
-    Button playButton, settingsButton, exitButton;
-    playButton = createButton(pGame->pRenderer, "Resources/foundation.png", "Resources/firsttank.png", 350, 200, 100, 50);
-    settingsButton = createButton(pGame->pRenderer, "Resources/foundation.png", "Resources/firsttank.png", 350, 300, 100, 50);
-    exitButton = createButton(pGame->pRenderer, "Resources/foundation.png", "Resources/firsttank.png", 350, 400, 100, 50);
 
     pGame->pPlayer = createPlayer(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     if (!pGame->pPlayer) 
@@ -216,25 +203,6 @@ void handleInput(Game *pGame, const Uint8 *keystate)
     {
         enableTrigger(pGame->pPlayer, 1);
     }
-}
-
-Button createButton(SDL_Renderer *renderer, const char *normalPath, const char *selectedPath, int x, int y, int w, int h)
-{
-    Button button;
-    button.rect.x = x;
-    button.rect.y = y;
-    button.rect.w = w;
-    button.rect.h = h;
-    button.normaltexture = IMG_LoadTexture(renderer, normalPath);
-    button.selectedTexture = IMG_LoadTexture(renderer, selectedPath);
-    button.isSelected = SDL_FALSE;
-    return button;
-}
-
-void destroyButton(Button *button)
-{
-    SDL_DestroyTexture(button->normaltexture);
-    SDL_DestroyTexture(button->selectedTexture);
 }
 
 void closeGame(Game *pGame)
