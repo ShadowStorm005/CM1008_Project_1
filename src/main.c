@@ -149,7 +149,7 @@ void run(Game *pGame)
         {
             if(isActive(pGame->pProjectile[i]))
             {
-                updateProjectile(pGame->pProjectile[i]);
+                updateProjectile(pGame->pProjectile[i], pGame->pMap);
             }
         }
 
