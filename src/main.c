@@ -20,6 +20,7 @@ typedef struct {
 } Game;
 
 int initiate(Game *pGame);
+void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* background, SDL_Texture* newGame, SDL_Texture* exitGame);
 void run(Game *pGame);
 void closeGame(Game *pGame);
 void handleInput(Game *pGame, const Uint8 *keystate);
@@ -32,7 +33,8 @@ int main(int argc, char **argv)
     {
         return 1;
     }
-
+    SDL_Event event = {0};
+    menu(&game, game.pRenderer, &event, game.pbackground, IMG_LoadTexture(game.pRenderer, "Resources/firsttank.png"), IMG_LoadTexture(game.pRenderer, "Resources/PrimitivPlatform.png"));
     run(&game);
     closeGame(&game);
     return 0;
@@ -86,6 +88,27 @@ int initiate(Game *pGame)
 
     pGame->pbackground = SDL_CreateTextureFromSurface(pGame->pRenderer, pbackground);
     free(pbackground);
+
+    SDL_Texture* background = IMG_LoadTexture(pGame->pRenderer, "Resources/skybackground.png");
+    if (!background) {
+        printf("Error loading skybackground.png: %s\n", IMG_GetError());
+        free(background);
+        return 0;
+    }
+
+    SDL_Texture* newGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/firsttank.png");
+    if (!newGameButton) {
+        printf("Error loading newGame.png: %s\n", IMG_GetError());
+        free(newGameButton);
+        return 0;
+    }
+
+    SDL_Texture* exitGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/PrimitivPlatform.png");
+    if (!exitGameButton) {
+        printf("Error loading exitGame.png: %s\n", IMG_GetError());
+        free(exitGameButton);
+        return 0;
+    }
 
     if (!pGame->pbackground) {
         printf("Error creating texture: %s\n", SDL_GetError());
@@ -219,4 +242,72 @@ void closeGame(Game *pGame)
 
     IMG_Quit();
     SDL_Quit();
+}
+
+void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* background, SDL_Texture* newGameButton, SDL_Texture* exitGameButton)
+{
+    int Mx = 0;
+    int My = 0;
+    bool play = false;
+    bool exit = false;
+
+    SDL_Rect background_rect;
+    background_rect.x = 0;   
+    background_rect.y = 0;   
+    background_rect.w = 1280;
+    background_rect.h = 960; 
+    
+    SDL_Rect newGame_Rect;
+    newGame_Rect.x = 0;
+    newGame_Rect.y = 100;
+    newGame_Rect.w = 50;
+    newGame_Rect.h = 25;
+
+    SDL_Rect exit_Rect;
+    exit_Rect.x = 0;
+    exit_Rect.y = 200;
+    exit_Rect.w = 50;
+    exit_Rect.h = 25;
+
+    SDL_RenderCopy(pRenderer, background, NULL, &background_rect);
+    SDL_RenderCopy(pRenderer, newGameButton, NULL, &(SDL_Rect){0, 100, 50, 25});
+    SDL_RenderCopy(pRenderer, exitGameButton, NULL, &(SDL_Rect){0, 200, 50, 25});
+    SDL_RenderPresent(pRenderer);
+
+    while(!play && !exit)
+    {
+        SDL_GetMouseState(&Mx, &My);
+
+        while(SDL_PollEvent(event))
+        {
+            if(event->type == SDL_QUIT)
+            {
+                exit = true;
+                break;
+            }
+            if(event->type == SDL_MOUSEBUTTONDOWN && event->button.button == SDL_BUTTON_LEFT)
+            {
+                if(Mx >= newGame_Rect.x && Mx <= newGame_Rect.x + newGame_Rect.w && My >= newGame_Rect.y && My <= newGame_Rect.y + newGame_Rect.h)
+                {
+                    play = true;
+                }
+                else if(Mx >= exit_Rect.x && Mx <= exit_Rect.x + exit_Rect.w && My >= exit_Rect.y && My <= exit_Rect.y + exit_Rect.h)
+                {
+                    exit = true;
+                    closeGame(pGame);
+                }
+            }
+        }
+            SDL_RenderClear(pRenderer);
+
+        SDL_RenderCopy(pRenderer, background, NULL, &background_rect);
+        SDL_RenderCopy(pRenderer, newGameButton, NULL, &newGame_Rect);
+        SDL_RenderCopy(pRenderer, exitGameButton, NULL, &exit_Rect);
+
+        SDL_RenderPresent(pRenderer);
+
+        SDL_Delay(16);
+    }
+    if (newGameButton) SDL_DestroyTexture(newGameButton);
+    if (exitGameButton) SDL_DestroyTexture(exitGameButton);
 }
