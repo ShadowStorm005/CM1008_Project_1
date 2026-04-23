@@ -17,13 +17,22 @@ typedef struct {
     int platformCount;
     SDL_Texture *pbackground;
     Projectile *pProjectile[MAX_BULLETS];
+    bool inGameMenu;
+    SDL_Texture *resumeButton;
+    SDL_Texture *settingsButton;
+    SDL_Texture *exitGameButton;
+    SDL_Texture *backButton;
+    SDL_Texture *newGameButton;
 } Game;
 
 int initiate(Game *pGame);
-void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* background, SDL_Texture* newGame, SDL_Texture* exitGame);
+void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* background, SDL_Texture* newGame, SDL_Texture* settings, SDL_Texture* exitGameButton);
+void settingsMenu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, bool *settings, SDL_Texture* background, SDL_Texture* backButton);
+void inGameSettingsMenu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, bool *settings, SDL_Texture* backButton);
+void inGameMenu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, bool *inGameMenu, SDL_Texture* resumeButton, SDL_Texture* settingsButton, SDL_Texture* exitGameButton);    
 void run(Game *pGame);
 void closeGame(Game *pGame);
-void handleInput(Game *pGame, const Uint8 *keystate);
+void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu);
 
 int main(int argc, char **argv)
 {
@@ -34,7 +43,7 @@ int main(int argc, char **argv)
         return 1;
     }
     SDL_Event event = {0};
-    menu(&game, game.pRenderer, &event, game.pbackground, IMG_LoadTexture(game.pRenderer, "Resources/firsttank.png"), IMG_LoadTexture(game.pRenderer, "Resources/PrimitivPlatform.png"));
+    menu(&game, game.pRenderer, &event, game.pbackground, IMG_LoadTexture(game.pRenderer, "Resources/firsttank.png"), IMG_LoadTexture(game.pRenderer, "Resources/tank.png"), IMG_LoadTexture(game.pRenderer, "Resources/PrimitivPlatform.png"));
     run(&game);
     closeGame(&game);
     return 0;
@@ -89,24 +98,45 @@ int initiate(Game *pGame)
     pGame->pbackground = SDL_CreateTextureFromSurface(pGame->pRenderer, pbackground);
     free(pbackground);
 
-    SDL_Texture* background = IMG_LoadTexture(pGame->pRenderer, "Resources/skybackground.png");
-    if (!background) {
-        printf("Error loading skybackground.png: %s\n", IMG_GetError());
-        free(background);
+    pGame->resumeButton = IMG_LoadTexture(pGame->pRenderer, "Resources/firsttank.png");
+    if (!pGame->resumeButton) {
+        printf("Error loading resumeButton.png: %s\n", IMG_GetError());
+        free(pGame->resumeButton);
         return 0;
     }
 
-    SDL_Texture* newGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/firsttank.png");
-    if (!newGameButton) {
+    pGame->newGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/firsttank.png");
+    if (!pGame->newGameButton) {
         printf("Error loading newGame.png: %s\n", IMG_GetError());
-        free(newGameButton);
+        free(pGame->newGameButton);
         return 0;
     }
 
-    SDL_Texture* exitGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/PrimitivPlatform.png");
-    if (!exitGameButton) {
+    pGame->settingsButton = IMG_LoadTexture(pGame->pRenderer, "Resources/tank.png");
+    if (!pGame->settingsButton) {
+        printf("Error loading settings.png: %s\n", IMG_GetError());
+        free(pGame->settingsButton);
+        return 0;
+    }
+
+    pGame->exitGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/PrimitivPlatform.png");
+    if (!pGame->exitGameButton) {
         printf("Error loading exitGame.png: %s\n", IMG_GetError());
-        free(exitGameButton);
+        free(pGame->exitGameButton);
+        return 0;
+    }
+
+    pGame->backButton = IMG_LoadTexture(pGame->pRenderer, "Resources/bullets.png");
+    if (!pGame->backButton) {
+        printf("Error loading backButton.png: %s\n", IMG_GetError());
+        free(pGame->backButton);
+        return 0;
+    }
+
+    SDL_Texture* resumeGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/firsttank.png");
+    if (!resumeGameButton) {
+        printf("Error loading resumeGame.png: %s\n", IMG_GetError());
+        free(resumeGameButton);
         return 0;
     }
 
@@ -161,7 +191,7 @@ void run(Game *pGame)
         }
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
-        handleInput(pGame, keystate);
+        handleInput(pGame, keystate, &pGame->inGameMenu);
 
         updatePlayer(pGame->pPlayer, pGame->pPlatforms, pGame->platformCount);
         for(int i = 0; i < MAX_BULLETS; i++)
@@ -180,19 +210,28 @@ void run(Game *pGame)
         drawPlatforms(pGame->pPlatforms, pGame->platformCount);
         drawPlayer(pGame->pPlayer);
         for(int i = 0; i < MAX_BULLETS; i++)
-        { 
+        {
             if(isActive(pGame->pProjectile[i]))
             {
                 drawProjectile(pGame->pProjectile[i]);
             }
         }
+
         SDL_RenderPresent(pGame->pRenderer);
         SDL_Delay(16);
     }
 }
 
-void handleInput(Game *pGame, const Uint8 *keystate)
+void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
 {
+    if(keystate[SDL_SCANCODE_ESCAPE])
+    {
+        pGame->inGameMenu = true;
+        while(pGame->inGameMenu == true)
+        {
+            inGameMenu(pGame, pGame->pRenderer, &(SDL_Event){0}, &(pGame->inGameMenu), IMG_LoadTexture(pGame->pRenderer, "Resources/firsttank.png"), IMG_LoadTexture(pGame->pRenderer, "Resources/tank.png"), IMG_LoadTexture(pGame->pRenderer, "Resources/PrimitivPlatform.png"));
+        }
+    }
     if(keystate[SDL_SCANCODE_LEFT] || keystate[SDL_SCANCODE_A])
     {
         moveLeft(pGame->pPlayer);
@@ -245,11 +284,12 @@ void closeGame(Game *pGame)
     SDL_Quit();
 }
 
-void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* background, SDL_Texture* newGameButton, SDL_Texture* exitGameButton)
+void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* background, SDL_Texture* newGameButton, SDL_Texture* settingsButton, SDL_Texture* exitGameButton)
 {
     int Mx = 0;
     int My = 0;
     bool play = false;
+    bool settings = false;
     bool exit = false;
     
     SDL_Event e;
@@ -262,23 +302,30 @@ void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* b
     background_rect.h = 960; 
     
     SDL_Rect newGame_Rect;
-    newGame_Rect.x = 0;
-    newGame_Rect.y = 100;
+    newGame_Rect.x = 590;
+    newGame_Rect.y = 400;
     newGame_Rect.w = 50;
     newGame_Rect.h = 25;
 
+    SDL_Rect settings_Rect;
+    settings_Rect.x = 590;
+    settings_Rect.y = 450;
+    settings_Rect.w = 50;
+    settings_Rect.h = 25;
+    
     SDL_Rect exit_Rect;
-    exit_Rect.x = 0;
-    exit_Rect.y = 200;
+    exit_Rect.x = 590;
+    exit_Rect.y = 500;
     exit_Rect.w = 50;
     exit_Rect.h = 25;
 
     SDL_RenderCopy(pRenderer, background, NULL, &background_rect);
-    SDL_RenderCopy(pRenderer, newGameButton, NULL, &(SDL_Rect){0, 100, 50, 25});
-    SDL_RenderCopy(pRenderer, exitGameButton, NULL, &(SDL_Rect){0, 200, 50, 25});
+    SDL_RenderCopy(pRenderer, newGameButton, NULL, &(SDL_Rect){590, 400, 50, 25});
+    SDL_RenderCopy(pRenderer, settingsButton, NULL, &(SDL_Rect){590, 450, 50, 25});
+    SDL_RenderCopy(pRenderer, exitGameButton, NULL, &(SDL_Rect){590, 500, 50, 25});
     SDL_RenderPresent(pRenderer);
 
-    while(!play && !exit)
+    while(!play && !exit && !settings)
     {
         SDL_GetMouseState(&Mx, &My);
 
@@ -295,6 +342,11 @@ void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* b
                 {
                     play = true;
                 }
+                else if(Mx >= settings_Rect.x && Mx <= settings_Rect.x + settings_Rect.w && My >= settings_Rect.y && My <= settings_Rect.y + settings_Rect.h)
+                {
+                    settings = true;
+                    settingsMenu(pGame, pRenderer, event, &settings, background, IMG_LoadTexture(pRenderer, "Resources/bullets.png"));
+                }
                 else if(Mx >= exit_Rect.x && Mx <= exit_Rect.x + exit_Rect.w && My >= exit_Rect.y && My <= exit_Rect.y + exit_Rect.h)
                 {
                     exit = true;
@@ -306,6 +358,7 @@ void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* b
 
         SDL_RenderCopy(pRenderer, background, NULL, &background_rect);
         SDL_RenderCopy(pRenderer, newGameButton, NULL, &newGame_Rect);
+        SDL_RenderCopy(pRenderer, settingsButton, NULL, &settings_Rect);
         SDL_RenderCopy(pRenderer, exitGameButton, NULL, &exit_Rect);
 
         SDL_RenderPresent(pRenderer);
@@ -325,5 +378,241 @@ void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* b
     }
 
     if (newGameButton) SDL_DestroyTexture(newGameButton);
+    if (settingsButton) SDL_DestroyTexture(settingsButton);
     if (exitGameButton) SDL_DestroyTexture(exitGameButton);
 }
+
+void settingsMenu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, bool *settings, SDL_Texture* background, SDL_Texture* backButton)
+{
+    int Mx = 0;
+    int My = 0;
+    bool back = false;
+
+    SDL_Event e;
+    bool waiting = true;
+
+    SDL_Rect background_rect;
+    background_rect.x = 0;   
+    background_rect.y = 0;   
+    background_rect.w = 1280;
+    background_rect.h = 960; 
+
+    SDL_Rect backButton_Rect;
+    backButton_Rect.x = 590;
+    backButton_Rect.y = 500;
+    backButton_Rect.w = 50;
+    backButton_Rect.h = 25;
+
+    SDL_RenderCopy(pRenderer, background, NULL, &background_rect);
+    SDL_RenderCopy(pRenderer, backButton, NULL, &backButton_Rect);
+    SDL_RenderPresent(pRenderer);
+
+    while(!back)
+    {
+        SDL_GetMouseState(&Mx, &My);
+
+        while(SDL_PollEvent(event))
+        {
+            if(event->type == SDL_QUIT)
+            {
+                back = true;
+                break;
+            }
+            if(event->type == SDL_MOUSEBUTTONDOWN && event->button.button == SDL_BUTTON_LEFT)
+            {
+                if(Mx >= backButton_Rect.x && Mx <= backButton_Rect.x + backButton_Rect.w && My >= backButton_Rect.y && My <= backButton_Rect.y + backButton_Rect.h)
+                {
+                    back = true;
+                }
+            }
+        }
+        SDL_RenderClear(pRenderer);
+
+        SDL_RenderCopy(pRenderer, background, NULL, &background_rect);
+        SDL_RenderCopy(pRenderer, backButton, NULL, &backButton_Rect);
+
+        SDL_RenderPresent(pRenderer);
+
+        SDL_Delay(16);
+    }
+
+    while (waiting)
+    {
+        while(SDL_PollEvent(event))
+        {
+            if(event->type == SDL_MOUSEBUTTONUP)
+            {
+                waiting = false;
+            }
+        }
+    }
+    *settings = false;
+    if (backButton) SDL_DestroyTexture(backButton);
+}
+
+void inGameSettingsMenu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, bool *settings, SDL_Texture* backButton)
+{
+    int Mx = 0;
+    int My = 0;
+    bool back = false;
+
+    bool waiting = true;
+
+    SDL_Rect backButton_Rect;
+    backButton_Rect.x = 590;
+    backButton_Rect.y = 500;
+    backButton_Rect.w = 50;
+    backButton_Rect.h = 25;
+
+    while(!back)
+    {
+        SDL_GetMouseState(&Mx, &My);
+
+        while(SDL_PollEvent(event))
+        {
+            if(event->type == SDL_QUIT)
+            {
+                back = true;
+                break;
+            }
+            if(event->type == SDL_MOUSEBUTTONDOWN && event->button.button == SDL_BUTTON_LEFT)
+            {
+                if(Mx >= backButton_Rect.x && Mx <= backButton_Rect.x + backButton_Rect.w && My >= backButton_Rect.y && My <= backButton_Rect.y + backButton_Rect.h)
+                {
+                    back = true;
+                }
+            }
+        }
+        SDL_RenderClear(pRenderer);
+        SDL_RenderCopy(pRenderer, pGame->pbackground, NULL, NULL);
+        drawPlatforms(pGame->pPlatforms, pGame->platformCount);
+        drawPlayer(pGame->pPlayer);
+        for(int i = 0; i < MAX_BULLETS; i++)
+        { 
+            if(isActive(pGame->pProjectile[i]))
+            {
+                drawProjectile(pGame->pProjectile[i]);
+            }
+        }
+
+        SDL_RenderCopy(pRenderer, backButton, NULL, &backButton_Rect);
+
+        SDL_RenderPresent(pRenderer);
+
+        SDL_Delay(16);
+    }
+
+    while (waiting)
+    {
+        while(SDL_PollEvent(event))
+        {
+            if(event->type == SDL_MOUSEBUTTONUP)
+            {
+                waiting = false;
+            }
+        }
+    }
+    *settings = false;
+    if (backButton) SDL_DestroyTexture(backButton);
+}
+
+void inGameMenu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, bool *inGameMenu, SDL_Texture* resumeButton, SDL_Texture* settingsButton, SDL_Texture* exitGameButton)
+{
+    int Mx = 0;
+    int My = 0;
+    bool resume = false;
+    bool settings = false;
+    bool exit = false;
+    bool waiting = true;
+
+    SDL_Event e;
+
+    SDL_Rect resumeGame_Rect;
+    resumeGame_Rect.x = 590;
+    resumeGame_Rect.y = 400;
+    resumeGame_Rect.w = 50;
+    resumeGame_Rect.h = 25;
+
+    SDL_Rect settings_Rect;
+    settings_Rect.x = 590;
+    settings_Rect.y = 450;
+    settings_Rect.w = 50;
+    settings_Rect.h = 25;
+    
+    SDL_Rect exit_Rect;
+    exit_Rect.x = 590;
+    exit_Rect.y = 500;
+    exit_Rect.w = 50;
+    exit_Rect.h = 25;
+
+    while(!resume && !exit)
+    {
+        SDL_GetMouseState(&Mx, &My);
+
+        while(SDL_PollEvent(event))
+        {
+            if(event->type == SDL_QUIT)
+            {
+                exit = true;
+                break;
+            }
+            if(event->type == SDL_MOUSEBUTTONDOWN && event->button.button == SDL_BUTTON_LEFT)
+            {
+                if(Mx >= resumeGame_Rect.x && Mx <= resumeGame_Rect.x + resumeGame_Rect.w && My >= resumeGame_Rect.y && My <= resumeGame_Rect.y + resumeGame_Rect.h)
+                {
+                    resume = true;
+                    waiting = true;
+                }
+                else if(Mx >= settings_Rect.x && Mx <= settings_Rect.x + settings_Rect.w && My >= settings_Rect.y && My <= settings_Rect.y + settings_Rect.h)
+                {
+                    inGameSettingsMenu(pGame, pRenderer, event, &settings, IMG_LoadTexture(pRenderer, "Resources/bullets.png"));
+                }
+                else if(Mx >= exit_Rect.x && Mx <= exit_Rect.x + exit_Rect.w && My >= exit_Rect.y && My <= exit_Rect.y + exit_Rect.h)
+                {
+                    exit = true;
+                    closeGame(pGame);
+                }
+            }
+        }
+        SDL_RenderClear(pRenderer);
+        SDL_RenderCopy(pRenderer, pGame->pbackground, NULL, NULL);
+        drawPlatforms(pGame->pPlatforms, pGame->platformCount);
+        drawPlayer(pGame->pPlayer);
+        for(int i = 0; i < MAX_BULLETS; i++)
+        { 
+            if(isActive(pGame->pProjectile[i]))
+            {
+                drawProjectile(pGame->pProjectile[i]);
+            }
+        }
+
+        SDL_RenderCopy(pRenderer, resumeButton, NULL, &resumeGame_Rect);
+        SDL_RenderCopy(pRenderer, settingsButton, NULL, &settings_Rect);
+        SDL_RenderCopy(pRenderer, exitGameButton, NULL, &exit_Rect);
+
+        SDL_RenderPresent(pRenderer);
+
+        SDL_Delay(16);
+    }
+
+    if(resume)
+    {
+        *inGameMenu = false;
+    }
+    else if(exit)
+    {
+        *inGameMenu = false;
+    }
+
+    while (waiting)
+    {
+        while(SDL_PollEvent(event))
+        {
+            if(event->type == SDL_MOUSEBUTTONUP)
+            {
+                waiting = false;
+            }
+        }
+    }
+}
+
