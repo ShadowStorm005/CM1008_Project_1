@@ -317,6 +317,29 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
     }
     if(keystate[SDL_SCANCODE_SPACE] || SDL_GetMouseState(NULL,NULL)&SDL_BUTTON(1))
     {
+        int size;
+        float speed;
+        int automatic; 
+
+        switch (getCanonMode(pGame->pPlayer))
+        {
+        case 1:
+            size = 20;
+            speed = 16.0f;
+            automatic = 0;
+            break;
+        case 2:
+            size = 15;
+            speed = 20.0f;
+            automatic = 1;
+            break;
+        default:
+            size = 20;
+            speed = 16.0f;
+            automatic = 0;
+            break;
+        }
+
         if(canShoot(pGame->pPlayer))
         {
             enableTrigger(pGame->pPlayer, 0);
