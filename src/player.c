@@ -148,6 +148,13 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
         free(pPlayer);
         return NULL;
     }
+
+    if (!pPlayer->pTurretTx) 
+    {
+        printf("Error creating turret texture: %s\n", SDL_GetError());
+        free(pPlayer);
+        return NULL;
+    }
     
     if (!pPlayer->pCanonTx) 
     {
@@ -222,6 +229,16 @@ void jump(Player *pPlayer)
         pPlayer->velY = -pPlayer->jumpForce;
         pPlayer->isGrounded = 0;
     }
+}
+
+void setCanonMode(Player *pPlayer, int mode)
+{
+    pPlayer->canonMode = mode;
+}
+
+int getCanonMode(Player *pPlayer)
+{
+    return pPlayer->canonMode;
 }
 
 void setCanonMode(Player *pPlayer, int mode)
