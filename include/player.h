@@ -17,6 +17,8 @@ void enableTrigger(Player *pPlayer, int enable);
 void moveLeft(Player *pPlayer);
 void moveRight(Player *pPlayer);
 void jump(Player *pPlayer);
+void setCanonMode(Player *pPlayer, int mode);
+int getCanonMode(Player *pPlayer);
 void deaccelerate(Player *pPlayer);
 void updatePlayer(Player *pPlayer, Map *tiles);
 void drawPlayer(Player *pPlayer);
