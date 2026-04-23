@@ -272,18 +272,39 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
     {
         jump(pGame->pPlayer);
     }
-    /* The future functionality to change gun/canon needs function and stuff from player.c
     if(keystate[SDL_SCANCODE_1])
     {
-
+        setCanonMode(pGame->pPlayer, 1);
     }
     if(keystate[SDL_SCANCODE_2])
     {
-
+        setCanonMode(pGame->pPlayer, 2);
     }
-    */
     if(keystate[SDL_SCANCODE_SPACE] || SDL_GetMouseState(NULL,NULL)&SDL_BUTTON(1))
     {
+        int size;
+        float speed;
+        int automatic; 
+
+        switch (getCanonMode(pGame->pPlayer))
+        {
+        case 1:
+            size = 20;
+            speed = 16.0f;
+            automatic = 0;
+            break;
+        case 2:
+            size = 15;
+            speed = 20.0f;
+            automatic = 1;
+            break;
+        default:
+            size = 20;
+            speed = 16.0f;
+            automatic = 0;
+            break;
+        }
+
         if(canShoot(pGame->pPlayer))
         {
             enableTrigger(pGame->pPlayer, 0);
