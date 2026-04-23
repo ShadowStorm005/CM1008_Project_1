@@ -241,12 +241,22 @@ SDL_Rect getSelectedTile(int tileNr)
     return selectedTexture;
 }
 
+void setSelectedTexture(Map *tiles, int x, int y, int selectedTexture)
+{
+    tiles->tileMap[x][y].selectedTile = selectedTexture;
+}
+
+int getSelectedTexture(Map *tiles, int x, int y)
+{
+    return tiles->tileMap[x][y].selectedTile;
+}
+
 SDL_Rect getTileRect(Map *tiles, int x, int y)
 {
     return tiles->tileMap[x][y].tileRect;
 }
 
-int isTileAktive(Map *tiles, int x, int y)
+int isTileActive(Map *tiles, int x, int y)
 {
     return tiles->tileMap[x][y].isActive;
 }
