@@ -160,6 +160,7 @@ void run(Game *pGame)
             } 
         }
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+
         handleInput(pGame, keystate);
 
         updatePlayer(pGame->pPlayer, pGame->pPlatforms, pGame->platformCount);
@@ -250,6 +251,9 @@ void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* b
     int My = 0;
     bool play = false;
     bool exit = false;
+    
+    SDL_Event e;
+    bool waiting = true;
 
     SDL_Rect background_rect;
     background_rect.x = 0;   
@@ -308,6 +312,18 @@ void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* b
 
         SDL_Delay(16);
     }
+
+    while (waiting)
+    {
+        while(SDL_PollEvent(&e))
+        {
+            if(e.type == SDL_MOUSEBUTTONUP)
+            {
+                waiting = false;
+            }
+        }
+    }
+
     if (newGameButton) SDL_DestroyTexture(newGameButton);
     if (exitGameButton) SDL_DestroyTexture(exitGameButton);
 }
