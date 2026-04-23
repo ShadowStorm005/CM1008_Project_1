@@ -8,7 +8,7 @@ typedef struct projectile Projectile;
 
 Projectile *createProjectile(SDL_Renderer *pRenderer);
 int isActive(Projectile *pProjectile);
-void shoot(Projectile *pProjectile[], float x, float y, float angle);
+void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, float angle);
 void updateProjectile(Projectile *pProjectile);
 void drawProjectile(Projectile *pProjectile);
 void destroyProjectile(Projectile *pProjectile);
