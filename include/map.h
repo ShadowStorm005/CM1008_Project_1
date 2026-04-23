@@ -14,13 +14,13 @@ typedef struct map Map;
 
 Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height);
 void drawTiles(Map *map);
-SDL_Rect getSelectedTile(int tileNr);
+SDL_Rect getSelectedTextureTile(int tileNr);
 void setSelectedTexture(Map *tiles, int x, int y, int selectedTexture);
 int getSelectedTexture(Map *tiles, int x, int y);
 SDL_Rect getTileRect(Map *map, int x, int y);
 int isTileActive(Map *tiles, int x, int y);
 void inactivateTile(Map *tiles, int x, int y);
-void destroyTiles(Map *map, int tilecount);
+void destroyTiles(Map *map);
 
 Tile createTile(int x, int y, int selectedTile);
 

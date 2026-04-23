@@ -194,7 +194,7 @@ Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
 
     SDL_Surface *surface = IMG_Load("Resources/Sprite-all.png");
     if (!surface) {
-        printf("Error loading foundation.png: %s\n", IMG_GetError());
+        printf("Error loading spritesheet: %s\n", IMG_GetError());
         free(map);
         return NULL;
     }
@@ -203,7 +203,7 @@ Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
     SDL_FreeSurface(surface);
 
     if (!map->pTexture) {
-        printf("Error creating platform texture: %s\n", SDL_GetError());
+        printf("Error creating tile texture: %s\n", SDL_GetError());
         free(map);
         return NULL;
     }
@@ -224,14 +224,14 @@ void drawTiles(Map *tiles)
     {
         for(int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++)
         {
-            SDL_Rect selectedTexture = getSelectedTile(tiles->tileMap[x][y].selectedTile);
+            SDL_Rect selectedTexture = getSelectedTextureTile(tiles->tileMap[x][y].selectedTile);
             if (!tiles->tileMap[x][y].isActive) continue;
             SDL_RenderCopy(tiles->pRenderer, tiles->pTexture, &selectedTexture, &tiles->tileMap[x][y].tileRect);
         }
     }
 }
 
-SDL_Rect getSelectedTile(int tileNr)
+SDL_Rect getSelectedTextureTile(int tileNr)
 {
     SDL_Rect selectedTexture;
     selectedTexture.x = (tileNr % 3)*64;
@@ -266,16 +266,13 @@ void inactivateTile(Map *tiles, int x, int y)
     tiles->tileMap[x][y].isActive = 0;
 }
 
-void destroyTiles(Map *tiles, int tilecount)
+void destroyTiles(Map *tiles)
 {
     if (!tiles) return;
-
-    if (tilecount > 0 && tiles[0].pTexture) {
-        SDL_DestroyTexture(tiles[0].pTexture);
-    }
-
+    if (tiles->pTexture) SDL_DestroyTexture(tiles->pTexture);
     free(tiles);
 }
+
 
 Tile createTile(int x, int y, int selectedTile)
 {
