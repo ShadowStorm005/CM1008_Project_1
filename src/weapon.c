@@ -91,7 +91,7 @@ void drawProjectile(Projectile *pProjectile)
 {
     if(!pProjectile->active) return;
     SDL_Point center = {0, pProjectile->projectile_rect.h / 2};
-    SDL_RenderCopyEx(pProjectile->pRenderer, pProjectile->pTexture, NULL /**/, &pProjectile->projectile_rect, pProjectile->angle*180/3.141f, &center, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(pProjectile->pRenderer, pProjectile->pTexture, NULL /**/, &pProjectile->projectile_rect, pProjectile->angle*180/PI, &center, SDL_FLIP_NONE);
 }
 
 void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, float angle)
