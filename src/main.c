@@ -7,14 +7,16 @@
 #include "map.h"
 #include "physics.h"
 
+#define FPS 60
+#define frameDelay 1000/FPS
+
 //window width & height moved to map.h
 
 typedef struct {
     SDL_Window *pWindow;
     SDL_Renderer *pRenderer;
     Player *pPlayer;
-    Platform *pPlatforms;
-    int platformCount;
+    Map *pMap;
     SDL_Texture *pbackground;
     Projectile *pProjectile[MAX_BULLETS];
 } Game;
@@ -101,10 +103,9 @@ int initiate(Game *pGame)
         return 0;
     }
 
-    pGame->pPlatforms = createPlatforms(pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT, &pGame->platformCount);
-    if (!pGame->pPlatforms) 
-    {
-        printf("Platform creation failed\n");
+    pGame->pMap = createMap(pGame->pRenderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+    if (!pGame->pMap) {
+        printf("Tile creation failed\n");
         closeGame(pGame);
         return 0;
     }
@@ -126,9 +127,12 @@ void run(Game *pGame)
 {
     int close_requested = 0;
     SDL_Event event;
+    Uint32 frameStart;
+    Uint32 frameTime;
 
     while (!close_requested) 
     {
+        frameStart = SDL_GetTicks();
         while (SDL_PollEvent(&event)) 
         {
             if (event.type == SDL_QUIT) 
@@ -139,12 +143,12 @@ void run(Game *pGame)
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
         handleInput(pGame, keystate);
 
-        updatePlayer(pGame->pPlayer, pGame->pPlatforms, pGame->platformCount);
+        updatePlayer(pGame->pPlayer, pGame->pMap);
         for(int i = 0; i < MAX_BULLETS; i++)
         {
             if(isActive(pGame->pProjectile[i]))
             {
-                updateProjectile(pGame->pProjectile[i]);
+                updateProjectile(pGame->pProjectile[i], pGame->pMap);
             }
         }
 
@@ -153,7 +157,7 @@ void run(Game *pGame)
 
         SDL_RenderCopy(pGame->pRenderer, pGame->pbackground, NULL, NULL);
 
-        drawPlatforms(pGame->pPlatforms, pGame->platformCount);
+        drawTiles(pGame->pMap);
         drawPlayer(pGame->pPlayer);
         for(int i = 0; i < MAX_BULLETS; i++)
         { 
@@ -163,7 +167,12 @@ void run(Game *pGame)
             }
         }
         SDL_RenderPresent(pGame->pRenderer);
-        SDL_Delay(16);
+
+        frameTime = SDL_GetTicks() - frameStart;
+        if (frameDelay > frameTime) SDL_Delay(frameDelay - frameTime);
+
+        
+
     }
 }
 
@@ -208,7 +217,7 @@ void handleInput(Game *pGame, const Uint8 *keystate)
 void closeGame(Game *pGame)
 {
     if (pGame->pPlayer) destroyPlayer(pGame->pPlayer);
-    if (pGame->pPlatforms) destroyPlatforms(pGame->pPlatforms, pGame->platformCount);
+    if (pGame->pMap) destroyTiles(pGame->pMap);
     if (pGame->pbackground)SDL_DestroyTexture(pGame->pbackground); 
     for(int i = 0; i < MAX_BULLETS; i++)
     {

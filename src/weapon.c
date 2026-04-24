@@ -6,8 +6,9 @@
 #include "player.h"
 #include "weapon.h"
 #include "map.h"
+#include "physics.h"
 
-#define BULLET_ASPECT 11
+#define BULLET_ASPECT 1
 
 typedef struct projectile
 {
@@ -33,9 +34,9 @@ Projectile *createProjectile(SDL_Renderer *pRenderer)
     pProjectile->projectile_rect.x = (int)pProjectile->x;
     pProjectile->projectile_rect.y = (int)pProjectile->y;
     pProjectile->active = 0;
-    pProjectile->gravity = 0.3f;
+    pProjectile->gravity = 0.15f;
 
-    SDL_Surface *pSurface = IMG_Load("Resources/bullets.png");
+    SDL_Surface *pSurface = IMG_Load("Resources/bullet.png");
     if (!pSurface) {
         printf("Error loading bullets.png: %s\n", IMG_GetError());
         free(pProjectile);
@@ -61,15 +62,22 @@ int isActive(Projectile *pProjectile)
     return pProjectile->active;
 }
 
-void updateProjectile(Projectile *pProjectile)
+void updateProjectileRect(Projectile *pProjectile)
+{
+    pProjectile->projectile_rect.x = (int)(pProjectile->x);
+    pProjectile->projectile_rect.y = (int)(pProjectile->y - pProjectile->projectile_rect.h / 2);
+}
+
+void updateProjectile(Projectile *pProjectile, Map *pMap)
 {
     pProjectile->velY += pProjectile->gravity;
 
     pProjectile->x += pProjectile->velX;
     pProjectile->y += pProjectile->velY;
 
-    pProjectile->projectile_rect.x = (int)(pProjectile->x);
-    pProjectile->projectile_rect.y = (int)(pProjectile->y - pProjectile->projectile_rect.h / 2);
+    updateProjectileRect(pProjectile);
+
+    checkForBulletCollision(pProjectile, pMap);
 
     pProjectile->angle = atan2(pProjectile->velY, pProjectile->velX);
 
@@ -102,17 +110,29 @@ void shoot(Projectile *pProjectile[], float x, float y)
             pProjectile[i]->x = x;
             pProjectile[i]->y = y;
 
+            updateProjectileRect(pProjectile[i]);
+
             float dx = mousePosx - x;
             float dy = mousePosy - y;
 
             pProjectile[i]->angle = atan2(dy, dx);
-            pProjectile[i]->speed = 16.0f;
+            pProjectile[i]->speed = 10.0f;
             pProjectile[i]->velX = pProjectile[i]->speed * cos(pProjectile[i]->angle);
             pProjectile[i]->velY = pProjectile[i]->speed * sin(pProjectile[i]->angle);
 
             break;
         }
     }
+}
+
+void inactivateBullet(Projectile *pProjectile)
+{
+    pProjectile->active = 0;
+}
+
+SDL_Rect getBulletRect(Projectile *pProjectile)
+{
+    return pProjectile->projectile_rect;
 }
 
 void destroyProjectile(Projectile *pProjectile)

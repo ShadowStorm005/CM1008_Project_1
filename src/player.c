@@ -7,6 +7,8 @@
 #include "map.h"
 #include "physics.h"
 
+#define MAX_VELY_SPEED 15.0f
+
 struct player {
     int health;
 
@@ -54,8 +56,8 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     pPlayer->velX = 0.0f;
     pPlayer->velY = 0.0f;
-    pPlayer->moveSpeed = 3.0f;
-    pPlayer->jumpForce = 16.0f;
+    pPlayer->moveSpeed = 2.0f;
+    pPlayer->jumpForce = 12.0f;
     pPlayer->gravity = 0.7f;
     pPlayer->isGrounded = 0;
     pPlayer->isTouchingWall = 0;
@@ -79,8 +81,8 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     SDL_QueryTexture(pPlayer->pTexture, NULL, NULL, &pPlayer->playerRect.w, &pPlayer->playerRect.h);
 
-    pPlayer->playerRect.w = 65;
-    pPlayer->playerRect.h = 30;
+    pPlayer->playerRect.w = 32*1.4f;
+    pPlayer->playerRect.h = 31*1.4f;
 
     pPlayer->x = x - pPlayer->playerRect.w / 2.0f;
     pPlayer->y = y - pPlayer->playerRect.h / 2.0f;
@@ -145,13 +147,15 @@ void enableTrigger(Player *pPlayer, int enable)
     }
 }
 
-void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
+void updatePlayer(Player *pPlayer, Map *pMap)
 {
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
     deaccelerate(pPlayer);
 
     pPlayer->velY += pPlayer->gravity;
+    if (pPlayer->velY > MAX_VELY_SPEED) pPlayer->velY = MAX_VELY_SPEED;
+    else if (pPlayer->velY < -MAX_VELY_SPEED) pPlayer->velY = -MAX_VELY_SPEED;
 
     pPlayer->x += pPlayer->velX;
     pPlayer->y += pPlayer->velY;
@@ -159,7 +163,7 @@ void updatePlayer(Player *pPlayer, Platform *platforms, int platformCount)
     updatePlayerRects(pPlayer);
     pPlayer->isGrounded = 0;
     
-    checkForCollisions(pPlayer, platforms, platformCount);
+    checkForPlayerCollision(pPlayer, pMap);
 
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->playerRect.w > pPlayer->window_width)
@@ -199,7 +203,7 @@ SDL_Rect getPlayerRect(Player *pPlayer)
     return pPlayer->playerRect;
 }
 
-void setPlayerRect(Player *pPlayer, int x, int y)
+void setPlayerCord(Player *pPlayer, int x, int y)
 {
     pPlayer->x = x;
     pPlayer->y = y;
@@ -217,10 +221,16 @@ void stopVelY(Player *pPlayer)
     pPlayer->velY = 0.0f;
 }
 
+void stopVelX(Player *pPlayer)
+{
+    pPlayer->velX = 0.0f;
+}
+
 void touchingWall(Player *pPlayer)
 {
     if (pPlayer->velY < 0) pPlayer->velY /= 1.5f;
     pPlayer->isTouchingWall = 1;
+    pPlayer->velX = 0.0f;
 }
 
 void destroyPlayer(Player *pPlayer)
