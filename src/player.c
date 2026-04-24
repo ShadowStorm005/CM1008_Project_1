@@ -27,8 +27,6 @@ struct player {
     int window_width, window_height;
 
     float canonAngle;
-
-    float canonAngle;
     float targetAngle;
 
     SDL_Texture *pHullTx;
@@ -239,7 +237,19 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     SDL_QueryTexture(pPlayer->pTurretTx, NULL, NULL, &pPlayer->turretRect.w, &pPlayer->turretRect.h);
     SDL_QueryTexture(pPlayer->pCanonTx, NULL, NULL, &pPlayer->canonRect.w, &pPlayer->canonRect.h);
 
-    initPlayerDefaults(pPlayer, x, y, window_width, window_height);
+    pPlayer->hullRect.w = 77*1.2f;
+    pPlayer->hullRect.h = 26*1.2f;
+
+    pPlayer->turretRect.w = 49*1.2f;
+    pPlayer->turretRect.h = 30*1.2f;   
+
+    pPlayer->canonRect.w = 54*1.2f;
+    pPlayer->canonRect.h = 15*1.2f;
+
+    pPlayer->x = x - pPlayer->hullRect.w / 2.0f;
+    pPlayer->y = y - pPlayer->hullRect.h / 2.0f;
+
+    pPlayer->tankFlip = SDL_FLIP_NONE;
 
     updatePlayerRects(pPlayer);
     return pPlayer;
@@ -318,57 +328,7 @@ float getCanonX(Player *pPlayer)
 
 float getCanonY(Player *pPlayer)
 {
-    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2 + (pPlayer->canonRect.w-5)*sin(pPlayer->canonAngle);
-}
-
-float getAngle(Player *pPlayer)
-{
-    return pPlayer->canonAngle;
-}
-
-float getCanonX(Player *pPlayer)
-{
-    return pPlayer->canonRect.x + (pPlayer->canonRect.w-5)*cos(pPlayer->canonAngle);
-}
-
-float getCanonY(Player *pPlayer)
-{
-    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2 + (pPlayer->canonRect.w-5)*sin(pPlayer->canonAngle);
-}
-
-float getAngle(Player *pPlayer)
-{
-    return pPlayer->canonAngle;
-}
-
-float getCanonX(Player *pPlayer)
-{
-    return pPlayer->canonRect.x + (pPlayer->canonRect.w-5)*cos(pPlayer->canonAngle);
-}
-
-float getCanonY(Player *pPlayer)
-{
-    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2 + (pPlayer->canonRect.w-5)*sin(pPlayer->canonAngle);
-}
-
-float getAngle(Player *pPlayer)
-{
-    return pPlayer->canonAngle;
-}
-
-float getCanonX(Player *pPlayer)
-{
-    return pPlayer->canonRect.x + (pPlayer->canonRect.w-5)*cos(pPlayer->canonAngle);
-}
-
-float getCanonY(Player *pPlayer)
-{
-    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2 + (pPlayer->canonRect.w-5)*sin(pPlayer->canonAngle);
-}
-
-float getAngle(Player *pPlayer)
-{
-    return pPlayer->canonAngle;
+    return pPlayer->canonRect.y;
 }
 
 float getCanonX(Player *pPlayer)
