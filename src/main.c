@@ -103,28 +103,28 @@ int initiate(Game *pGame)
         return 0;
     }
 
-    pGame->newGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/firsttank.png");
+    pGame->newGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/Sprite-startButton.png");
     if (!pGame->newGameButton) {
         printf("Error loading newGame.png: %s\n", IMG_GetError());
         free(pGame->newGameButton);
         return 0;
     }
 
-    pGame->settingsButton = IMG_LoadTexture(pGame->pRenderer, "Resources/tank.png");
+    pGame->settingsButton = IMG_LoadTexture(pGame->pRenderer, "Resources/Sprite-settingsButton.png");
     if (!pGame->settingsButton) {
         printf("Error loading settings.png: %s\n", IMG_GetError());
         free(pGame->settingsButton);
         return 0;
     }
 
-    pGame->exitGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/PrimitivPlatform.png");
+    pGame->exitGameButton = IMG_LoadTexture(pGame->pRenderer, "Resources/Sprite-exitButton.png");
     if (!pGame->exitGameButton) {
         printf("Error loading exitGame.png: %s\n", IMG_GetError());
         free(pGame->exitGameButton);
         return 0;
     }
 
-    pGame->backButton = IMG_LoadTexture(pGame->pRenderer, "Resources/bullets.png");
+    pGame->backButton = IMG_LoadTexture(pGame->pRenderer, "Resources/Sprite-backButton.png");
     if (!pGame->backButton) {
         printf("Error loading backButton.png: %s\n", IMG_GetError());
         free(pGame->backButton);
@@ -300,27 +300,27 @@ void menu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, SDL_Texture* b
     background_rect.h = 960; 
     
     SDL_Rect newGame_Rect;
-    newGame_Rect.x = 590;
-    newGame_Rect.y = 400;
-    newGame_Rect.w = 50;
-    newGame_Rect.h = 25;
+    newGame_Rect.x = 480;
+    newGame_Rect.y = 250;
+    newGame_Rect.w = 300;
+    newGame_Rect.h = 100;
 
     SDL_Rect settings_Rect;
-    settings_Rect.x = 590;
-    settings_Rect.y = 450;
-    settings_Rect.w = 50;
-    settings_Rect.h = 25;
+    settings_Rect.x = 480;
+    settings_Rect.y = 400;
+    settings_Rect.w = 300;
+    settings_Rect.h = 100;
     
     SDL_Rect exit_Rect;
-    exit_Rect.x = 590;
-    exit_Rect.y = 500;
-    exit_Rect.w = 50;
-    exit_Rect.h = 25;
+    exit_Rect.x = 480;
+    exit_Rect.y = 550;
+    exit_Rect.w = 300;
+    exit_Rect.h = 100;
 
     SDL_RenderCopy(pRenderer, background, NULL, &background_rect);
-    SDL_RenderCopy(pRenderer, newGameButton, NULL, &(SDL_Rect){590, 400, 50, 25});
-    SDL_RenderCopy(pRenderer, settingsButton, NULL, &(SDL_Rect){590, 450, 50, 25});
-    SDL_RenderCopy(pRenderer, exitGameButton, NULL, &(SDL_Rect){590, 500, 50, 25});
+    SDL_RenderCopy(pRenderer, newGameButton, NULL, &newGame_Rect);
+    SDL_RenderCopy(pRenderer, settingsButton, NULL, &settings_Rect);
+    SDL_RenderCopy(pRenderer, exitGameButton, NULL, &exit_Rect);
     SDL_RenderPresent(pRenderer);
 
     while(!play && !exit && !settings)
@@ -396,10 +396,10 @@ void settingsMenu(Game *pGame, SDL_Renderer* pRenderer, SDL_Event *event, bool *
     background_rect.h = 960; 
 
     SDL_Rect backButton_Rect;
-    backButton_Rect.x = 590;
-    backButton_Rect.y = 500;
-    backButton_Rect.w = 50;
-    backButton_Rect.h = 25;
+    backButton_Rect.x = 480;
+    backButton_Rect.y = 550;
+    backButton_Rect.w = 300;
+    backButton_Rect.h = 100;
 
     SDL_RenderCopy(pRenderer, background, NULL, &background_rect);
     SDL_RenderCopy(pRenderer, backButton, NULL, &backButton_Rect);
