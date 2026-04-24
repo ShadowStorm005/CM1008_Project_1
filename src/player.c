@@ -26,6 +26,7 @@ struct player {
     int window_width, window_height;
 
     float canonAngle;
+    float targetAngle;
 
     SDL_Texture *pHullTx;
     SDL_Texture *pCanonTx;
@@ -38,7 +39,8 @@ struct player {
     SDL_Rect canonRect;
     SDL_Rect turretRect;
 
-    SDL_RendererFlip flip;
+    SDL_RendererFlip tankFlip;
+    SDL_RendererFlip turretFlip;
 };
 
 void updatePlayerRects(Player *pPlayer)
@@ -49,7 +51,7 @@ void updatePlayerRects(Player *pPlayer)
     pPlayer->turretRect.y = (int)pPlayer->y - 7*(pPlayer->hullRect.h)/6;
     pPlayer->canonRect.y = (int)pPlayer->y - 3*(pPlayer->hullRect.h)/5;
 
-    if(pPlayer->flip == SDL_FLIP_NONE)
+    if(pPlayer->turretFlip == SDL_FLIP_NONE)
     {
         pPlayer->turretRect.x = (int)pPlayer->x + (pPlayer->hullRect.w)/10;
 
@@ -156,7 +158,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->x = x - pPlayer->hullRect.w / 2.0f;
     pPlayer->y = y - pPlayer->hullRect.h / 2.0f;
 
-    pPlayer->flip = SDL_FLIP_NONE;
+    pPlayer->tankFlip = SDL_FLIP_NONE;
 
     updatePlayerRects(pPlayer);
     return pPlayer;
@@ -165,13 +167,13 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 void moveLeft(Player *pPlayer)
 {
     pPlayer->velX += -pPlayer->moveSpeed;
-    pPlayer->flip = SDL_FLIP_HORIZONTAL;
+    pPlayer->tankFlip = SDL_FLIP_HORIZONTAL;
 }
 
 void moveRight(Player *pPlayer)
 {
     pPlayer->velX += pPlayer->moveSpeed;
-    pPlayer->flip = SDL_FLIP_NONE;
+    pPlayer->tankFlip = SDL_FLIP_NONE;
 }
 
 void jump(Player *pPlayer)
@@ -200,7 +202,17 @@ float getXCord(Player *pPlayer)
 
 float getYCord(Player *pPlayer)
 {
-    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2;
+    return pPlayer->canonRect.y;
+}
+
+float getCanonX(Player *pPlayer)
+{
+    return pPlayer->canonRect.x + (pPlayer->canonRect.w-5)*cos(pPlayer->canonAngle);
+}
+
+float getCanonY(Player *pPlayer)
+{
+    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2 + (pPlayer->canonRect.w-5)*sin(pPlayer->canonAngle);
 }
 
 float getAngle(Player *pPlayer)
@@ -231,9 +243,47 @@ void enableTrigger(Player *pPlayer, int enable)
     }
 }
 
+static void restrictCanonAngle(Player *pPlayer)
+{
+    if(pPlayer->turretFlip == SDL_FLIP_NONE)
+    {
+        if(pPlayer->canonAngle <= -1.2f) pPlayer->canonAngle = -1.2f;
+        else if(pPlayer->canonAngle >= 0.7f) pPlayer->canonAngle = 0.7f;
+    }
+    else if(pPlayer->turretFlip == SDL_FLIP_HORIZONTAL)
+    {
+        if(pPlayer->canonAngle > 4.2f) pPlayer->canonAngle = 4.2f;
+        else if(pPlayer->canonAngle < 2.4f && (pPlayer->canonAngle > 0.0f)) pPlayer->canonAngle = 2.4f;
+    }
+
+}
+
+static void flipCanon(Player *pPlayer)
+{
+    if(pPlayer->targetAngle > -PI/2 && pPlayer->targetAngle < PI/2)
+    {
+        if(pPlayer->canonAngle <= 2.4f) 
+        {
+            pPlayer->turretFlip = SDL_FLIP_NONE;
+        }
+        else if(pPlayer->canonAngle >= 4.2f)
+        {
+            pPlayer->turretFlip = SDL_FLIP_NONE;
+            pPlayer->canonAngle = -1.2f;
+        }
+    }
+    else if(pPlayer->canonAngle >= 0.7f) pPlayer->turretFlip = SDL_FLIP_HORIZONTAL;
+    else if(pPlayer->canonAngle <= -1.2f)
+    {
+        pPlayer->turretFlip = SDL_FLIP_HORIZONTAL;
+        pPlayer->canonAngle = 4.2f;
+    }
+}
+
 void updatePlayer(Player *pPlayer, Map *pMap)
 {
     int mousePosx, mousePosy;
+    float diffAngle;
     Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
@@ -254,22 +304,24 @@ void updatePlayer(Player *pPlayer, Map *pMap)
     float dx = mousePosx - pPlayer->x - (pPlayer->hullRect.w)/2;
     float dy = mousePosy - pPlayer->y + (pPlayer->hullRect.h)/2;
 
-    pPlayer->canonAngle = atan2(dy, dx);
+    pPlayer->targetAngle = atan2(dy, dx);
 
-    if(pPlayer->canonAngle > -1.5f && pPlayer->canonAngle < 1.5f) pPlayer->flip = SDL_FLIP_NONE;
-    else pPlayer->flip = SDL_FLIP_HORIZONTAL;
+    flipCanon(pPlayer);
 
-    if(pPlayer->flip == SDL_FLIP_NONE)
+    if(pPlayer->turretFlip == SDL_FLIP_HORIZONTAL)
     {
-        if(pPlayer->canonAngle < -1.2f) pPlayer->canonAngle = -1.2f;
-        else if(pPlayer->canonAngle > 0.7f) pPlayer->canonAngle = 0.7f;
+        if(pPlayer->targetAngle < 0) pPlayer->targetAngle += 2*PI;
     }
-    else if(pPlayer->flip == SDL_FLIP_HORIZONTAL)
-    {
-        if(pPlayer->canonAngle > -1.95f && !(pPlayer->canonAngle > 0.0f)) pPlayer->canonAngle = -1.95f;
-        else if(pPlayer->canonAngle < 2.4f && (pPlayer->canonAngle > 0.0f)) pPlayer->canonAngle = 2.4f;
-    }
+    diffAngle = pPlayer->targetAngle - pPlayer->canonAngle;
 
+    if(fabs(diffAngle) > 0.05f)
+    {
+        if(diffAngle > 0) pPlayer->canonAngle += 0.05f;
+        else pPlayer->canonAngle += -0.05f;
+    }
+    else pPlayer->canonAngle = pPlayer->targetAngle;
+    restrictCanonAngle(pPlayer);
+    
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->hullRect.w > pPlayer->window_width)
         pPlayer->x = pPlayer->window_width - pPlayer->hullRect.w;
@@ -294,12 +346,10 @@ void drawPlayer(Player *pPlayer)
 {
     SDL_Point canonCenter = {0, pPlayer->canonRect.h / 2};
 
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pHullTx, NULL, &pPlayer->hullRect, 0.0, NULL, pPlayer->flip);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pHullTx, NULL, &pPlayer->hullRect, 0.0, NULL, pPlayer->tankFlip);
     SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pCanonTx, NULL, &pPlayer->canonRect, pPlayer->canonAngle*180/3.141f, &canonCenter, SDL_FLIP_NONE);
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTurretTx, NULL, &pPlayer->turretRect, 0.0, NULL, pPlayer->flip);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTurretTx, NULL, &pPlayer->turretRect, 0.0, NULL, pPlayer->turretFlip);
     
-    SDL_SetRenderDrawColor(pPlayer->pRenderer, 255, 0, 0, 255);
-    SDL_RenderDrawRect(pPlayer->pRenderer, &pPlayer->hitbox);
 }
 
 SDL_Rect getPlayerHitbox(Player *pPlayer)

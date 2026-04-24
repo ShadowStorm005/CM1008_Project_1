@@ -289,7 +289,7 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
         switch (getCanonMode(pGame->pPlayer))
         {
         case 1:
-            size = 20;
+            size = 30;
             speed = 16.0f;
             automatic = 0;
             break;
@@ -299,7 +299,7 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
             automatic = 1;
             break;
         default:
-            size = 20;
+            size = 30;
             speed = 16.0f;
             automatic = 0;
             break;
