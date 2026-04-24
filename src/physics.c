@@ -77,38 +77,36 @@ void triggerBulletExplosion(Map *pMap, int x, int y, int radius)
         if (i <= x){
             for (int j = y - (i-minX); j <= y + (i-minX); j++){
                 if (!isTileActive(pMap, i, j)) continue;
-                //setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j) + (int)hypotf(x-i, y-j));
                 if (hypotf(x-i, y-j) < 1.2f) inactivateTile(pMap, i, j);
-                else if (hypotf(x-i, y-j) < 2.2f) {
-                    if ((getSelectedTexture(pMap, i, j)+5)%6 < (getSelectedTexture(pMap, i, j))%6)
+                else if (hypotf(x-i, y-j) < 2.4f) {
+                    if ((getSelectedTexture(pMap, i, j)+2)%3 <= (getSelectedTexture(pMap, i, j))%3)
                         inactivateTile(pMap, i, j);
                     else
-                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+5);
+                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+2);
                 }
                 else if (hypotf(x-i, y-j) < 3.2f) {
-                    if ((getSelectedTexture(pMap, i, j)+3)%6 < (getSelectedTexture(pMap, i, j))%6)
+                    if ((getSelectedTexture(pMap, i, j)+1)%3 <= (getSelectedTexture(pMap, i, j))%3)
                         inactivateTile(pMap, i, j);
                     else
-                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+3);
+                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+1);
                 }
             }
         }
         else{
             for (int j = y - (maxX-i); j <= y + (maxX-i); j++){
                 if (!isTileActive(pMap, i, j)) continue;
-                //setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j) + (int)hypotf(i-x, y-j));
                 if (hypotf(i-x, y-j) < 1.2f) inactivateTile(pMap, i, j);
-                else if (hypotf(i-x, y-j) < 2.2f) {
-                    if ((getSelectedTexture(pMap, i, j)+5)%6 < (getSelectedTexture(pMap, i, j))%6)
+                else if (hypotf(i-x, y-j) < 2.4f) {
+                    if ((getSelectedTexture(pMap, i, j)+2)%3 <= (getSelectedTexture(pMap, i, j))%3)
                         inactivateTile(pMap, i, j);
                     else
-                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+5);
+                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+2);
                 }
                 else if (hypotf(i-x, y-j) < 3.2f) {
-                    if ((getSelectedTexture(pMap, i, j)+3)%6 < (getSelectedTexture(pMap, i, j))%6)
+                    if ((getSelectedTexture(pMap, i, j)+1)%3 <= (getSelectedTexture(pMap, i, j))%3)
                         inactivateTile(pMap, i, j);
                     else
-                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+3);
+                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+1);
                 }
             }
         }
