@@ -195,7 +195,7 @@ void handleInput(Game *pGame, const Uint8 *keystate)
         switch (getCanonMode(pGame->pPlayer))
         {
         case 1:
-            size = 20;
+            size = 30;
             speed = 16.0f;
             automatic = 0;
             break;
@@ -205,7 +205,7 @@ void handleInput(Game *pGame, const Uint8 *keystate)
             automatic = 1;
             break;
         default:
-            size = 20;
+            size = 30;
             speed = 16.0f;
             automatic = 0;
             break;
@@ -214,7 +214,7 @@ void handleInput(Game *pGame, const Uint8 *keystate)
         if(canShoot(pGame->pPlayer))
         {
             if(!automatic) enableTrigger(pGame->pPlayer, 0);
-            shoot(pGame->pProjectile, size, speed, getXCord(pGame->pPlayer), getYCord(pGame->pPlayer), getAngle(pGame->pPlayer));
+            shoot(pGame->pProjectile, size, speed, getCanonX(pGame->pPlayer), getCanonY(pGame->pPlayer), getAngle(pGame->pPlayer));
         }
     }
     else

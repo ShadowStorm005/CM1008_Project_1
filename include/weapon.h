@@ -1,6 +1,7 @@
 #ifndef WEAPON_H
 #define WEAPON_H
 #define MAX_BULLETS 200
+#define PI 3.141592653589f
 
 #include <SDL.h>
 
