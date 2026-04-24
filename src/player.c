@@ -7,7 +7,7 @@
 #include "map.h"
 #include "physics.h"
 
-#define MAX_FALLING_SPEED 16.0f
+#define MAX_VELY_SPEED 15.0f
 
 struct player {
     int health;
@@ -81,8 +81,8 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     SDL_QueryTexture(pPlayer->pTexture, NULL, NULL, &pPlayer->playerRect.w, &pPlayer->playerRect.h);
 
-    pPlayer->playerRect.w = 32*1.5f;
-    pPlayer->playerRect.h = 31*1.5f;
+    pPlayer->playerRect.w = 32*1.4f;
+    pPlayer->playerRect.h = 31*1.4f;
 
     pPlayer->x = x - pPlayer->playerRect.w / 2.0f;
     pPlayer->y = y - pPlayer->playerRect.h / 2.0f;
@@ -154,7 +154,8 @@ void updatePlayer(Player *pPlayer, Map *pMap)
     deaccelerate(pPlayer);
 
     pPlayer->velY += pPlayer->gravity;
-    if (pPlayer->velY > MAX_FALLING_SPEED) pPlayer->velY = MAX_FALLING_SPEED;
+    if (pPlayer->velY > MAX_VELY_SPEED) pPlayer->velY = MAX_VELY_SPEED;
+    else if (pPlayer->velY < -MAX_VELY_SPEED) pPlayer->velY = -MAX_VELY_SPEED;
 
     pPlayer->x += pPlayer->velX;
     pPlayer->y += pPlayer->velY;
@@ -202,7 +203,7 @@ SDL_Rect getPlayerRect(Player *pPlayer)
     return pPlayer->playerRect;
 }
 
-void setPlayerRect(Player *pPlayer, int x, int y)
+void setPlayerCord(Player *pPlayer, int x, int y)
 {
     pPlayer->x = x;
     pPlayer->y = y;

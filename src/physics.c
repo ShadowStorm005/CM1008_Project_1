@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <SDL.h>
+#include <math.h>
 #include "physics.h"
 #include "player.h"
 #include "map.h"
@@ -12,21 +13,21 @@ void checkForPlayerCollision(Player *pPlayer, Map *pMap)
     for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++){
         for (int j = 0; j < AMOUNT_OF_TILES_VERTICAL; j++){
             SDL_Rect tileRect = getTileRect(pMap, i, j);
-            if (!isTileAktive(pMap, i, j)) continue;
+            if (!isTileActive(pMap, i, j)) continue;
             if (SDL_IntersectRect(&playerRect, &tileRect, &collisionResult)){
                 if (collisionResult.w > collisionResult.h){
                     if (collisionResult.y > tileRect.y + (tileRect.h / 2)){
                         // Player colliding from bottom
                         playerRect.y += collisionResult.h;
                         stopVelY(pPlayer);
-                        setPlayerRect(pPlayer, playerRect.x, playerRect.y);
+                        setPlayerCord(pPlayer, playerRect.x, playerRect.y);
                         updatePlayerRects(pPlayer);
                     }
                     else{
                         // Player colliding from top
                         playerRect.y -= collisionResult.h;
                         setPlayerGrounded(pPlayer);
-                        setPlayerRect(pPlayer, playerRect.x, playerRect.y);
+                        setPlayerCord(pPlayer, playerRect.x, playerRect.y);
                         updatePlayerRects(pPlayer);
                     }
                 }
@@ -35,14 +36,14 @@ void checkForPlayerCollision(Player *pPlayer, Map *pMap)
                         // Player colliding from right
                         playerRect.x += collisionResult.w;
                         touchingWall(pPlayer);
-                        setPlayerRect(pPlayer, playerRect.x, playerRect.y);
+                        setPlayerCord(pPlayer, playerRect.x, playerRect.y);
                         updatePlayerRects(pPlayer);
                     }
                     else{
                         // Player colliding from left
                         playerRect.x -= collisionResult.w;
                         touchingWall(pPlayer);
-                        setPlayerRect(pPlayer, playerRect.x, playerRect.y);
+                        setPlayerCord(pPlayer, playerRect.x, playerRect.y);
                         updatePlayerRects(pPlayer);
                     }
                 }
@@ -57,11 +58,56 @@ void checkForBulletCollision(Projectile *pProjectile, Map *pMap)
     for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++){
         for (int j = 0; j < AMOUNT_OF_TILES_VERTICAL; j++){
             SDL_Rect tileRect = getTileRect(pMap, i, j);
-            if (!isTileAktive(pMap, i, j)) continue;
+            if (!isTileActive(pMap, i, j)) continue;
             if (SDL_HasIntersection(&bulletRect, &tileRect)){
                 inactivateBullet(pProjectile);
                 inactivateTile(pMap, i, j);
+                triggerBulletExplosion(pMap, i, j, 4);
                 return;
+            }
+        }
+    }
+}
+
+void triggerBulletExplosion(Map *pMap, int x, int y, int radius)
+{
+    int minX = x - radius;
+    int maxX = x + radius;
+    for (int i = minX; i <= maxX; i++){
+        if (i <= x){
+            for (int j = y - (i-minX); j <= y + (i-minX); j++){
+                if (!isTileActive(pMap, i, j)) continue;
+                if (hypotf(x-i, y-j) < 1.2f) inactivateTile(pMap, i, j);
+                else if (hypotf(x-i, y-j) < 2.4f) {
+                    if ((getSelectedTexture(pMap, i, j)+2)%3 <= (getSelectedTexture(pMap, i, j))%3)
+                        inactivateTile(pMap, i, j);
+                    else
+                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+2);
+                }
+                else if (hypotf(x-i, y-j) < 3.2f) {
+                    if ((getSelectedTexture(pMap, i, j)+1)%3 <= (getSelectedTexture(pMap, i, j))%3)
+                        inactivateTile(pMap, i, j);
+                    else
+                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+1);
+                }
+            }
+        }
+        else{
+            for (int j = y - (maxX-i); j <= y + (maxX-i); j++){
+                if (!isTileActive(pMap, i, j)) continue;
+                if (hypotf(i-x, y-j) < 1.2f) inactivateTile(pMap, i, j);
+                else if (hypotf(i-x, y-j) < 2.4f) {
+                    if ((getSelectedTexture(pMap, i, j)+2)%3 <= (getSelectedTexture(pMap, i, j))%3)
+                        inactivateTile(pMap, i, j);
+                    else
+                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+2);
+                }
+                else if (hypotf(i-x, y-j) < 3.2f) {
+                    if ((getSelectedTexture(pMap, i, j)+1)%3 <= (getSelectedTexture(pMap, i, j))%3)
+                        inactivateTile(pMap, i, j);
+                    else
+                        setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+1);
+                }
             }
         }
     }
