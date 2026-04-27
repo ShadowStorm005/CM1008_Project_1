@@ -13,7 +13,7 @@ typedef struct projectile Projectile;
 Projectile *createProjectile(SDL_Renderer *pRenderer);
 int isActive(Projectile *pProjectile);
 void updateProjectileRect(Projectile *pProjectile);
-void updateProjectile(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount);
+void updateProjectile(Projectile *pProjectile, Map *pMap, Sounds *sounds, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount);
 void setProjectileVar(Projectile *pProjectile, int active, float x, float y, float angle);
 void drawProjectile(Projectile *pProjectile);
 void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, float angle);
