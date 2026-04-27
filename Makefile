@@ -22,6 +22,9 @@ physics.o: $(SRCDIR)\physics.c $(INCDIR)\physics.h
 weapon.o: $(SRCDIR)\weapon.c $(INCDIR)\weapon.h
 	gcc $(CFLAGS) $(SRCDIR)\weapon.c
 
+sound.o: $(SRCDIR)\sound.c
+	gcc $(CFLAGS) $(SRCDIR)\sound.c
+	
 clean:
 	rm *.exe
 	rm *.o
