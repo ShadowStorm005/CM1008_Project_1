@@ -41,9 +41,9 @@ $(OBJDIR)/weapon.o: $(SRCDIR)/weapon.c $(INCDIR)/weapon.h $(INCDIR)/server_creat
 $(OBJDIR):
 	if not exist $(OBJDIR) mkdir $(OBJDIR)
 
-sound.o: $(SRCDIR)\sound.c
+sound.o: $(SRCDIR)\sound.c $(INCDIR)\sound.h
 	gcc $(CFLAGS) $(SRCDIR)\sound.c
-	
+
 clean:
 	del $(OBJDIR)\server_main.o
 	del $(OBJDIR)\client_main.o

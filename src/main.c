@@ -207,8 +207,14 @@ void run(Game *pGame)
 
         int isMoving = keystate[SDL_SCANCODE_LEFT]  || keystate[SDL_SCANCODE_A] ||
                        keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D];
-        if (isMoving && !wasMoving)
-            playSound(pGame->sounds.tankmoving);
+        if (isMoving){
+            Mix_HaltChannel(IDLE_CHANNEL);
+            playMoveSound(pGame->sounds.tankmoving);
+        }
+        else
+            Mix_HaltChannel(MOVE_CHANNEL);
+            if (!Mix_Playing(IDLE_CHANNEL))    
+                Mix_PlayChannel(IDLE_CHANNEL, pGame->sounds.tankidle, -1);
         wasMoving = isMoving;
 
         updatePlayer(pGame->pPlayer, pGame->pMap);
