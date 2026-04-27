@@ -5,18 +5,15 @@
 
 #include <SDL2/SDL_mixer.h>
 
-typedef struct {
-    Mix_Chunk *explodenear;
-    Mix_Chunk *explodefar;
-    Mix_Chunk *tankmoving;
-    Mix_Chunk *tankidle;
-} Sounds;
+typedef struct sounds Sounds;
 
+Sounds *createSound();
+void destroySound(Sounds *sounds);
 int initSound(Sounds *sounds);
-void playSound(Mix_Chunk *sound);
-int playLoopingSound(Mix_Chunk *sound);
-void stopMoveSound(int Channel);
+void startIdleSound(Sounds *sounds);
+void updateMovementSound(Sounds *sounds, int isMoving);
+void playFireSound(Sounds *sounds);                          
+void playExplosionSound(Sounds *sounds);
 void cleanupSound(Sounds *sounds);
-void playMoveSound(Mix_Chunk *sound);
 
 #endif
