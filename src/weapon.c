@@ -7,6 +7,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "physics.h"
+#include "sound.h"
 
 #define BULLET_ASPECT 1
 
@@ -68,7 +69,7 @@ void updateProjectileRect(Projectile *pProjectile)
     pProjectile->projectile_rect.y = (int)(pProjectile->y - pProjectile->projectile_rect.h / 2);
 }
 
-void updateProjectile(Projectile *pProjectile, Map *pMap)
+void updateProjectile(Projectile *pProjectile, Map *pMap, Sounds *sounds)
 {
     pProjectile->velY += pProjectile->gravity;
 
@@ -77,7 +78,7 @@ void updateProjectile(Projectile *pProjectile, Map *pMap)
 
     updateProjectileRect(pProjectile);
 
-    checkForBulletCollision(pProjectile, pMap);
+    checkForBulletCollision(pProjectile, pMap, sounds);
 
     pProjectile->angle = atan2(pProjectile->velY, pProjectile->velX);
 
