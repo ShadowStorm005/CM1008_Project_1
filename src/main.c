@@ -65,7 +65,19 @@ int initiate(Game *pGame)
         return 0;
     }
 
-    if (!initSound(&pGame->sounds))
+    if (!pGame->sounds)
+    {
+        printf("Sound allocation failed\n");
+        return 0;
+    }
+
+    pGame->sounds = createSound();
+    if (!pGame->sounds)
+    {
+        printf("Sound allocation failed\n");
+        return 0;
+    }
+    if (!initSound(pGame->sounds))
     {
         printf("Sound init failed\n");
         closeGame(pGame);
@@ -188,8 +200,8 @@ void run(Game *pGame)
     SDL_Event event;
     Uint32 frameStart;
     Uint32 frameTime;
-    int idleChannel = playLoopingSound(pGame->sounds.tankidle);
     int wasMoving = 0;
+    startIdleSound(pGame->sounds);
 
     while (!close_requested) 
     {
@@ -207,16 +219,14 @@ void run(Game *pGame)
 
         int isMoving = keystate[SDL_SCANCODE_LEFT]  || keystate[SDL_SCANCODE_A] ||
                        keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D];
-        if (isMoving && !wasMoving)
-            playSound(pGame->sounds.tankmoving);
-        wasMoving = isMoving;
+        updateMovementSound(pGame->sounds, isMoving);
 
         updatePlayer(pGame->pPlayer, pGame->pMap);
         for(int i = 0; i < MAX_BULLETS; i++)
         {
             if(isActive(pGame->pProjectile[i]))
             {
-                updateProjectile(pGame->pProjectile[i], pGame->pMap);
+                updateProjectile(pGame->pProjectile[i], pGame->pMap, pGame->sounds);
             }
         }
 
@@ -282,7 +292,7 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
         {
             enableTrigger(pGame->pPlayer, 0);
             shoot(pGame->pProjectile, getBulletSize(pGame->pPlayer), getBulletSpeed(pGame->pPlayer), getCanonX(pGame->pPlayer), getCanonY(pGame->pPlayer), getAngle(pGame->pPlayer));
-            playSound(pGame->sounds.explodenear);
+            playFireSound(pGame->sounds); 
         }
     }
     else
@@ -300,7 +310,9 @@ void closeGame(Game *pGame)
     {
         if (pGame->pProjectile[i]) destroyProjectile(pGame->pProjectile[i]);
     }
-    cleanupSound(&pGame->sounds);
+    if (pGame->sounds) cleanupSound(pGame->sounds);
+    if (pGame->sounds) destroySound(pGame->sounds);
+    pGame->sounds = NULL;   
     if (pGame->pRenderer) SDL_DestroyRenderer(pGame->pRenderer);
     if (pGame->pWindow) SDL_DestroyWindow(pGame->pWindow);
 
