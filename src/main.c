@@ -75,6 +75,14 @@ int initiate(Game *pGame)
         return 0;
     }
 
+    if (!initSound(&pGame->sounds))
+    {
+        printf("Sound init failed\n");
+        closeGame(pGame);
+        return 0;
+    }
+    
+
     if (!pGame->sounds)
     {
         printf("Sound allocation failed\n");
@@ -334,11 +342,9 @@ void closeGame(Game *pGame)
     {
         if (pGame->pProjectile[i]) destroyProjectile(pGame->pProjectile[i]);
     }
-    cleanupSound(pGame->sounds);
-    cleanupSound(pGame->sounds);
-    destroySound(pGame->sounds);  
+    if (pGame->sounds) cleanupSound(pGame->sounds);
+    if (pGame->sounds) destroySound(pGame->sounds);
     pGame->sounds = NULL;   
-    free(pGame->sounds);
     if (pGame->pRenderer) SDL_DestroyRenderer(pGame->pRenderer);
     if (pGame->pWindow) SDL_DestroyWindow(pGame->pWindow);
 
