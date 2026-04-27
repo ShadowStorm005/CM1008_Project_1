@@ -218,6 +218,7 @@ void run(Game *pGame)
                 drawProjectile(pGame->pProjectile[i]);
             }
         }
+        drawPlayer(pGame->pPlayer);
         SDL_RenderPresent(pGame->pRenderer);
 
         frameTime = SDL_GetTicks() - frameStart;
