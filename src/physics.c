@@ -53,7 +53,7 @@ void checkForPlayerCollision(Player *pPlayer, Map *pMap)
     }
 }
 
-void checkForBulletCollision(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount)
+void checkForBulletCollision(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount, Sounds *sounds)
 {
     SDL_Rect bulletRect = getBulletRect(pProjectile);
     for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++){
