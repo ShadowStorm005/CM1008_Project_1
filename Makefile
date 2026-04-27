@@ -1,58 +1,30 @@
-SRCDIR  = src
-INCDIR  = include
-OBJDIR  = OBJ_FILES
+SRCDIR=.\src
+INCDIR=.\include
+INCLUDE = -IC:\msys64\mingw64\include\SDL2 -I$(INCDIR) 
+CFLAGS = -g $(INCLUDE) -c
+LDFLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -mwindows -mconsole -lm
 
-INCLUDE  = -IC:/msys64/mingw64/include/SDL2 -I$(INCDIR)
-CFLAGS   = -g $(INCLUDE) -c
-LDFLAGS  = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_net -mwindows -mconsole -lm
+CM1008_Project_1: main.o player.o map.o physics.o weapon.o sound.o
+	gcc -o CM1008_Project_1 main.o player.o map.o physics.o weapon.o sound.o $(LDFLAGS)
 
-SERVER_OBJ = $(OBJDIR)/server_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
-CLIENT_OBJ = $(OBJDIR)/client_main.o $(OBJDIR)/menu.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
+main.o: $(SRCDIR)\main.c
+	gcc $(CFLAGS) $(SRCDIR)\main.c
 
-all: server.exe client.exe
+player.o: $(SRCDIR)\player.c $(INCDIR)\player.h
+	gcc $(CFLAGS) $(SRCDIR)\player.c
 
-server.exe: $(SERVER_OBJ)
-	gcc $(SERVER_OBJ) -o server.exe $(LDFLAGS) $(INCLUDE)
+map.o: $(SRCDIR)\map.c $(INCDIR)\map.h
+	gcc $(CFLAGS) $(SRCDIR)\map.c
 
-client.exe: $(CLIENT_OBJ)
-	gcc $(CLIENT_OBJ) -o client.exe $(LDFLAGS) $(INCLUDE)
+physics.o: $(SRCDIR)\physics.c $(INCDIR)\physics.h
+	gcc $(CFLAGS) $(SRCDIR)\physics.c
 
-$(OBJDIR)/server_main.o: server/server_main.c $(INCDIR)/server_net.h $(INCDIR)/game_net.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # server compiler
-	gcc $(CFLAGS) server/server_main.c -o $(OBJDIR)/server_main.o
-
-$(OBJDIR)/client_main.o: client/client_main.c $(INCDIR)/client_net.h $(INCDIR)/game_net.h $(INCDIR)/menu.h | $(OBJDIR) # client compiler
-	gcc $(CFLAGS) client/client_main.c -o $(OBJDIR)/client_main.o
-
-$(OBJDIR)/menu.o: $(SRCDIR)/menu.c $(INCDIR)/menu.h $(INCDIR)/map.h| $(OBJDIR) # physics compiler
-	gcc $(CFLAGS) $(SRCDIR)/menu.c -o $(OBJDIR)/menu.o
-
-$(OBJDIR)/map.o: $(SRCDIR)/map.c $(INCDIR)/map.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # map compiler
-	gcc $(CFLAGS) $(SRCDIR)/map.c -o $(OBJDIR)/map.o
-
-$(OBJDIR)/physics.o: $(SRCDIR)/physics.c $(INCDIR)/physics.h | $(OBJDIR) # physics compiler
-	gcc $(CFLAGS) $(SRCDIR)/physics.c -o $(OBJDIR)/physics.o
-
-$(OBJDIR)/player.o: $(SRCDIR)/player.c $(INCDIR)/player.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # player compiler
-	gcc $(CFLAGS) $(SRCDIR)/player.c -o $(OBJDIR)/player.o
-
-$(OBJDIR)/weapon.o: $(SRCDIR)/weapon.c $(INCDIR)/weapon.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # weapon compiler
-	gcc $(CFLAGS) $(SRCDIR)/weapon.c -o $(OBJDIR)/weapon.o
-
-$(OBJDIR):
-	if not exist $(OBJDIR) mkdir $(OBJDIR)
+weapon.o: $(SRCDIR)\weapon.c $(INCDIR)\weapon.h
+	gcc $(CFLAGS) $(SRCDIR)\weapon.c
 
 sound.o: $(SRCDIR)\sound.c $(INCDIR)\sound.h
 	gcc $(CFLAGS) $(SRCDIR)\sound.c
 
-sound.o: $(SRCDIR)\sound.c $(INCDIR)\sound.h
-	gcc $(CFLAGS) $(SRCDIR)\sound.c
-
-sound.o: $(SRCDIR)\sound.c $(INCDIR)\sound.h
-	gcc $(CFLAGS) $(SRCDIR)\sound.c
-
-sound.o: $(SRCDIR)\sound.c
-	gcc $(CFLAGS) $(SRCDIR)\sound.c
-	
 clean:
 	del $(OBJDIR)\server_main.o
 	del $(OBJDIR)\client_main.o
