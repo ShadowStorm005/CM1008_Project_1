@@ -80,8 +80,7 @@ int initiate(Game *pGame)
     
     if (!initSound(pGame->sounds))
     {
-        printf("Sound init failed\n");
-        closeGame(pGame);
+        printf("Sound allocation failed\n");
         return 0;
     }
     
