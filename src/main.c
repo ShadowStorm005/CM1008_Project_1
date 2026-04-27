@@ -25,7 +25,7 @@ typedef struct {
     SDL_Texture *exitGameButton;
     SDL_Texture *backButton;
     SDL_Texture *newGameButton;
-    Sounds sounds;
+    Sounds *sounds;
 } Game;
 
 int initiate(Game *pGame);
@@ -37,6 +37,9 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu);
 
 int main(int argc, char **argv)
 {
+    printf("main started\n");
+    fflush(stdout);
+   
     Game game = {0};
 
     if (!initiate(&game)) 
@@ -52,6 +55,13 @@ int main(int argc, char **argv)
 
 int initiate(Game *pGame)
 {
+    printf("initiate started\n");
+    fflush(stdout);
+
+    pGame->sounds = createSound();
+    printf("after createSound\n");
+    fflush(stdout);
+
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) 
     {
         printf("SDL Init Error: %s\n", SDL_GetError());
@@ -65,15 +75,19 @@ int initiate(Game *pGame)
         return 0;
     }
 
-    if (!initSound(&pGame->sounds))
+    if (!pGame->sounds)
     {
-        printf("Sound init failed\n");
-        closeGame(pGame);
+        printf("Sound allocation failed\n");
         return 0;
     }
-    
 
-    if (!initSound(&pGame->sounds))
+    pGame->sounds = createSound();
+    if (!pGame->sounds)
+    {
+        printf("Sound allocation failed\n");
+        return 0;
+    }
+    if (!initSound(pGame->sounds))
     {
         printf("Sound init failed\n");
         closeGame(pGame);
@@ -196,9 +210,9 @@ void run(Game *pGame)
     SDL_Event event;
     Uint32 frameStart;
     Uint32 frameTime;
-    int idleChannel = playLoopingSound(pGame->sounds.tankidle);
     int wasMoving = 0;
-
+    startIdleSound(pGame->sounds);
+    
     while (!close_requested) 
     {
         frameStart = SDL_GetTicks();
@@ -212,31 +226,17 @@ void run(Game *pGame)
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
         handleInput(pGame, keystate, &pGame->inGameMenu);
-
+        
         int isMoving = keystate[SDL_SCANCODE_LEFT]  || keystate[SDL_SCANCODE_A] ||
-                       keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D];
-        if (isMoving && !wasMoving)
-            playSound(pGame->sounds.tankmoving);
-        wasMoving = isMoving;
-
-        int isMoving = keystate[SDL_SCANCODE_LEFT]  || keystate[SDL_SCANCODE_A] ||
-                       keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D];
-        if (isMoving){
-            Mix_HaltChannel(IDLE_CHANNEL);
-            playMoveSound(pGame->sounds.tankmoving);
-        }
-        else
-            Mix_HaltChannel(MOVE_CHANNEL);
-            if (!Mix_Playing(IDLE_CHANNEL))    
-                Mix_PlayChannel(IDLE_CHANNEL, pGame->sounds.tankidle, -1);
-        wasMoving = isMoving;
-
+                        keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D];
+        updateMovementSound(pGame->sounds, isMoving);
+        
         updatePlayer(pGame->pPlayer, pGame->pMap);
         for(int i = 0; i < MAX_BULLETS; i++)
         {
             if(isActive(pGame->pProjectile[i]))
             {
-                updateProjectile(pGame->pProjectile[i], pGame->pMap);
+                updateProjectile(pGame->pProjectile[i], pGame->pMap, pGame->sounds);
             }
         }
 
@@ -268,6 +268,20 @@ void run(Game *pGame)
 
 void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
 {
+    /*
+        int isMoving = keystate[SDL_SCANCODE_LEFT]  || keystate[SDL_SCANCODE_A] ||
+                       keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D];
+        if (isMoving){
+            Mix_HaltChannel(IDLE_CHANNEL);
+            playMoveSound(pGame->sounds.tankmoving);
+        }
+        else
+            Mix_HaltChannel(MOVE_CHANNEL);
+            if (!Mix_Playing(IDLE_CHANNEL))    
+                Mix_PlayChannel(IDLE_CHANNEL, pGame->sounds.tankidle, -1);
+        wasMoving = isMoving;
+        
+    */
     if(keystate[SDL_SCANCODE_ESCAPE])
     {
         pGame->inGameMenu = true;
@@ -302,7 +316,7 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
         {
             enableTrigger(pGame->pPlayer, 0);
             shoot(pGame->pProjectile, getBulletSize(pGame->pPlayer), getBulletSpeed(pGame->pPlayer), getCanonX(pGame->pPlayer), getCanonY(pGame->pPlayer), getAngle(pGame->pPlayer));
-            playSound(pGame->sounds.explodenear);
+            playFireSound(pGame->sounds);        
         }
     }
     else
@@ -320,7 +334,11 @@ void closeGame(Game *pGame)
     {
         if (pGame->pProjectile[i]) destroyProjectile(pGame->pProjectile[i]);
     }
-    cleanupSound(&pGame->sounds);
+    cleanupSound(pGame->sounds);
+    cleanupSound(pGame->sounds);
+    destroySound(pGame->sounds);  
+    pGame->sounds = NULL;   
+    free(pGame->sounds);
     if (pGame->pRenderer) SDL_DestroyRenderer(pGame->pRenderer);
     if (pGame->pWindow) SDL_DestroyWindow(pGame->pWindow);
 
