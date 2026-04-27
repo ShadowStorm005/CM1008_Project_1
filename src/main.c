@@ -78,6 +78,20 @@ int initiate(Game *pGame)
         return 0;
     }
     
+
+    pGame->sounds = createSound();
+    if (!pGame->sounds)
+    {
+        printf("Sound allocation failed\n");
+        return 0;
+    }
+    if (!initSound(pGame->sounds))
+    {
+        printf("Sound init failed\n");
+        closeGame(pGame);
+        return 0;
+    }
+    
     pGame->pWindow = SDL_CreateWindow(
         "Tank Turtles",
         SDL_WINDOWPOS_CENTERED,
@@ -210,6 +224,12 @@ void run(Game *pGame)
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
         handleInput(pGame, keystate, &pGame->inGameMenu);
+
+        int isMoving = keystate[SDL_SCANCODE_LEFT]  || keystate[SDL_SCANCODE_A] ||
+                       keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D];
+        if (isMoving && !wasMoving)
+            playSound(pGame->sounds.tankmoving);
+        wasMoving = isMoving;
 
         int isMoving = keystate[SDL_SCANCODE_LEFT]  || keystate[SDL_SCANCODE_A] ||
                        keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D];
