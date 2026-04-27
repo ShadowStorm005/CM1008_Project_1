@@ -6,7 +6,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "physics.h"
-
+#include "sound.h"
 //window width & height moved to map.h
 
 typedef struct {
@@ -17,6 +17,7 @@ typedef struct {
     int platformCount;
     SDL_Texture *pbackground;
     Projectile *pProjectile[MAX_BULLETS];
+    Sounds sounds;
 } Game;
 
 int initiate(Game *pGame);
@@ -53,6 +54,13 @@ int initiate(Game *pGame)
         return 0;
     }
 
+    if (!initSound(&pGame->sounds))
+    {
+        printf("Sound init failed\n");
+        closeGame(pGame);
+        return 0;
+    }
+    
     pGame->pWindow = SDL_CreateWindow(
         "Tank Turtles",
         SDL_WINDOWPOS_CENTERED,
@@ -126,6 +134,8 @@ void run(Game *pGame)
 {
     int close_requested = 0;
     SDL_Event event;
+    int idleChannel = playLoopingSound(pGame->sounds.tankidle);
+    int wasMoving = 0;
 
     while (!close_requested) 
     {
@@ -138,6 +148,12 @@ void run(Game *pGame)
         }
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
         handleInput(pGame, keystate);
+
+        int isMoving = keystate[SDL_SCANCODE_LEFT]  || keystate[SDL_SCANCODE_A] ||
+                       keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D];
+        if (isMoving && !wasMoving)
+            playSound(pGame->sounds.tankmoving);
+        wasMoving = isMoving;
 
         updatePlayer(pGame->pPlayer, pGame->pPlatforms, pGame->platformCount);
         for(int i = 0; i < MAX_BULLETS; i++)
@@ -197,6 +213,7 @@ void handleInput(Game *pGame, const Uint8 *keystate)
         {
             enableTrigger(pGame->pPlayer, 0);
             shoot(pGame->pProjectile, getXCord(pGame->pPlayer), getYCord(pGame->pPlayer));
+            playSound(pGame->sounds.explodenear);
         }
     }
     else
@@ -214,6 +231,7 @@ void closeGame(Game *pGame)
     {
         if (pGame->pProjectile[i]) destroyProjectile(pGame->pProjectile[i]);
     }
+    cleanupSound(&pGame->sounds);
     if (pGame->pRenderer) SDL_DestroyRenderer(pGame->pRenderer);
     if (pGame->pWindow) SDL_DestroyWindow(pGame->pWindow);
 
