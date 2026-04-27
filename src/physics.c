@@ -5,6 +5,7 @@
 #include "player.h"
 #include "map.h"
 #include "weapon.h"
+#include "sound.h"
 
 void checkForPlayerCollision(Player *pPlayer, Map *pMap)
 {
@@ -62,6 +63,7 @@ void checkForBulletCollision(Projectile *pProjectile, Map *pMap, Sounds *sounds)
             if (SDL_HasIntersection(&bulletRect, &tileRect)){
                 inactivateBullet(pProjectile);
                 inactivateTile(pMap, i, j);
+                playExplosionSound(sounds);
                 triggerBulletExplosion(pMap, i, j, 4);
                 return;
             }
