@@ -69,20 +69,6 @@ int initiate(Game *pGame)
         return 0;
     }
 
-    pGame->sounds = createSound();
-    if (!pGame->sounds)
-    {
-        printf("Sound allocation failed\n");
-        return 0;
-    }
-    
-    if (!initSound(pGame->sounds))
-    {
-        printf("Sound init failed\n");
-        closeGame(pGame);
-        return 0;
-    }
-    
 
     pGame->sounds = createSound();
     if (!pGame->sounds)
