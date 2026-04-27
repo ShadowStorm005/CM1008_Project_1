@@ -12,6 +12,7 @@
 #include <SDL.h>
 #include "game_net.h"
 
+typedef struct sounds Sounds;
 typedef struct projectile Projectile;
 
 Projectile *createProjectile(SDL_Renderer *pRenderer);

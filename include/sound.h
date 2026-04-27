@@ -15,6 +15,5 @@ void updateMovementSound(Sounds *sounds, int isMoving);
 void playFireSound(Sounds *sounds);                          
 void playExplosionSound(Sounds *sounds);
 void cleanupSound(Sounds *sounds);
-void playMoveSound(Mix_Chunk *sound);
 
 #endif
