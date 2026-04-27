@@ -260,7 +260,6 @@ int canShoot(Player *pPlayer)
     return pPlayer->canFire;
 }
 
-<<<<<<< HEAD
 float getBulletSpeed(Player *pPlayer)
 {
     switch(pPlayer->canonMode)
