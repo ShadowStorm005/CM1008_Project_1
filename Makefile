@@ -47,9 +47,9 @@ sound.o: $(SRCDIR)\sound.c $(INCDIR)\sound.h
 sound.o: $(SRCDIR)\sound.c $(INCDIR)\sound.h
 	gcc $(CFLAGS) $(SRCDIR)\sound.c
 
-sound.o: $(SRCDIR)\sound.c
+sound.o: $(SRCDIR)\sound.c $(INCDIR)\sound.h
 	gcc $(CFLAGS) $(SRCDIR)\sound.c
-	
+
 clean:
 	del $(OBJDIR)\server_main.o
 	del $(OBJDIR)\client_main.o
