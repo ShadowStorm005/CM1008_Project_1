@@ -2,14 +2,26 @@
 #define MAP_H
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 960
+#define AMOUNT_OF_TILES_HORIZONTAL 80
+#define AMOUNT_OF_TILES_VERTICAL 60
+#define TILESIZE_PIXELS 16
 
 #include <SDL.h>
 
-typedef struct platform Platform;
 
-Platform *createPlatforms(SDL_Renderer *pRenderer, int window_width, int window_height, int *platformCount);
-void drawPlatforms(Platform *platforms, int platformCount);
-SDL_Rect getPlatformRect(Platform *platforms, int index);
-void destroyPlatforms(Platform *platforms, int platformCount);
+typedef struct tile Tile;
+typedef struct map Map;
+
+Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height);
+void drawTiles(Map *map);
+SDL_Rect getSelectedTextureTile(int tileNr);
+void setSelectedTexture(Map *tiles, int x, int y, int selectedTexture);
+int getSelectedTexture(Map *tiles, int x, int y);
+SDL_Rect getTileRect(Map *map, int x, int y);
+int isTileActive(Map *tiles, int x, int y);
+void inactivateTile(Map *tiles, int x, int y);
+void destroyTiles(Map *map);
+
+Tile createTile(int x, int y, int selectedTile);
 
 #endif

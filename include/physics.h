@@ -4,7 +4,10 @@
 #include <SDL.h>
 #include "player.h"
 #include "map.h"
+#include "weapon.h"
 
-void checkForCollisions(Player *pPlayer, Platform *pPlatforms, int platformCount);
+void checkForPlayerCollision(Player *pPlayer, Map *pMap);
+void checkForBulletCollision(Projectile *pProjectile, Map *pMap);
+void triggerBulletExplosion(Map *pMap, int x, int y, int radius);
 
 #endif
