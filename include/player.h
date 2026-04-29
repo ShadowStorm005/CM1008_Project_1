@@ -16,12 +16,8 @@ float getCanonX(Player *pPlayer);
 float getCanonY(Player *pPlayer);
 float getAngle(Player *pPlayer);
 int canShoot(Player *pPlayer);
-
-float getBulletSpeed(Player *pPlayer);
-int getBulletSize(Player *pPlayer);
-
-void setTriggerState(Player *pPlayer, int enable);
-
+void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap);
+void enableTrigger(Player *pPlayer, int enable);
 void moveLeft(Player *pPlayer);
 void moveRight(Player *pPlayer);
 void jump(Player *pPlayer);
