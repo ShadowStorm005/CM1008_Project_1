@@ -208,6 +208,7 @@ void run(Game *pGame)
         SDL_RenderClear(pGame->pRenderer);
 
         SDL_RenderCopy(pGame->pRenderer, pGame->pbackground, NULL, NULL);
+        drawTrajectory(pGame->pPlayer, 16.0f, pGame->pMap);
 
         drawTiles(pGame->pMap);
         drawPlayer(pGame->pPlayer);
@@ -264,28 +265,26 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
         int size;
         float speed;
         int automatic; 
-
-        switch (getCanonMode(pGame->pPlayer))
-        {
-        case 1:
-            size = 30;
-            speed = 16.0f;
-            automatic = 0;
-            break;
-        case 2:
-            size = 15;
-            speed = 20.0f;
-            automatic = 1;
-            break;
-        default:
-            size = 30;
-            speed = 16.0f;
-            automatic = 0;
-            break;
-        }
-
         if(canShoot(pGame->pPlayer))
         {
+            switch (getCanonMode(pGame->pPlayer))
+            {
+            case 1:
+                size = 30;
+                speed = 16.0f;
+                automatic = 0;
+                break;
+            case 2:
+                size = 15;
+                speed = 20.0f;
+                automatic = 1;
+                break;
+            default:
+                size = 30;
+                speed = 16.0f;
+                automatic = 0;
+                break;
+            }
             if(!automatic) enableTrigger(pGame->pPlayer, 0);
             shoot(pGame->pProjectile, size, speed, getCanonX(pGame->pPlayer), getCanonY(pGame->pPlayer), getAngle(pGame->pPlayer));
         }
