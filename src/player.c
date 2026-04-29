@@ -361,6 +361,39 @@ int canShoot(Player *pPlayer)
     return pPlayer->canFire;
 }
 
+void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
+{
+    float x = getCanonX(pPlayer);
+    float y = getCanonY(pPlayer);
+
+    float vx = initialSpeed * cos(pPlayer->canonAngle);
+    float vy = initialSpeed * sin(pPlayer->canonAngle);
+    float dt = 0.2f;
+
+    for(int i = 0; i < 255; i++)
+    {
+        float prevX = x;
+        float prevY = y;
+
+        vy += PROJECTILE_GRAVITY * dt;
+        x += vx * dt;
+        y += vy * dt;
+        int x1 = (int)prevX, x2 = (int)x, y1 = (int)prevY, y2 = (int)y;
+        for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++){
+            for (int j = 0; j < AMOUNT_OF_TILES_VERTICAL; j++){
+                SDL_Rect tileRect = getTileRect(pMap, i, j);
+                if (isTileActive(pMap, i, j))
+                    if(SDL_IntersectRectAndLine(&tileRect, &x1, &y1, &x2, &y2)) return;
+            }
+        }
+        //SDL_RenderDrawPoint(pPlayer->pRenderer, (int)x, (int)y);
+        SDL_SetRenderDrawBlendMode(pPlayer->pRenderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(pPlayer->pRenderer, 255, 255, 255, 255-i);
+        if(i%10 == 0) SDL_RenderDrawPoint(pPlayer->pRenderer, (int)x, (int)y);
+        //SDL_RenderDrawLine(pPlayer->pRenderer, (int)prevX, (int)prevY, (int)x, (int)y);
+    }
+}
+
 float getBulletSpeed(Player *pPlayer)
 {
     switch(pPlayer->canonMode)
