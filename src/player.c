@@ -245,14 +245,73 @@ int canShoot(Player *pPlayer)
     return pPlayer->canFire;
 }
 
+float getBulletSpeed(Player *pPlayer)
+{
+    switch(pPlayer->canonMode)
+    {
+    case 1:
+        return 16.0f;
+        break;
+    case 2:
+        return 20.0f;
+        break;
+    default:
+        return 16.0f;
+        break;
+    }
+}
+
+int getBulletSize(Player *pPlayer)
+{
+    switch(pPlayer->canonMode)
+    {
+    case 1:
+        return 30;
+        break;
+    case 2:
+        return 15;
+        break;
+    default:
+        return 30;
+        break;
+    }
+}
+
+void drawCircle(SDL_Renderer * renderer, int centerX, int centerY, float rad, int opacity)
+{
+    int outline = 70;
+    int fill = 255;
+    for(int x = -rad; x <= rad; x++)
+    {
+        for(int y = -rad; y <= rad; y++)
+        {
+            float dist = x*x + y*y;
+            float rad2 = rad * rad;
+            if(fabsf(dist - rad2) < rad) 
+            {
+                SDL_SetRenderDrawColor(renderer, outline, outline, outline, opacity);
+                SDL_RenderDrawPoint(renderer, centerX + x, centerY + y);
+            }
+            else if(dist <= rad2) 
+            {
+                SDL_SetRenderDrawColor(renderer, fill, fill, fill, opacity);
+                SDL_RenderDrawPoint(renderer, centerX + x, centerY + y);
+            }
+        }
+    }
+}
+
 void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
 {
+    if(pPlayer->velX) return;
+    
     float x = getCanonX(pPlayer);
     float y = getCanonY(pPlayer);
 
     float vx = initialSpeed * cos(pPlayer->canonAngle);
     float vy = initialSpeed * sin(pPlayer->canonAngle);
-    float dt = 0.2f;
+    float dt = 0.05f;
+    float rad = 3.0f;
 
     for(int i = 0; i < 255; i++)
     {
@@ -270,11 +329,11 @@ void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
                     if(SDL_IntersectRectAndLine(&tileRect, &x1, &y1, &x2, &y2)) return;
             }
         }
-        //SDL_RenderDrawPoint(pPlayer->pRenderer, (int)x, (int)y);
         SDL_SetRenderDrawBlendMode(pPlayer->pRenderer, SDL_BLENDMODE_BLEND);
-        SDL_SetRenderDrawColor(pPlayer->pRenderer, 255, 255, 255, 255-i);
-        if(i%10 == 0) SDL_RenderDrawPoint(pPlayer->pRenderer, (int)x, (int)y);
-        //SDL_RenderDrawLine(pPlayer->pRenderer, (int)prevX, (int)prevY, (int)x, (int)y);
+        if((i+1)%30 == 0) 
+            {
+                drawCircle(pPlayer->pRenderer, (int)x, (int)y, rad, 255-i);
+            }
     }
 }
 
