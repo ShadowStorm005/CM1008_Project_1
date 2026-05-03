@@ -14,6 +14,8 @@ float getYCord(Player *pPlayer);
 float getCanonX(Player *pPlayer);
 float getCanonY(Player *pPlayer);
 float getAngle(Player *pPlayer);
+float getBulletSpeed(Player *pPlayer);
+int getBulletSize(Player *pPlayer);
 int canShoot(Player *pPlayer);
 void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap);
 void enableTrigger(Player *pPlayer, int enable);

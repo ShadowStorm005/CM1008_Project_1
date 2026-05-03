@@ -208,7 +208,7 @@ void run(Game *pGame)
         SDL_RenderClear(pGame->pRenderer);
 
         SDL_RenderCopy(pGame->pRenderer, pGame->pbackground, NULL, NULL);
-        drawTrajectory(pGame->pPlayer, 16.0f, pGame->pMap);
+        drawTrajectory(pGame->pPlayer, getBulletSpeed(pGame->pPlayer), pGame->pMap);
 
         drawTiles(pGame->pMap);
         drawPlayer(pGame->pPlayer);
@@ -262,31 +262,10 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
     }
     if(keystate[SDL_SCANCODE_SPACE] || SDL_GetMouseState(NULL,NULL)&SDL_BUTTON(1))
     {
-        int size;
-        float speed;
-        int automatic; 
         if(canShoot(pGame->pPlayer))
         {
-            switch (getCanonMode(pGame->pPlayer))
-            {
-            case 1:
-                size = 30;
-                speed = 16.0f;
-                automatic = 0;
-                break;
-            case 2:
-                size = 15;
-                speed = 20.0f;
-                automatic = 1;
-                break;
-            default:
-                size = 30;
-                speed = 16.0f;
-                automatic = 0;
-                break;
-            }
-            if(!automatic) enableTrigger(pGame->pPlayer, 0);
-            shoot(pGame->pProjectile, size, speed, getCanonX(pGame->pPlayer), getCanonY(pGame->pPlayer), getAngle(pGame->pPlayer));
+            shoot(pGame->pProjectile, getBulletSize(pGame->pPlayer), getBulletSpeed(pGame->pPlayer), getCanonX(pGame->pPlayer), getCanonY(pGame->pPlayer), getAngle(pGame->pPlayer));
+            enableTrigger(pGame->pPlayer, 0);
         }
     }
     else
