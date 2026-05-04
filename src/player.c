@@ -366,13 +366,13 @@ float getBulletSpeed(Player *pPlayer)
     switch(pPlayer->canonMode)
     {
     case 1:
-        return 16.0f;
+        return 10.0f;
         break;
     case 2:
-        return 20.0f;
+        return 16.0f;
         break;
     default:
-        return 16.0f;
+        return 10.0f;
         break;
     }
 }
