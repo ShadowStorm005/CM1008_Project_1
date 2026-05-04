@@ -26,8 +26,8 @@ struct player {
 
     int window_width, window_height;
 
-    double canonAngle;
-    double targetAngle;
+    float canonAngle;
+    float targetAngle;
 
     SDL_Texture *pHullTx;
     SDL_Texture *pCanonTx;
@@ -361,6 +361,7 @@ int canShoot(Player *pPlayer)
     return pPlayer->canFire;
 }
 
+<<<<<<< HEAD
 float getBulletSpeed(Player *pPlayer)
 {
     switch(pPlayer->canonMode)
@@ -688,7 +689,7 @@ void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
 void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
 {
     int mousePosx, mousePosy;
-    double diffAngle;
+    float diffAngle;
     Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
