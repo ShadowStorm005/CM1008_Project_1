@@ -230,7 +230,6 @@ void run(Game *pGame)
         SDL_RenderClear(pGame->pRenderer);
 
         SDL_RenderCopy(pGame->pRenderer, pGame->pbackground, NULL, NULL);
-        drawTrajectory(pGame->pPlayer, getBulletSpeed(pGame->pPlayer), pGame->pMap);
 
         drawTiles(pGame->pMap);
         drawPlayer(pGame->pPlayer);
