@@ -2,7 +2,6 @@
 #define WEAPON_H
 #define MAX_BULLETS 200
 #define PI 3.141592653589f
-#define PROJECTILE_GRAVITY 0.15f
 
 #include <SDL.h>
 
