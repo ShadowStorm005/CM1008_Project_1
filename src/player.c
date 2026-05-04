@@ -246,6 +246,7 @@ int canShoot(Player *pPlayer)
     return pPlayer->canFire;
 }
 
+<<<<<<< HEAD
 float getBulletSpeed(Player *pPlayer)
 {
     switch(pPlayer->canonMode)
@@ -340,6 +341,8 @@ void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
     }
 }
 
+=======
+>>>>>>> f6dae32 (Revert "Trajectories")
 void enableTrigger(Player *pPlayer, int enable)
 {
     if(enable)

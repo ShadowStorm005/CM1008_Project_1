@@ -35,6 +35,7 @@ Projectile *createProjectile(SDL_Renderer *pRenderer)
     pProjectile->projectile_rect.x = (int)pProjectile->x;
     pProjectile->projectile_rect.y = (int)pProjectile->y;
     pProjectile->active = 0;
+    pProjectile->gravity = 0.15f;
 
     SDL_Surface *pSurface = IMG_Load("Resources/bullet.png");
     if (!pSurface) {
@@ -70,7 +71,7 @@ void updateProjectileRect(Projectile *pProjectile)
 
 void updateProjectile(Projectile *pProjectile, Map *pMap, Sounds *sounds)
 {
-    pProjectile->velY += PROJECTILE_GRAVITY;
+    pProjectile->velY += pProjectile->gravity;
 
     pProjectile->x += pProjectile->velX;
     pProjectile->y += pProjectile->velY;
@@ -100,6 +101,7 @@ void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, f
     {
         if(!pProjectile[i]->active)
         {
+            //bullet size
             pProjectile[i]->projectile_rect.w = size*BULLET_ASPECT;
             pProjectile[i]->projectile_rect.h = size;
 
