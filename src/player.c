@@ -26,8 +26,8 @@ struct player {
 
     int window_width, window_height;
 
-    float canonAngle;
-    float targetAngle;
+    double canonAngle;
+    double targetAngle;
 
     SDL_Texture *pHullTx;
     SDL_Texture *pCanonTx;
@@ -419,14 +419,14 @@ void drawCircle(SDL_Renderer * renderer, int centerX, int centerY, float rad, in
 
 void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
 {
-    if(pPlayer->velX) return;
+    if(pPlayer->velX || pPlayer->velX) return;
     
     float x = getCanonX(pPlayer);
     float y = getCanonY(pPlayer);
 
     float vx = initialSpeed * cos(pPlayer->canonAngle);
     float vy = initialSpeed * sin(pPlayer->canonAngle);
-    float dt = 0.05f;
+    float dt = 0.1f;
     float rad = 3.0f;
 
     for(int i = 0; i < 255; i++)
@@ -438,16 +438,18 @@ void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
         x += vx * dt;
         y += vy * dt;
         int x1 = (int)prevX, x2 = (int)x, y1 = (int)prevY, y2 = (int)y;
-        for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++){
-            for (int j = 0; j < AMOUNT_OF_TILES_VERTICAL; j++){
-                SDL_Rect tileRect = getTileRect(pMap, i, j);
-                if (isTileActive(pMap, i, j))
-                    if(SDL_IntersectRectAndLine(&tileRect, &x1, &y1, &x2, &y2)) return;
-            }
-        }
         SDL_SetRenderDrawBlendMode(pPlayer->pRenderer, SDL_BLENDMODE_BLEND);
-        if((i+1)%30 == 0) 
+        if((i+1)%20 == 0) 
             {
+                for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++)
+                {
+                    for (int j = 0; j < AMOUNT_OF_TILES_VERTICAL; j++)
+                    {
+                        SDL_Rect tileRect = getTileRect(pMap, i, j);
+                        if (isTileActive(pMap, i, j))
+                            if(SDL_IntersectRectAndLine(&tileRect, &x1, &y1, &x2, &y2)) return;
+                    }
+                }
                 drawCircle(pPlayer->pRenderer, (int)x, (int)y, rad, 255-i);
             }
     }
@@ -686,7 +688,7 @@ void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
 void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
 {
     int mousePosx, mousePosy;
-    float diffAngle;
+    double diffAngle;
     Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
