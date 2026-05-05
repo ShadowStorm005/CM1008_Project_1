@@ -1,27 +1,49 @@
-SRCDIR=.\src
-INCDIR=.\include
-INCLUDE = -IC:\msys64\mingw64\include\SDL2 -I$(INCDIR) 
-CFLAGS = -g $(INCLUDE) -c
-LDFLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -mwindows -mconsole -lm
+SRCDIR  = src
+INCDIR  = include
+OBJDIR  = OBJ_FILES
 
-CM1008_Project_1: main.o player.o map.o physics.o weapon.o
-	gcc -o CM1008_Project_1 main.o player.o map.o physics.o weapon.o $(LDFLAGS)
+INCLUDE  = -IC:/msys64/mingw64/include/SDL2 -I$(INCDIR)
+CFLAGS   = -g $(INCLUDE) -c
+LDFLAGS  = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_net -mwindows -mconsole -lm
 
-main.o: $(SRCDIR)\main.c
-	gcc $(CFLAGS) $(SRCDIR)\main.c
+SERVER_OBJ = $(OBJDIR)/server_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
+CLIENT_OBJ = $(OBJDIR)/client_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
 
-player.o: $(SRCDIR)\player.c $(INCDIR)\player.h
-	gcc $(CFLAGS) $(SRCDIR)\player.c
+all: server.exe client.exe
 
-map.o: $(SRCDIR)\map.c $(INCDIR)\map.h
-	gcc $(CFLAGS) $(SRCDIR)\map.c
+server.exe: $(SERVER_OBJ)
+	gcc $(SERVER_OBJ) -o server.exe $(LDFLAGS) $(INCLUDE)
 
-physics.o: $(SRCDIR)\physics.c $(INCDIR)\physics.h
-	gcc $(CFLAGS) $(SRCDIR)\physics.c
+client.exe: $(CLIENT_OBJ)
+	gcc $(CLIENT_OBJ) -o client.exe $(LDFLAGS) $(INCLUDE)
 
-weapon.o: $(SRCDIR)\weapon.c $(INCDIR)\weapon.h
-	gcc $(CFLAGS) $(SRCDIR)\weapon.c
+$(OBJDIR)/server_main.o: server/main.c | $(OBJDIR)
+	gcc $(CFLAGS) server/main.c -o $(OBJDIR)/server_main.o
+
+$(OBJDIR)/client_main.o: client/main.c | $(OBJDIR)
+	gcc $(CFLAGS) client/main.c -o $(OBJDIR)/client_main.o
+
+$(OBJDIR)/map.o: $(SRCDIR)/map.c $(INCDIR)/map.h | $(OBJDIR)
+	gcc $(CFLAGS) $(SRCDIR)/map.c -o $(OBJDIR)/map.o
+
+$(OBJDIR)/physics.o: $(SRCDIR)/physics.c $(INCDIR)/physics.h | $(OBJDIR)
+	gcc $(CFLAGS) $(SRCDIR)/physics.c -o $(OBJDIR)/physics.o
+
+$(OBJDIR)/player.o: $(SRCDIR)/player.c $(INCDIR)/player.h | $(OBJDIR)
+	gcc $(CFLAGS) $(SRCDIR)/player.c -o $(OBJDIR)/player.o
+
+$(OBJDIR)/weapon.o: $(SRCDIR)/weapon.c $(INCDIR)/weapon.h | $(OBJDIR)
+	gcc $(CFLAGS) $(SRCDIR)/weapon.c -o $(OBJDIR)/weapon.o
+
+$(OBJDIR):
+	if not exist $(OBJDIR) mkdir $(OBJDIR)
 
 clean:
-	rm *.exe
-	rm *.o
+	del $(OBJDIR)\server_main.o
+	del $(OBJDIR)\client_main.o
+	del $(OBJDIR)\map.o
+	del $(OBJDIR)\physics.o
+	del $(OBJDIR)\player.o
+	del $(OBJDIR)\weapon.o
+	del server.exe
+	del client.exe
