@@ -109,7 +109,6 @@ void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, f
             pProjectile[i]->y = y;
 
             updateProjectileRect(pProjectile[i]);
-
             pProjectile[i]->angle = angle;
             pProjectile[i]->speed = speed;
             pProjectile[i]->velX = pProjectile[i]->speed * cos(pProjectile[i]->angle);
