@@ -231,6 +231,100 @@ int canShoot(Player *pPlayer)
     return pPlayer->canFire;
 }
 
+float getBulletSpeed(Player *pPlayer)
+{
+    switch(pPlayer->canonMode)
+    {
+    case 1:
+        return 10.0f;
+        break;
+    case 2:
+        return 16.0f;
+        break;
+    default:
+        return 10.0f;
+        break;
+    }
+}
+
+int getBulletSize(Player *pPlayer)
+{
+    switch(pPlayer->canonMode)
+    {
+    case 1:
+        return 30;
+        break;
+    case 2:
+        return 15;
+        break;
+    default:
+        return 30;
+        break;
+    }
+}
+
+void drawCircle(SDL_Renderer * renderer, int centerX, int centerY, float rad, int opacity)
+{
+    int outline = 70;
+    int fill = 255;
+    for(int x = -rad; x <= rad; x++)
+    {
+        for(int y = -rad; y <= rad; y++)
+        {
+            float dist = x*x + y*y;
+            float rad2 = rad * rad;
+            if(fabsf(dist - rad2) < rad) 
+            {
+                SDL_SetRenderDrawColor(renderer, outline, outline, outline, opacity);
+                SDL_RenderDrawPoint(renderer, centerX + x, centerY + y);
+            }
+            else if(dist <= rad2) 
+            {
+                SDL_SetRenderDrawColor(renderer, fill, fill, fill, opacity);
+                SDL_RenderDrawPoint(renderer, centerX + x, centerY + y);
+            }
+        }
+    }
+}
+
+void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
+{
+    if(pPlayer->velX || pPlayer->velX) return;
+    
+    float x = getCanonX(pPlayer);
+    float y = getCanonY(pPlayer);
+
+    float vx = initialSpeed * cos(pPlayer->canonAngle);
+    float vy = initialSpeed * sin(pPlayer->canonAngle);
+    float dt = 0.1f;
+    float rad = 3.0f;
+
+    for(int i = 0; i < 255; i++)
+    {
+        float prevX = x;
+        float prevY = y;
+
+        vy += PROJECTILE_GRAVITY * dt;
+        x += vx * dt;
+        y += vy * dt;
+        int x1 = (int)prevX, x2 = (int)x, y1 = (int)prevY, y2 = (int)y;
+        SDL_SetRenderDrawBlendMode(pPlayer->pRenderer, SDL_BLENDMODE_BLEND);
+        if((i+1)%20 == 0) 
+            {
+                for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++)
+                {
+                    for (int j = 0; j < AMOUNT_OF_TILES_VERTICAL; j++)
+                    {
+                        SDL_Rect tileRect = getTileRect(pMap, i, j);
+                        if (isTileActive(pMap, i, j))
+                            if(SDL_IntersectRectAndLine(&tileRect, &x1, &y1, &x2, &y2)) return;
+                    }
+                }
+                drawCircle(pPlayer->pRenderer, (int)x, (int)y, rad, 255-i);
+            }
+    }
+}
+
 void enableTrigger(Player *pPlayer, int enable)
 {
     if(enable)
