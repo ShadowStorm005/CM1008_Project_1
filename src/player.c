@@ -25,8 +25,8 @@ struct player {
 
     int window_width, window_height;
 
-    double canonAngle;
-    double targetAngle;
+    float canonAngle;
+    float targetAngle;
 
     SDL_Texture *pHullTx;
     SDL_Texture *pCanonTx;
@@ -377,7 +377,7 @@ static void flipCanon(Player *pPlayer)
 void updatePlayer(Player *pPlayer, Map *pMap)
 {
     int mousePosx, mousePosy;
-    double diffAngle;
+    float diffAngle;
     Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
@@ -395,8 +395,8 @@ void updatePlayer(Player *pPlayer, Map *pMap)
     
     checkForPlayerCollision(pPlayer, pMap);
 
-    double dx = mousePosx - pPlayer->x - (pPlayer->hullRect.w)/2;
-    double dy = mousePosy - pPlayer->y + (pPlayer->hullRect.h)/2;
+    float dx = mousePosx - pPlayer->x - (pPlayer->hullRect.w)/2;
+    float dy = mousePosy - pPlayer->y + (pPlayer->hullRect.h)/2;
 
     pPlayer->targetAngle = atan2(dy, dx);
 
