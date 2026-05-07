@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "map.h"
+#include "server_creation_functions.h"
 
 const int mapTemplate12[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL] = {
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,13,13,13,13,13,13,13},
@@ -208,6 +209,24 @@ Map *createMap(SDL_Renderer *pRenderer, int window_width, int window_height)
         free(map);
         return NULL;
     }
+
+    for (int x = 0; x < AMOUNT_OF_TILES_HORIZONTAL; x++) 
+    {
+        for (int y = 0; y < AMOUNT_OF_TILES_VERTICAL; y++) 
+        {
+            map->tileMap[x][y] = createTile(x*TILESIZE_PIXELS, y*TILESIZE_PIXELS, mapTemplate2[x][y]);
+        }
+    }
+    return map;
+}
+
+Map *createServerMap(int window_width, int window_height)
+{
+    Map *map = malloc(sizeof(Map));
+    if(!map) return NULL;
+
+    map->pRenderer = NULL;
+    map->pTexture = NULL;
 
     for (int x = 0; x < AMOUNT_OF_TILES_HORIZONTAL; x++) 
     {

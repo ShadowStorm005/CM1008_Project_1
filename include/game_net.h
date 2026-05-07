@@ -13,20 +13,25 @@
 
 typedef enum {
     CLIENT_JOIN_PACKET,
+    CLIENT_IDLE_PACKET,
     CLIENT_INPUT_PACKET
 } ClientPacketTypes;
 
 typedef enum {
-    NONE,
-    LEFT,
-    RIGHT,
-    JUMP,
-    SHOOT
+    INPUT_NONE,
+    INPUT_LEFT,
+    INPUT_RIGHT,
+    INPUT_JUMP,
+    INPUT_SHOOT,
+    INPUT_1,
+    INPUT_2
 } InputType;
 
 typedef enum {
-    CLIENT_WAITING_STATE,
+    CLIENT_MAIN_MENU_STATE,
+    CLIENT_LOBBY_STATE,
     CLIENT_PLAYING_STATE,
+    CLIENT_INGAME_MENU_STATE,
     CLIENT_DEAD_STATE
 } ClientState;
 
@@ -34,8 +39,8 @@ typedef struct {
     int32_t mouseX;
     int32_t mouseY;
     ClientPacketTypes packetType;
-    InputType input;
     ClientState clientState;
+    uint8_t input;
     uint8_t playerId;
 } ClientPacket;
 

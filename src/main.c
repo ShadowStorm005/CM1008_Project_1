@@ -286,13 +286,13 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
 
         if(canShoot(pGame->pPlayer))
         {
-            if(!automatic) enableTrigger(pGame->pPlayer, 0);
+            if(!automatic) setTriggerState(pGame->pPlayer, 0);
             shoot(pGame->pProjectile, size, speed, getCanonX(pGame->pPlayer), getCanonY(pGame->pPlayer), getAngle(pGame->pPlayer));
         }
     }
     else
     {
-        enableTrigger(pGame->pPlayer, 1);
+        setTriggerState(pGame->pPlayer, 1);
     }
 }
 

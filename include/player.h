@@ -8,14 +8,17 @@
 typedef struct player Player;
 
 void updatePlayerRects(Player *pPlayer);
+static void initPlayerDefaults(Player *pPlayer, float x, float y, int windows_width, int window_height);
 Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height);
-float getXCord(Player *pPlayer);
-float getYCord(Player *pPlayer);
+float getPlayerX(Player *pPlayer);
+float getPlayerY(Player *pPlayer);
 float getCanonX(Player *pPlayer);
 float getCanonY(Player *pPlayer);
 float getAngle(Player *pPlayer);
 int canShoot(Player *pPlayer);
-void enableTrigger(Player *pPlayer, int enable);
+float getBulletSpeed(Player *pPlayer);
+int getBulletSize(Player *pPlayer);
+void setTriggerState(Player *pPlayer, int enable);
 void moveLeft(Player *pPlayer);
 void moveRight(Player *pPlayer);
 void jump(Player *pPlayer);

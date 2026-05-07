@@ -7,6 +7,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "physics.h"
+#include "server_creation_functions.h"
 
 #define BULLET_ASPECT 1
 
@@ -57,6 +58,28 @@ Projectile *createProjectile(SDL_Renderer *pRenderer)
     return pProjectile;
 }
 
+Projectile *createServerProjectile(void)
+{
+    Projectile *pProjectile = malloc(sizeof(Projectile));
+    if(!pProjectile) return NULL;
+
+    pProjectile->x = 0.0f;
+    pProjectile->y = 0.0f;
+    pProjectile->velX = 0.0f;
+    pProjectile->velY = 0.0f;
+    pProjectile->angle = 0.0f;
+    pProjectile->active = 0;
+    pProjectile->speed = 10.0f;
+    pProjectile->gravity = 0.15f;
+    pProjectile->pTexture = NULL;
+    pProjectile->pRenderer = NULL;
+    pProjectile->projectile_rect.x = (int)pProjectile->x;
+    pProjectile->projectile_rect.y = (int)pProjectile->y;
+    pProjectile->projectile_rect.w = 20 * BULLET_ASPECT;
+    pProjectile->projectile_rect.h = 20;
+    return pProjectile;
+}
+
 int isActive(Projectile *pProjectile)
 {
     return pProjectile->active;
@@ -68,7 +91,7 @@ void updateProjectileRect(Projectile *pProjectile)
     pProjectile->projectile_rect.y = (int)(pProjectile->y - pProjectile->projectile_rect.h / 2);
 }
 
-void updateProjectile(Projectile *pProjectile, Map *pMap)
+void updateProjectile(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t tileChangeCount)
 {
     pProjectile->velY += pProjectile->gravity;
 
@@ -77,7 +100,7 @@ void updateProjectile(Projectile *pProjectile, Map *pMap)
 
     updateProjectileRect(pProjectile);
 
-    checkForBulletCollision(pProjectile, pMap);
+    checkForBulletCollision(pProjectile, pMap, tileChanges, &tileChangeCount);
 
     pProjectile->angle = atan2(pProjectile->velY, pProjectile->velX);
 
@@ -135,4 +158,19 @@ void destroyProjectile(Projectile *pProjectile)
     if(!pProjectile) return;
     if(pProjectile->pTexture) SDL_DestroyTexture(pProjectile->pTexture);
     free(pProjectile);
+}
+
+float getBulletX(Projectile *pProjectile)
+{
+    return pProjectile->x;
+}
+
+float getBulletY(Projectile *pProjectile)
+{
+    return pProjectile->y;
+}
+
+float getBulletAngle(Projectile *pProjectile)
+{
+    return pProjectile->angle;
 }
