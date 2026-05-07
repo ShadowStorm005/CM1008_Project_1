@@ -17,22 +17,22 @@ server.exe: $(SERVER_OBJ)
 client.exe: $(CLIENT_OBJ)
 	gcc $(CLIENT_OBJ) -o client.exe $(LDFLAGS) $(INCLUDE)
 
-$(OBJDIR)/server_main.o: server/main.c $(INCDIR)/server_net.h $(INCDIR)/game_net.h | $(OBJDIR) # server compiler
-	gcc $(CFLAGS) server/main.c -o $(OBJDIR)/server_main.o
+$(OBJDIR)/server_main.o: server/server_main.c $(INCDIR)/server_net.h $(INCDIR)/game_net.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # server compiler
+	gcc $(CFLAGS) server/server_main.c -o $(OBJDIR)/server_main.o
 
-$(OBJDIR)/client_main.o: client/main.c $(INCDIR)/client_net.h $(INCDIR)/game_net.h | $(OBJDIR) # client compiler
-	gcc $(CFLAGS) client/main.c -o $(OBJDIR)/client_main.o
+$(OBJDIR)/client_main.o: client/client_main.c $(INCDIR)/client_net.h $(INCDIR)/game_net.h | $(OBJDIR) # client compiler
+	gcc $(CFLAGS) client/client_main.c -o $(OBJDIR)/client_main.o
 
-$(OBJDIR)/map.o: $(SRCDIR)/map.c $(INCDIR)/map.h $(INCDIR)/netwok_helpers.h | $(OBJDIR) # map compiler
+$(OBJDIR)/map.o: $(SRCDIR)/map.c $(INCDIR)/map.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # map compiler
 	gcc $(CFLAGS) $(SRCDIR)/map.c -o $(OBJDIR)/map.o
 
 $(OBJDIR)/physics.o: $(SRCDIR)/physics.c $(INCDIR)/physics.h | $(OBJDIR) # physics compiler
 	gcc $(CFLAGS) $(SRCDIR)/physics.c -o $(OBJDIR)/physics.o
 
-$(OBJDIR)/player.o: $(SRCDIR)/player.c $(INCDIR)/player.h $(INCDIR)/netwok_helpers.h | $(OBJDIR) # player compiler
+$(OBJDIR)/player.o: $(SRCDIR)/player.c $(INCDIR)/player.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # player compiler
 	gcc $(CFLAGS) $(SRCDIR)/player.c -o $(OBJDIR)/player.o
 
-$(OBJDIR)/weapon.o: $(SRCDIR)/weapon.c $(INCDIR)/weapon.h $(INCDIR)/netwok_helpers.h | $(OBJDIR) # weapon compiler
+$(OBJDIR)/weapon.o: $(SRCDIR)/weapon.c $(INCDIR)/weapon.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # weapon compiler
 	gcc $(CFLAGS) $(SRCDIR)/weapon.c -o $(OBJDIR)/weapon.o
 
 $(OBJDIR):
