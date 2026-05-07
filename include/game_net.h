@@ -32,7 +32,8 @@ typedef enum {
     CLIENT_LOBBY_STATE,
     CLIENT_PLAYING_STATE,
     CLIENT_INGAME_MENU_STATE,
-    CLIENT_DEAD_STATE
+    CLIENT_DEAD_STATE,
+    CLIENT_QUIT_STATE
 } ClientState;
 
 typedef struct {

@@ -75,8 +75,8 @@ Projectile *createServerProjectile(void)
     pProjectile->pRenderer = NULL;
     pProjectile->projectile_rect.x = (int)pProjectile->x;
     pProjectile->projectile_rect.y = (int)pProjectile->y;
-    pProjectile->projectile_rect.w = 20 * BULLET_ASPECT;
-    pProjectile->projectile_rect.h = 20;
+    pProjectile->projectile_rect.w = BULLET_SIZE * BULLET_ASPECT;
+    pProjectile->projectile_rect.h = BULLET_SIZE;
     return pProjectile;
 }
 
@@ -108,6 +108,16 @@ void updateProjectile(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MA
     {
         pProjectile->active = 0;
     }
+}
+
+void setProjectileVar(Projectile *pProjectile, int active, float x, float y, float angle)
+{
+    pProjectile->active = active;
+    pProjectile->x = x;
+    pProjectile->y = y;
+    pProjectile->angle = angle;
+    pProjectile->projectile_rect.w = BULLET_SIZE * BULLET_ASPECT;
+    pProjectile->projectile_rect.h = BULLET_SIZE;
 }
 
 void drawProjectile(Projectile *pProjectile)

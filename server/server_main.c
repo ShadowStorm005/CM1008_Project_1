@@ -43,7 +43,7 @@ int main(int argc, char **argv)
         memset(&serverPacket, 0, sizeof(serverPacket));
         receiveInputs(&game);
         updateWorld(&game, serverPacket.tileChanges, &serverPacket.tileChangeCount);
-        sendState(&game, &serverPacket);
+        sendStatus(&game, &serverPacket);
 
         Uint32 frameTime = SDL_GetTicks() - frameStart;
         if (frameTime < FRAME_DELAY) SDL_Delay(FRAME_DELAY - frameTime);
@@ -192,7 +192,7 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
     }
 }
 
-static void sendState(ServerGame *game, ServerPacket *serverPacket)
+static void sendStatus(ServerGame *game, ServerPacket *serverPacket)
 {
     for (int i = 0; i < MAX_PLAYERS; i++) {
         if (!game->clients[i].connected) continue;
