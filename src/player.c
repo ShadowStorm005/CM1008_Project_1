@@ -371,7 +371,6 @@ int canShoot(Player *pPlayer)
     return pPlayer->canFire;
 }
 
-<<<<<<< HEAD
 float getBulletSpeed(Player *pPlayer)
 {
     switch(pPlayer->canonMode)
@@ -466,8 +465,6 @@ void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
     }
 }
 
-=======
->>>>>>> f6dae32 (Revert "Trajectories")
 void enableTrigger(Player *pPlayer, int enable)
 {
     if(enable)
@@ -477,43 +474,6 @@ void enableTrigger(Player *pPlayer, int enable)
     else
     {
         pPlayer->canFire = 0;
-    }
-}
-
-static void restrictCanonAngle(Player *pPlayer)
-{
-    if(pPlayer->turretFlip == SDL_FLIP_NONE)
-    {
-        if(pPlayer->canonAngle <= -1.2f) pPlayer->canonAngle = -1.2f;
-        else if(pPlayer->canonAngle >= 0.7f) pPlayer->canonAngle = 0.7f;
-    }
-    else if(pPlayer->turretFlip == SDL_FLIP_HORIZONTAL)
-    {
-        if(pPlayer->canonAngle > 4.2f) pPlayer->canonAngle = 4.2f;
-        else if(pPlayer->canonAngle < 2.4f && (pPlayer->canonAngle > 0.0f)) pPlayer->canonAngle = 2.4f;
-    }
-
-}
-
-static void flipCanon(Player *pPlayer)
-{
-    if(pPlayer->targetAngle > -PI/2 && pPlayer->targetAngle < PI/2)
-    {
-        if(pPlayer->canonAngle <= 2.4f) 
-        {
-            pPlayer->turretFlip = SDL_FLIP_NONE;
-        }
-        else if(pPlayer->canonAngle >= 4.2f)
-        {
-            pPlayer->turretFlip = SDL_FLIP_NONE;
-            pPlayer->canonAngle = -1.2f;
-        }
-    }
-    else if(pPlayer->canonAngle >= 0.7f) pPlayer->turretFlip = SDL_FLIP_HORIZONTAL;
-    else if(pPlayer->canonAngle <= -1.2f)
-    {
-        pPlayer->turretFlip = SDL_FLIP_HORIZONTAL;
-        pPlayer->canonAngle = 4.2f;
     }
 }
 
