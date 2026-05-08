@@ -440,7 +440,7 @@ static void flipCanon(Player *pPlayer)
     }
 }
 
-void steerCanon(Player *pPlayer, int mousePosX, int mousePosY)
+void updatePlayer(Player *pPlayer, Map *pMap)
 {
     float diffAngle;
     float dx = mousePosX - pPlayer->x - (pPlayer->hullRect.w)/2;
