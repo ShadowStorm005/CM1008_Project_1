@@ -388,6 +388,31 @@ static void flipCanon(Player *pPlayer)
     }
 }
 
+void steerCanon(Player *pPlayer, int mousePosX, int mousePosY)
+{
+    float diffAngle;
+    float dx = mousePosX - pPlayer->x - (pPlayer->hullRect.w)/2;
+    float dy = mousePosY - pPlayer->y + (pPlayer->hullRect.h)/2;
+
+    pPlayer->targetAngle = atan2(dy, dx);
+
+    flipCanon(pPlayer);
+
+    if(pPlayer->turretFlip == SDL_FLIP_HORIZONTAL)
+    {
+        if(pPlayer->targetAngle < 0) pPlayer->targetAngle += 2*PI;
+    }
+    diffAngle = pPlayer->targetAngle - pPlayer->canonAngle;
+
+    if(fabs(diffAngle) > 0.05f)
+    {
+        if(diffAngle > 0) pPlayer->canonAngle += 0.05f;
+        else pPlayer->canonAngle += -0.05f;
+    }
+    else pPlayer->canonAngle = pPlayer->targetAngle;
+    restrictCanonAngle(pPlayer);
+}
+
 void updatePlayer(Player *pPlayer, Map *pMap)
 {
     int mousePosx, mousePosy;
