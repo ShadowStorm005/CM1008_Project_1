@@ -10,23 +10,23 @@
 #include "game_net.h"
 #include "server_creation_functions.h"
 
-typedef struct {
+struct serverclient {
     bool connected;
     IPaddress ipaddress;
     Player *player;
     uint8_t input;
     int mouseX;
     int mouseY;
-} ServerClient;
+};
 
-typedef struct {
+struct servergame{
     UDPsocket socket;
     UDPpacket *recvPacket;
     UDPpacket *sendPacket;
     ServerClient clients[MAX_PLAYERS];
     Map *map;
     Projectile *projectiles[MAX_BULLETS];
-} ServerGame;
+};
 
 int main(int argc, char **argv)
 {
@@ -150,7 +150,7 @@ static void updateWorld(ServerGame *game, NetTile tileChanges[MAX_TILE_CHANGES],
     for (int i = 0; i < MAX_PLAYERS; i++) {
         ServerClient *client = &game->clients[i];
         if (!client->connected || !client->player) continue;
-        uint8_t *buttons = client->input;
+        uint8_t *buttons = &client->input;
         if (buttons[INPUT_LEFT]) moveLeft(client->player);
         if (buttons[INPUT_RIGHT]) moveRight(client->player);
         if (buttons[INPUT_JUMP]) jump(client->player);
@@ -168,7 +168,7 @@ static void updateWorld(ServerGame *game, NetTile tileChanges[MAX_TILE_CHANGES],
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) updateProjectile(game->projectiles[i], game->map, tileChanges, &tileChangeCount);
+        if (isActive(game->projectiles[i])) updateProjectile(game->projectiles[i], game->map, tileChanges, tileChangeCount);
     }
 }
 
@@ -210,4 +210,20 @@ void addChangedTile(NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCo
     tileChanges[*tileChangeCount].x = x;
     tileChanges[*tileChangeCount].y = y;
     tileChanges[(*tileChangeCount)++].selectedTexture = newTexture;
+}
+
+static void closeServer(ServerGame *game)
+{
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        if (game->clients[i].player) destroyPlayer(game->clients[i].player);
+    }
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (game->projectiles[i]) destroyProjectile(game->projectiles[i]);
+    }
+    if (game->map) destroyTiles(game->map);
+    if (game->recvPacket) SDLNet_FreePacket(game->recvPacket);
+    if (game->sendPacket) SDLNet_FreePacket(game->sendPacket);
+    if (game->socket) SDLNet_UDP_Close(game->socket);
+    SDLNet_Quit();
+    SDL_Quit();
 }

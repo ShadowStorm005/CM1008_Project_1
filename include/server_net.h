@@ -1,6 +1,7 @@
 #ifndef SERVER_NET_H
 #define SERVER_NET_H
 
+#include <SDL_net.h>
 #include "game_net.h"
 
 typedef struct serverclient ServerClient;
@@ -15,5 +16,6 @@ static void updateWorld(ServerGame *game, NetTile tileChanges[MAX_TILE_CHANGES],
 static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, int clientId);
 static void sendStatus(ServerGame *game, ServerPacket *serverPacket);
 void addChangedTile(NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount, int x, int y, int newTexture);
+static void closeServer(ServerGame *game);
 
 #endif

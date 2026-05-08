@@ -25,6 +25,9 @@ void jump(Player *pPlayer);
 void setCanonMode(Player *pPlayer, int mode);
 int getCanonMode(Player *pPlayer);
 void deaccelerate(Player *pPlayer);
+static void restrictCanonAngle(Player *pPlayer);
+static void flipCanon(Player *pPlayer);
+void steerCanon(Player *pPlayer, int mousePosX, int mousePosY);
 void updatePlayer(Player *pPlayer, Map *tiles);
 void drawPlayer(Player *pPlayer);
 SDL_Rect getPlayerHitbox(Player *pPlayer);
@@ -35,5 +38,7 @@ void stopVelY(Player *pPlayer);
 void stopVelX(Player *pPlayer);
 void touchingWall(Player *pPlayer);
 void destroyPlayer(Player *pPlayer);
+
+void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap);
 
 #endif

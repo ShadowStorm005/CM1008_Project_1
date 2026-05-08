@@ -91,7 +91,7 @@ void updateProjectileRect(Projectile *pProjectile)
     pProjectile->projectile_rect.y = (int)(pProjectile->y - pProjectile->projectile_rect.h / 2);
 }
 
-void updateProjectile(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t tileChangeCount)
+void updateProjectile(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount)
 {
     pProjectile->velY += pProjectile->gravity;
 
@@ -100,7 +100,7 @@ void updateProjectile(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MA
 
     updateProjectileRect(pProjectile);
 
-    checkForBulletCollision(pProjectile, pMap, tileChanges, &tileChangeCount);
+    checkForBulletCollision(pProjectile, pMap, tileChanges, tileChangeCount);
 
     pProjectile->angle = atan2(pProjectile->velY, pProjectile->velX);
 

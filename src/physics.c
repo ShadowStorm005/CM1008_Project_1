@@ -53,7 +53,7 @@ void checkForPlayerCollision(Player *pPlayer, Map *pMap)
     }
 }
 
-void checkForBulletCollision(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t tileChangeCount)
+void checkForBulletCollision(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount)
 {
     SDL_Rect bulletRect = getBulletRect(pProjectile);
     for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++){
@@ -63,15 +63,15 @@ void checkForBulletCollision(Projectile *pProjectile, Map *pMap, NetTile tileCha
             if (SDL_HasIntersection(&bulletRect, &tileRect)){
                 inactivateBullet(pProjectile);
                 inactivateTile(pMap, i, j);
-                addChangedTile(tileChanges, &tileChangeCount, i, j, -1);
-                triggerBulletExplosion(pMap, i, j, 4, tileChanges, &tileChangeCount);
+                addChangedTile(tileChanges, tileChangeCount, i, j, -1);
+                triggerBulletExplosion(pMap, i, j, 4, tileChanges, tileChangeCount);
                 return;
             }
         }
     }
 }
 
-void triggerBulletExplosion(Map *pMap, int x, int y, int radius, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t tileChangeCount)
+void triggerBulletExplosion(Map *pMap, int x, int y, int radius, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount)
 {
     int minX = x - radius;
     int maxX = x + radius;
@@ -81,26 +81,26 @@ void triggerBulletExplosion(Map *pMap, int x, int y, int radius, NetTile tileCha
                 if (!isTileActive(pMap, i, j)) continue;
                 if (hypotf(x-i, y-j) < 1.2f) {
                     inactivateTile(pMap, i, j);
-                    addChangedTile(tileChanges, &tileChangeCount, i, j, -1);
+                    addChangedTile(tileChanges, tileChangeCount, i, j, -1);
                 }
                 else if (hypotf(x-i, y-j) < 2.4f) {
                     if ((getSelectedTexture(pMap, i, j)+2)%3 <= (getSelectedTexture(pMap, i, j))%3) {
                         inactivateTile(pMap, i, j);
-                        addChangedTile(tileChanges, &tileChangeCount, i, j, -1);
+                        addChangedTile(tileChanges, tileChangeCount, i, j, -1);
                     }
                     else {
                         setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+2);
-                        addChangedTile(tileChanges, &tileChangeCount, i, j, getSelectedTexture(pMap, i, j));
+                        addChangedTile(tileChanges, tileChangeCount, i, j, getSelectedTexture(pMap, i, j));
                     }
                 }
                 else if (hypotf(x-i, y-j) < 3.2f) {
                     if ((getSelectedTexture(pMap, i, j)+1)%3 <= (getSelectedTexture(pMap, i, j))%3) {
                         inactivateTile(pMap, i, j);
-                        addChangedTile(tileChanges, &tileChangeCount, i, j, -1);
+                        addChangedTile(tileChanges, tileChangeCount, i, j, -1);
                     }
                     else {
                         setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+1);
-                        addChangedTile(tileChanges, &tileChangeCount, i, j, getSelectedTexture(pMap, i, j));
+                        addChangedTile(tileChanges, tileChangeCount, i, j, getSelectedTexture(pMap, i, j));
                     }
                 }
             }
@@ -110,26 +110,26 @@ void triggerBulletExplosion(Map *pMap, int x, int y, int radius, NetTile tileCha
                 if (!isTileActive(pMap, i, j)) continue;
                 if (hypotf(i-x, y-j) < 1.2f) {
                     inactivateTile(pMap, i, j);
-                    addChangedTile(tileChanges, &tileChangeCount, i, j, -1);
+                    addChangedTile(tileChanges, tileChangeCount, i, j, -1);
                 }
                 else if (hypotf(i-x, y-j) < 2.4f) {
                     if ((getSelectedTexture(pMap, i, j)+2)%3 <= (getSelectedTexture(pMap, i, j))%3) {
                         inactivateTile(pMap, i, j);
-                        addChangedTile(tileChanges, &tileChangeCount, i, j, -1);
+                        addChangedTile(tileChanges, tileChangeCount, i, j, -1);
                     }
                     else {
                         setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+2);
-                        addChangedTile(tileChanges, &tileChangeCount, i, j, getSelectedTexture(pMap, i, j));
+                        addChangedTile(tileChanges, tileChangeCount, i, j, getSelectedTexture(pMap, i, j));
                     }
                 }
                 else if (hypotf(i-x, y-j) < 3.2f) {
                     if ((getSelectedTexture(pMap, i, j)+1)%3 <= (getSelectedTexture(pMap, i, j))%3) {
                         inactivateTile(pMap, i, j);
-                        addChangedTile(tileChanges, &tileChangeCount, i, j, -1);
+                        addChangedTile(tileChanges, tileChangeCount, i, j, -1);
                     }
                     else {
                         setSelectedTexture(pMap, i, j, getSelectedTexture(pMap, i, j)+1);
-                        addChangedTile(tileChanges, &tileChangeCount, i, j, getSelectedTexture(pMap, i, j));
+                        addChangedTile(tileChanges, tileChangeCount, i, j, getSelectedTexture(pMap, i, j));
                     }
                 }
             }

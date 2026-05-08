@@ -11,7 +11,7 @@
 #include "client_net.h"
 #include "game_net.h"
 
-typedef struct {
+struct clientgame{
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Texture *background;
@@ -35,7 +35,7 @@ typedef struct {
     uint8_t playerId;
     ClientState clientState;
     ServerState serverState;
-} ClientGame;
+};
 
 int main(int argc, char **argv)
 {
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
             if (event.type == SDL_QUIT) game.clientState = CLIENT_QUIT_STATE;
         }
         sendJoin(&game);
-        recieveState(&game, &serverPacket);
+        recieveStatus(&game, &serverPacket);
     }
 
     while (game.clientState != CLIENT_MAIN_MENU_STATE && 
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
             sendInput(&game);
         }
 
-        receiveStatus(&game, &serverPacket);
+        recieveStatus(&game, &serverPacket);
         render(&game);
 
         Uint32 frameTime = SDL_GetTicks() - frameStart;
@@ -102,7 +102,7 @@ static int initClient(ClientGame *game, const char *serverIp)
     memset(game, 0, sizeof(*game));
     game->playerId = UNKNOWN_PLAYER;
     game->clientState = CLIENT_MAIN_MENU_STATE;
-    game->serverState = NULL;
+    game->serverState = CLIENT_MAIN_MENU_STATE;
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("SDL_Init failed: %s\n", SDL_GetError());
@@ -233,7 +233,7 @@ static void sendJoin(ClientGame *game)
 
 static void sendInput(ClientGame *game)
 {
-    
+
 }
 
 static void updateGameVar(ClientGame *game, ServerPacket *serverPacket)
@@ -261,7 +261,7 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket)
     }
 }
 
-static void receiveStatus(ClientGame *game, ServerPacket *serverPacket)
+static void recieveStatus(ClientGame *game, ServerPacket *serverPacket)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
         memset(&serverPacket, 0, sizeof(serverPacket));

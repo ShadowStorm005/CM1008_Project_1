@@ -26,7 +26,7 @@ $(OBJDIR)/client_main.o: client/client_main.c $(INCDIR)/client_net.h $(INCDIR)/g
 $(OBJDIR)/map.o: $(SRCDIR)/map.c $(INCDIR)/map.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # map compiler
 	gcc $(CFLAGS) $(SRCDIR)/map.c -o $(OBJDIR)/map.o
 
-$(OBJDIR)/physics.o: $(SRCDIR)/physics.c $(INCDIR)/physics.h | $(OBJDIR) # physics compiler
+$(OBJDIR)/physics.o: $(SRCDIR)/physics.c $(INCDIR)/physics.h $(INCDIR)/server_net.h | $(OBJDIR) # physics compiler
 	gcc $(CFLAGS) $(SRCDIR)/physics.c -o $(OBJDIR)/physics.o
 
 $(OBJDIR)/player.o: $(SRCDIR)/player.c $(INCDIR)/player.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # player compiler

@@ -7,7 +7,7 @@
 #include "weapon.h"
 
 void checkForPlayerCollision(Player *pPlayer, Map *pMap);
-void checkForBulletCollision(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t tileChangeCount);
-void triggerBulletExplosion(Map *pMap, int x, int y, int radius, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t tileChangeCount);
+void checkForBulletCollision(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount);
+void triggerBulletExplosion(Map *pMap, int x, int y, int radius, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount);
 
 #endif
