@@ -205,13 +205,6 @@ static void sendStatus(ServerGame *game, ServerPacket *serverPacket)
     }
 }
 
-void addChangedTile(NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount, int x, int y, int newTexture)
-{
-    tileChanges[*tileChangeCount].x = x;
-    tileChanges[*tileChangeCount].y = y;
-    tileChanges[(*tileChangeCount)++].selectedTexture = newTexture;
-}
-
 static void closeServer(ServerGame *game)
 {
     for (int i = 0; i < MAX_PLAYERS; i++) {

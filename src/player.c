@@ -6,6 +6,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "physics.h"
+#include "server_creation_functions.h"
 
 #define MAX_VELY_SPEED 15.0f
 

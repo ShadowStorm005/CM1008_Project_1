@@ -102,7 +102,7 @@ static int initClient(ClientGame *game, const char *serverIp)
     memset(game, 0, sizeof(*game));
     game->playerId = UNKNOWN_PLAYER;
     game->clientState = CLIENT_MAIN_MENU_STATE;
-    game->serverState = CLIENT_MAIN_MENU_STATE;
+    game->serverState = SERVER_MENU_STATE;
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("SDL_Init failed: %s\n", SDL_GetError());
@@ -146,7 +146,7 @@ static int initClient(ClientGame *game, const char *serverIp)
     /*game->resumeButton = loadTexture(game->renderer, "Resources/firsttank.png");
     if (!game->resumeButton) return 0;*/
 
-    game->resumeButton = IMG_LoadTexture(game->renderer, "Resources/firsttank.png");
+    game->resumeButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-backButton.png");
     if (!game->resumeButton) {
         printf("Error loading resumeButton.png: %s\n", IMG_GetError());
         free(game->resumeButton);
@@ -181,7 +181,7 @@ static int initClient(ClientGame *game, const char *serverIp)
         return 0;
     }
 
-    SDL_Texture* resumeGameButton = IMG_LoadTexture(game->renderer, "Resources/firsttank.png");
+    SDL_Texture* resumeGameButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-backButton.png");
     if (!resumeGameButton) {
         printf("Error loading resumeGame.png: %s\n", IMG_GetError());
         free(resumeGameButton);
@@ -212,7 +212,7 @@ static int initClient(ClientGame *game, const char *serverIp)
     game->sendPacket = SDLNet_AllocPacket(sizeof(ClientPacket));
     game->recvPacket = SDLNet_AllocPacket(sizeof(ServerPacket));
     if (!game->sendPacket || !game->recvPacket) return 0;
-
+    printf("Init complete\n");
     return 1;
 }
 
@@ -264,6 +264,7 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket)
 static void recieveStatus(ClientGame *game, ServerPacket *serverPacket)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
+        printf("hello\n");
         memset(&serverPacket, 0, sizeof(serverPacket));
         memcpy(&serverPacket, game->recvPacket->data, sizeof(serverPacket));
 

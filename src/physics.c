@@ -5,7 +5,7 @@
 #include "player.h"
 #include "map.h"
 #include "weapon.h"
-#include "server_net.h"
+#include "game_net.h"
 
 void checkForPlayerCollision(Player *pPlayer, Map *pMap)
 {
@@ -135,4 +135,11 @@ void triggerBulletExplosion(Map *pMap, int x, int y, int radius, NetTile tileCha
             }
         }
     }
+}
+
+void addChangedTile(NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount, int x, int y, int newTexture)
+{
+    tileChanges[*tileChangeCount].x = x;
+    tileChanges[*tileChangeCount].y = y;
+    tileChanges[(*tileChangeCount)++].selectedTexture = newTexture;
 }
