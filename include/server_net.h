@@ -14,7 +14,7 @@ static int findClientId(ServerGame *game, IPaddress *address);
 static int addClient(ServerGame *game, IPaddress *address);
 static void receiveInputs(ServerGame *game);
 static void handleInput(ServerGame *game, ServerClient *client);
-static void updateWorld(ServerGame *game);
+static void updateWorld(ServerGame *game, ServerPacket *serverPacket);
 static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, int clientId);
 static void sendStatus(ServerGame *game, ServerPacket *serverPacket);
 static void closeServer(ServerGame *game);

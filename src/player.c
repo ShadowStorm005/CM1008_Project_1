@@ -414,7 +414,7 @@ void steerCanon(Player *pPlayer, int mousePosX, int mousePosY)
     restrictCanonAngle(pPlayer);
 }
 
-void updatePlayer(Player *pPlayer, Map *pMap)
+void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
 {
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
