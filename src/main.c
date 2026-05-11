@@ -270,7 +270,7 @@ void handleInput(Game *pGame, const Uint8 *keystate, bool *pInGameMenu)
     }
     else
     {
-        enableTrigger(pGame->pPlayer, 1);
+        setTriggerState(pGame->pPlayer, 1);
     }
 }
 

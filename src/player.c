@@ -6,6 +6,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "physics.h"
+#include "server_creation_functions.h"
 
 #define MAX_VELY_SPEED 15.0f
 
@@ -70,11 +71,8 @@ void updatePlayerRects(Player *pPlayer)
     pPlayer->hitbox.h = pPlayer->hullRect.h;
 }
 
-Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height)
+static void initPlayerDefaults(Player *pPlayer, float x, float y, int window_width, int window_height)
 {
-    Player *pPlayer = malloc(sizeof(struct player));
-    if (!pPlayer) return NULL;
-
     pPlayer->window_width = window_width;
     pPlayer->window_height = window_height;
     pPlayer->health = 100;
@@ -88,6 +86,26 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->isGrounded = 0;
     pPlayer->isTouchingWall = 0;
     pPlayer->canonMode = 1;
+
+    pPlayer->hullRect.w = 77*1.2f;
+    pPlayer->hullRect.h = 26*1.2f;
+
+    pPlayer->turretRect.w = 49*1.2f;
+    pPlayer->turretRect.h = 30*1.2f;   
+
+    pPlayer->canonRect.w = 54*1.2f;
+    pPlayer->canonRect.h = 15*1.2f;
+
+    pPlayer->x = x - pPlayer->hullRect.w / 2.0f;
+    pPlayer->y = y - pPlayer->hullRect.h / 2.0f;
+
+    pPlayer->tankFlip = SDL_FLIP_NONE;
+}
+
+Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height)
+{
+    Player *pPlayer = malloc(sizeof(struct player));
+    if (!pPlayer) return NULL;
 
     SDL_Surface *pSurface = IMG_Load("Resources/Sprite-tankHull.png");
     if (!pSurface) 
@@ -146,21 +164,18 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     SDL_QueryTexture(pPlayer->pTurretTx, NULL, NULL, &pPlayer->turretRect.w, &pPlayer->turretRect.h);
     SDL_QueryTexture(pPlayer->pCanonTx, NULL, NULL, &pPlayer->canonRect.w, &pPlayer->canonRect.h);
 
-    pPlayer->hullRect.w = 77*1.2f;
-    pPlayer->hullRect.h = 26*1.2f;
-
-    pPlayer->turretRect.w = 49*1.2f;
-    pPlayer->turretRect.h = 30*1.2f;   
-
-    pPlayer->canonRect.w = 54*1.2f;
-    pPlayer->canonRect.h = 15*1.2f;
-
-    pPlayer->x = x - pPlayer->hullRect.w / 2.0f;
-    pPlayer->y = y - pPlayer->hullRect.h / 2.0f;
-
-    pPlayer->tankFlip = SDL_FLIP_NONE;
+    initPlayerDefaults(pPlayer, x, y, window_width, window_height);
 
     updatePlayerRects(pPlayer);
+    return pPlayer;
+}
+
+Player *createServerPlayer(float x, float y, int window_width, int window_height)
+{
+    Player *pPlayer = malloc(sizeof(struct player));
+    if (!pPlayer) return NULL;
+
+    initPlayerDefaults(pPlayer, x, y, window_width, window_height);
     return pPlayer;
 }
 
@@ -195,14 +210,14 @@ int getCanonMode(Player *pPlayer)
     return pPlayer->canonMode;
 }
 
-float getXCord(Player *pPlayer)
+float getPlayerX(Player *pPlayer)
 {
-    return pPlayer->canonRect.x;
+    return pPlayer->x;
 }
 
-float getYCord(Player *pPlayer)
+float getPlayerY(Player *pPlayer)
 {
-    return pPlayer->canonRect.y;
+    return pPlayer->y;
 }
 
 float getCanonX(Player *pPlayer)
@@ -325,7 +340,7 @@ void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
     }
 }
 
-void enableTrigger(Player *pPlayer, int enable)
+void setTriggerState(Player *pPlayer, int enable)
 {
     if(enable)
     {
@@ -374,29 +389,11 @@ static void flipCanon(Player *pPlayer)
     }
 }
 
-void updatePlayer(Player *pPlayer, Map *pMap)
+void steerCanon(Player *pPlayer, int mousePosX, int mousePosY)
 {
-    int mousePosx, mousePosy;
     float diffAngle;
-    Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
-    SDL_Rect previousHitbox = pPlayer->hitbox;
-
-    deaccelerate(pPlayer);
-
-    pPlayer->velY += pPlayer->gravity;
-    if (pPlayer->velY > MAX_VELY_SPEED) pPlayer->velY = MAX_VELY_SPEED;
-    else if (pPlayer->velY < -MAX_VELY_SPEED) pPlayer->velY = -MAX_VELY_SPEED;
-
-    pPlayer->x += pPlayer->velX;
-    pPlayer->y += pPlayer->velY;
-
-    updatePlayerRects(pPlayer);
-    pPlayer->isGrounded = 0;
-    
-    checkForPlayerCollision(pPlayer, pMap);
-
-    float dx = mousePosx - pPlayer->x - (pPlayer->hullRect.w)/2;
-    float dy = mousePosy - pPlayer->y + (pPlayer->hullRect.h)/2;
+    float dx = mousePosX - pPlayer->x - (pPlayer->hullRect.w)/2;
+    float dy = mousePosY - pPlayer->y + (pPlayer->hullRect.h)/2;
 
     pPlayer->targetAngle = atan2(dy, dx);
 
@@ -415,6 +412,25 @@ void updatePlayer(Player *pPlayer, Map *pMap)
     }
     else pPlayer->canonAngle = pPlayer->targetAngle;
     restrictCanonAngle(pPlayer);
+}
+
+void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
+{
+    SDL_Rect previousHitbox = pPlayer->hitbox;
+
+    deaccelerate(pPlayer);
+
+    pPlayer->velY += pPlayer->gravity;
+    if (pPlayer->velY > MAX_VELY_SPEED) pPlayer->velY = MAX_VELY_SPEED;
+    else if (pPlayer->velY < -MAX_VELY_SPEED) pPlayer->velY = -MAX_VELY_SPEED;
+
+    pPlayer->x += pPlayer->velX;
+    pPlayer->y += pPlayer->velY;
+
+    updatePlayerRects(pPlayer);
+    pPlayer->isGrounded = 0;
+    
+    checkForPlayerCollision(pPlayer, pMap);
     
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->hullRect.w > pPlayer->window_width)
@@ -458,6 +474,8 @@ SDL_Rect getPlayerRect(Player *pPlayer)
 
 void setPlayerCord(Player *pPlayer, int x, int y)
 {
+    if (pPlayer->x < x) pPlayer->tankFlip = SDL_FLIP_NONE;
+    else if (pPlayer->x > x) pPlayer->tankFlip = SDL_FLIP_HORIZONTAL;
     pPlayer->x = x;
     pPlayer->y = y;
 }
