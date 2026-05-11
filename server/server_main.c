@@ -44,7 +44,9 @@ int main(int argc, char **argv)
         Uint32 frameStart = SDL_GetTicks();
         memset(&serverPacket, 0, sizeof(serverPacket));
         receiveInputs(&game);
-        updateWorld(&game);
+        if(connectedClientCount(&game) >=2){
+            updateWorld(&game, serverPacket.tileChanges, &serverPacket.tileChangeCount);
+        }
         sendStatus(&game, &serverPacket);
 
         Uint32 frameTime = SDL_GetTicks() - frameStart;
@@ -147,7 +149,20 @@ static void receiveInputs(ServerGame *game)
     }
 }
 
-static void updateWorld(ServerGame *game)
+static int connectedClientCount(ServerGame *game)
+{
+    int count = 0;
+
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        if (game->clients[i].connected) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+static void updateWorld(ServerGame *game, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangCount)
 {
     for (int i = 0; i < MAX_PLAYERS; i++) {
         ServerClient *client = &game->clients[i];
@@ -156,10 +171,17 @@ static void updateWorld(ServerGame *game)
         if (buttons[INPUT_LEFT]) moveLeft(client->player);
         if (buttons[INPUT_RIGHT]) moveRight(client->player);
         if (buttons[INPUT_JUMP]) jump(client->player);
+        if (buttons[INPUT_1]) setCanonMode(client->player, 1);
+        if (buttons[INPUT_2]) setCanonMode(client->player, 2);
 
         steerCanon(client->player, client->mouseX, client->mouseY);
         if (buttons[INPUT_SHOOT] && canShoot(client->player)) {
-            shoot(game->projectiles, getBulletSize(client->player), getBulletSpeed(client->player), getCanonX(client->player), getCanonY(client->player), getAngle(client->player));
+            shoot(game->projectiles, 
+                getBulletSize(client->player), 
+                getBulletSpeed(client->player), 
+                getCanonX(client->player), 
+                getCanonY(client->player), 
+                getAngle(client->player));
             setTriggerState(client->player, 0);
         }
         else if (!buttons[INPUT_SHOOT] && !canShoot(client->player)){
@@ -170,24 +192,45 @@ static void updateWorld(ServerGame *game)
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) updateProjectile(game->projectiles[i], game->map, game->tileChanges, &game->tileChangeCount);
+        if (isActive(game->projectiles[i])) 
+            updateProjectile(game->projectiles[i], 
+                            game->map, 
+                            game->tileChanges, 
+                            &game->tileChangeCount);
     }
 }
 
 static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, int clientId)
 {
-    serverPacket->serverState = SERVER_RUN_STATE;
-    serverPacket->clientState  = CLIENT_PLAYING_STATE;
+    int connectedCount = connectedClientCount(game);
+
     serverPacket->playerId = (uint8_t)clientId;
 
+    if (connectedCount < 2) {
+        serverPacket->serverState = SERVER_MENU_STATE;
+        serverPacket->clientState = CLIENT_LOBBY_STATE;
+    }
+    else {
+        serverPacket->serverState = SERVER_RUN_STATE;
+        serverPacket->clientState = CLIENT_PLAYING_STATE;
+    }
+
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (!game->clients[i].connected || !game->clients[i].player) continue;
+        if (!game->clients[i].connected || !game->clients[i].player)
+        {
+            continue;
+        }
+        
         serverPacket->players[i].x = getPlayerX(game->clients[i].player);
         serverPacket->players[i].y = getPlayerY(game->clients[i].player);
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (!isActive(game->projectiles[i])) continue;
+        if (!isActive(game->projectiles[i]))
+        {
+            continue;
+        }
+
         serverPacket->projectiles[i].x = getBulletX(game->projectiles[i]);
         serverPacket->projectiles[i].y = getBulletY(game->projectiles[i]);
         serverPacket->projectiles[i].angle = getBulletAngle(game->projectiles[i]);
@@ -197,9 +240,14 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
 static void sendStatus(ServerGame *game, ServerPacket *serverPacket)
 {
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (!game->clients[i].connected) continue;
+        if (!game->clients[i].connected)
+        {
+            continue;
+        }
 
+        memset(serverPacket, 0, sizeof(*serverPacket));
         prepareClientPacket(game, serverPacket, i);
+        printf("Sending to client %d: serverState=%d clientState=%d\n", i, serverPacket->serverState, serverPacket->clientState);
         memcpy(game->sendPacket->data, serverPacket, sizeof(*serverPacket));
         game->sendPacket->len = sizeof(*serverPacket);
         game->sendPacket->address = game->clients[i].ipaddress;
