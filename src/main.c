@@ -55,6 +55,9 @@ int main(int argc, char **argv)
 
 int initiate(Game *pGame)
 {
+    printf("initiate started\n");
+    fflush(stdout);
+
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) 
     {
         printf("SDL Init Error: %s\n", SDL_GetError());
