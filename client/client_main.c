@@ -50,7 +50,6 @@ int main(int argc, char **argv)
     if (argc >= 2) serverIp = argv[1];
 
     ClientGame game;
-    ClientPacket clientPacket;
     ServerPacket serverPacket;
 
     if (!initClient(&game, serverIp)) {

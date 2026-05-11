@@ -186,7 +186,11 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) updateProjectile(game->projectiles[i], game->map, serverPacket->tileChanges, &serverPacket->tileChangeCount);
+        if (isActive(game->projectiles[i])) 
+            updateProjectile(game->projectiles[i], 
+                            game->map, 
+                            serverPacket->tileChanges, 
+                            &serverPacket->tileChangeCount);
     }
 }
 
