@@ -222,7 +222,11 @@ static void sendJoin(ClientGame *game)
     memset(&joinPacket, 0, sizeof(joinPacket));
 
     joinPacket.packetType = CLIENT_JOIN_PACKET;
+    joinPacket.clientState = CLIENT_MAIN_MENU_STATE;
     joinPacket.playerId = UNKNOWN_PLAYER;
+
+    game->clientState = CLIENT_MAIN_MENU_STATE;
+    game->serverState = SERVER_MENU_STATE;
 
     memcpy(game->sendPacket->data, &joinPacket, sizeof(joinPacket));
     game->sendPacket->len = sizeof(joinPacket);
@@ -264,25 +268,32 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket)
 static void recieveStatus(ClientGame *game, ServerPacket *serverPacket)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
-        printf("hello\n");
-        memset(&serverPacket, 0, sizeof(serverPacket));
-        memcpy(&serverPacket, game->recvPacket->data, sizeof(serverPacket));
+        memset(serverPacket, 0, sizeof(*serverPacket));
+        memcpy(serverPacket, game->recvPacket->data, sizeof(*serverPacket));
 
         switch (serverPacket->clientState) {
             case CLIENT_LOBBY_STATE:
+                printf("lobby state\n");
                 break;
             case CLIENT_PLAYING_STATE:
+                printf("playing state\n");
                 updateGameVar(game, serverPacket);
                 break;
             case CLIENT_INGAME_MENU_STATE:
+                printf("ingame menu state\n");
                 break;
             case CLIENT_DEAD_STATE:
+                printf("dead state\n");
                 break;
             case CLIENT_QUIT_STATE:
+                printf("quit state\n");
                 break;
         }
         game->clientState = serverPacket->clientState;
         game->serverState = serverPacket->serverState;
+        game->playerId = serverPacket->playerId;
+        printf("player id: %d\n", game->playerId);
+        printf("client state: %d\nserver state: %d\n", game->clientState, game->serverState);
     }
 }
 
