@@ -57,25 +57,11 @@ int initiate(Game *pGame)
         printf("SDL Init Error: %s\n", SDL_GetError());
         return 0;
     }
-
+    
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) 
     {
         printf("SDL_image Init Error: %s\n", IMG_GetError());
         SDL_Quit();
-        return 0;
-    }
-
-    if (!initSound(&pGame->sounds))
-    {
-        printf("Sound init failed\n");
-        closeGame(pGame);
-        return 0;
-    }
-    
-
-    if (!pGame->sounds)
-    {
-        printf("Sound allocation failed\n");
         return 0;
     }
 
