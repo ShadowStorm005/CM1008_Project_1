@@ -13,6 +13,7 @@ static bool isSameAddress(IPaddress *a, IPaddress *b);
 static int findClientId(ServerGame *game, IPaddress *address);
 static int addClient(ServerGame *game, IPaddress *address);
 static void receiveInputs(ServerGame *game);
+static void handleInput(ServerGame *game, ServerClient *client);
 static void updateWorld(ServerGame *game);
 static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, int clientId);
 static void sendStatus(ServerGame *game, ServerPacket *serverPacket);

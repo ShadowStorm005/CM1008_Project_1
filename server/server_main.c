@@ -147,25 +147,28 @@ static void receiveInputs(ServerGame *game)
     }
 }
 
+static void handleInput(ServerGame *game, ServerClient *client)
+{
+    if (client->input & INPUT_LEFT) moveLeft(client->player);
+    if (client->input & INPUT_RIGHT) moveRight(client->player);
+    if (client->input & INPUT_JUMP) jump(client->player);
+    
+    steerCanon(client->player, client->mouseX, client->mouseY);
+    if ((client->input & INPUT_SHOOT) && canShoot(client->player)) {
+        shoot(game->projectiles, getBulletSize(client->player), getBulletSpeed(client->player), getCanonX(client->player), getCanonY(client->player), getAngle(client->player));
+        setTriggerState(client->player, 0);
+    }
+    else if (!(client->input & INPUT_SHOOT) && !canShoot(client->player)){
+        setTriggerState(client->player, 1);
+    }
+}
+
 static void updateWorld(ServerGame *game)
 {
     for (int i = 0; i < MAX_PLAYERS; i++) {
         ServerClient *client = &game->clients[i];
         if (!client->connected || !client->player) continue;
-        uint8_t *buttons = &client->input;
-        if (buttons[INPUT_LEFT]) moveLeft(client->player);
-        if (buttons[INPUT_RIGHT]) moveRight(client->player);
-        if (buttons[INPUT_JUMP]) jump(client->player);
-
-        steerCanon(client->player, client->mouseX, client->mouseY);
-        if (buttons[INPUT_SHOOT] && canShoot(client->player)) {
-            shoot(game->projectiles, getBulletSize(client->player), getBulletSpeed(client->player), getCanonX(client->player), getCanonY(client->player), getAngle(client->player));
-            setTriggerState(client->player, 0);
-        }
-        else if (!buttons[INPUT_SHOOT] && !canShoot(client->player)){
-            setTriggerState(client->player, 1);
-        }
-
+        handleInput(game, client);
         updatePlayer(client->player, game->map);
     }
 
@@ -200,6 +203,7 @@ static void sendStatus(ServerGame *game, ServerPacket *serverPacket)
         if (!game->clients[i].connected) continue;
 
         prepareClientPacket(game, serverPacket, i);
+        if (serverPacket->tileChangeCount > 0) printf("hello\n");
         memcpy(game->sendPacket->data, serverPacket, sizeof(*serverPacket));
         game->sendPacket->len = sizeof(*serverPacket);
         game->sendPacket->address = game->clients[i].ipaddress;

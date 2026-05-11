@@ -72,7 +72,8 @@ int main(int argc, char **argv)
         if (game.playerId == UNKNOWN_PLAYER) {
             sendJoin(&game);
         } else {
-            sendInput(&game);
+            prepareClientPacket(&game, &clientPacket);
+            sendInput(&game, &clientPacket);
         }
 
         recieveStatus(&game, &serverPacket);
@@ -235,9 +236,41 @@ static void sendJoin(ClientGame *game)
     SDLNet_UDP_Send(game->socket, -1, game->sendPacket);
 }
 
-static void sendInput(ClientGame *game)
+static uint8_t getInput(const Uint8 *keys)
 {
+    uint8_t buttons = 0;
+    if (keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT]) buttons |= INPUT_LEFT;
+    if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT]) buttons |= INPUT_RIGHT;
+    if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_UP]) buttons |= INPUT_JUMP;
+    if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT) || keys[SDL_SCANCODE_SPACE]) buttons |= INPUT_SHOOT;
+    if (keys[SDL_SCANCODE_1]) buttons |= INPUT_1;
+    if (keys[SDL_SCANCODE_2]) buttons |= INPUT_2;
 
+    return buttons;
+}
+
+static void prepareClientPacket(ClientGame *game, ClientPacket *clientPacket)
+{
+    int mouseX = 0;
+    int mouseY = 0;
+    SDL_GetMouseState(&mouseX, &mouseY);
+
+    const Uint8 *keys = SDL_GetKeyboardState(NULL);
+
+    memset(clientPacket, 0, sizeof(*clientPacket));
+    clientPacket->packetType = CLIENT_INPUT_PACKET;
+    clientPacket->playerId = game->playerId;
+    clientPacket->input = getInput(keys);
+    clientPacket->mouseX = mouseX;
+    clientPacket->mouseY = mouseY;
+}
+
+static void sendInput(ClientGame *game, ClientPacket *clientPacket)
+{
+    memcpy(game->sendPacket->data, clientPacket, sizeof(*clientPacket));
+    game->sendPacket->len = sizeof(*clientPacket);
+    game->sendPacket->address = game->serverAddress;
+    SDLNet_UDP_Send(game->socket, -1, game->sendPacket);
 }
 
 static void updateGameVar(ClientGame *game, ServerPacket *serverPacket)
@@ -257,8 +290,9 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket)
                         serverPacket->projectiles[i].angle);
         updateProjectileRect(game->projectiles[i]);
     }
-
+    
     for (int i = 0; i < serverPacket->tileChangeCount && i < MAX_TILE_CHANGES; i++) {
+        printf("test\n");
         const NetTile *change = &serverPacket->tileChanges[i];
         setSelectedTexture(game->map, change->x, change->y, change->selectedTexture);
         if (!change->selectedTexture) inactivateTile(game->map, change->x, change->y);
@@ -273,27 +307,24 @@ static void recieveStatus(ClientGame *game, ServerPacket *serverPacket)
 
         switch (serverPacket->clientState) {
             case CLIENT_LOBBY_STATE:
-                printf("lobby state\n");
+                game->clientState = CLIENT_LOBBY_STATE;
                 break;
             case CLIENT_PLAYING_STATE:
-                printf("playing state\n");
+                game->clientState = CLIENT_PLAYING_STATE;
                 updateGameVar(game, serverPacket);
                 break;
             case CLIENT_INGAME_MENU_STATE:
-                printf("ingame menu state\n");
+                game->clientState = CLIENT_INGAME_MENU_STATE;
                 break;
             case CLIENT_DEAD_STATE:
-                printf("dead state\n");
+                game->clientState = CLIENT_DEAD_STATE;
                 break;
             case CLIENT_QUIT_STATE:
-                printf("quit state\n");
+                game->clientState = CLIENT_QUIT_STATE;
                 break;
         }
-        game->clientState = serverPacket->clientState;
         game->serverState = serverPacket->serverState;
         game->playerId = serverPacket->playerId;
-        printf("player id: %d\n", game->playerId);
-        printf("client state: %d\nserver state: %d\n", game->clientState, game->serverState);
     }
 }
 

@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define SERVER_PORT 1234
-#define DEFAULT_SERVER_IP "10.22.7.228"
+#define DEFAULT_SERVER_IP "172.20.10.4"
 #define MAX_PLAYERS 4
 #define MAX_TILE_CHANGES 128
 #define UNKNOWN_PLAYER 255
@@ -18,13 +18,13 @@ typedef enum {
 } ClientPacketTypes;
 
 typedef enum {
-    INPUT_NONE,
-    INPUT_LEFT,
-    INPUT_RIGHT,
-    INPUT_JUMP,
-    INPUT_SHOOT,
-    INPUT_1,
-    INPUT_2
+    INPUT_NONE = 0,
+    INPUT_LEFT = 1,
+    INPUT_RIGHT = 2,
+    INPUT_JUMP = 4,
+    INPUT_SHOOT = 8,
+    INPUT_1 = 16,
+    INPUT_2 = 32
 } InputType;
 
 typedef enum {
