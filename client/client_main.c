@@ -292,7 +292,6 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket)
     }
     
     for (int i = 0; i < serverPacket->tileChangeCount && i < MAX_TILE_CHANGES; i++) {
-        printf("test\n");
         const NetTile *change = &serverPacket->tileChanges[i];
         setSelectedTexture(game->map, change->x, change->y, change->selectedTexture);
         if (!change->selectedTexture) inactivateTile(game->map, change->x, change->y);

@@ -28,7 +28,7 @@ void deaccelerate(Player *pPlayer);
 static void restrictCanonAngle(Player *pPlayer);
 static void flipCanon(Player *pPlayer);
 void steerCanon(Player *pPlayer, int mousePosX, int mousePosY);
-void updatePlayer(Player *pPlayer, Map *tiles);
+void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY);
 void drawPlayer(Player *pPlayer);
 SDL_Rect getPlayerHitbox(Player *pPlayer);
 SDL_Rect getPlayerRect(Player *pPlayer);

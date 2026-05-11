@@ -141,5 +141,6 @@ void addChangedTile(NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCo
 {
     tileChanges[*tileChangeCount].x = x;
     tileChanges[*tileChangeCount].y = y;
-    tileChanges[(*tileChangeCount)++].selectedTexture = newTexture;
+    tileChanges[*tileChangeCount].selectedTexture = newTexture;
+    *tileChangeCount += 1;
 }

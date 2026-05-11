@@ -414,11 +414,9 @@ void steerCanon(Player *pPlayer, int mousePosX, int mousePosY)
     restrictCanonAngle(pPlayer);
 }
 
-void updatePlayer(Player *pPlayer, Map *pMap)
+void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
 {
-    int mousePosx, mousePosy;
     float diffAngle;
-    Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
     deaccelerate(pPlayer);
@@ -435,8 +433,8 @@ void updatePlayer(Player *pPlayer, Map *pMap)
     
     checkForPlayerCollision(pPlayer, pMap);
 
-    float dx = mousePosx - pPlayer->x - (pPlayer->hullRect.w)/2;
-    float dy = mousePosy - pPlayer->y + (pPlayer->hullRect.h)/2;
+    float dx = mouseX - pPlayer->x - (pPlayer->hullRect.w)/2;
+    float dy = mouseY - pPlayer->y + (pPlayer->hullRect.h)/2;
 
     pPlayer->targetAngle = atan2(dy, dx);
 

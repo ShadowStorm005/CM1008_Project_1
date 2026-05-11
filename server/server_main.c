@@ -26,8 +26,6 @@ struct servergame{
     ServerClient clients[MAX_PLAYERS];
     Map *map;
     Projectile *projectiles[MAX_BULLETS];
-    NetTile tileChanges[MAX_TILE_CHANGES];
-    uint8_t tileChangeCount;
 };
 
 int main(int argc, char **argv)
@@ -44,7 +42,7 @@ int main(int argc, char **argv)
         Uint32 frameStart = SDL_GetTicks();
         memset(&serverPacket, 0, sizeof(serverPacket));
         receiveInputs(&game);
-        updateWorld(&game);
+        updateWorld(&game, &serverPacket);
         sendStatus(&game, &serverPacket);
 
         Uint32 frameTime = SDL_GetTicks() - frameStart;
@@ -163,17 +161,17 @@ static void handleInput(ServerGame *game, ServerClient *client)
     }
 }
 
-static void updateWorld(ServerGame *game)
+static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
 {
     for (int i = 0; i < MAX_PLAYERS; i++) {
         ServerClient *client = &game->clients[i];
         if (!client->connected || !client->player) continue;
         handleInput(game, client);
-        updatePlayer(client->player, game->map);
+        updatePlayer(client->player, game->map, client->mouseX, client->mouseY);
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) updateProjectile(game->projectiles[i], game->map, game->tileChanges, &game->tileChangeCount);
+        if (isActive(game->projectiles[i])) updateProjectile(game->projectiles[i], game->map, serverPacket->tileChanges, &serverPacket->tileChangeCount);
     }
 }
 
@@ -203,7 +201,6 @@ static void sendStatus(ServerGame *game, ServerPacket *serverPacket)
         if (!game->clients[i].connected) continue;
 
         prepareClientPacket(game, serverPacket, i);
-        if (serverPacket->tileChangeCount > 0) printf("hello\n");
         memcpy(game->sendPacket->data, serverPacket, sizeof(*serverPacket));
         game->sendPacket->len = sizeof(*serverPacket);
         game->sendPacket->address = game->clients[i].ipaddress;
