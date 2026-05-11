@@ -54,6 +54,8 @@ typedef enum {
 typedef struct {
     float x;
     float y;
+    int32_t mouseX;
+    int32_t mouseY;
 } NetPlayer;
 
 typedef struct {

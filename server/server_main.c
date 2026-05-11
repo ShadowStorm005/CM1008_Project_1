@@ -185,6 +185,8 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
         if (!game->clients[i].connected || !game->clients[i].player) continue;
         serverPacket->players[i].x = getPlayerX(game->clients[i].player);
         serverPacket->players[i].y = getPlayerY(game->clients[i].player);
+        serverPacket->players[i].mouseX = game->clients[i].mouseX;
+        serverPacket->players[i].mouseY = game->clients[i].mouseY;
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {

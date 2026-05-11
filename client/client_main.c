@@ -280,7 +280,7 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPa
     for (int i = 0; i < MAX_PLAYERS; i++) {
         if (!game->players[i]) continue;
         setPlayerCord(game->players[i], (int)serverPacket->players[i].x, (int)serverPacket->players[i].y);
-        steerCanon(game->players[i], clientPacket->mouseX, clientPacket->mouseY);
+        steerCanon(game->players[i], serverPacket->players[i].mouseX, serverPacket->players[i].mouseY);
         updatePlayerRects(game->players[i]);
     }
 
