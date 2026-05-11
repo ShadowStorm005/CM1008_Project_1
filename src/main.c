@@ -55,14 +55,12 @@ int main(int argc, char **argv)
 
 int initiate(Game *pGame)
 {
-    printf("initiate started\n");
-    fflush(stdout);
-
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) 
     {
         printf("SDL Init Error: %s\n", SDL_GetError());
         return 0;
     }
+    
     
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) 
     {
@@ -70,29 +68,6 @@ int initiate(Game *pGame)
         SDL_Quit();
         return 0;
     }
-
-
-    if (!initSound(&pGame->sounds))
-    {
-        printf("Sound init failed\n");
-        closeGame(pGame);
-        return 0;
-    }
-    
-
-    pGame->sounds = createSound();
-    if (!pGame->sounds)
-    {
-        printf("Sound allocation failed\n");
-        return 0;
-    }
-    
-    if (!initSound(pGame->sounds))
-    {
-        printf("Sound allocation failed\n");
-        return 0;
-    }
-    
 
     pGame->sounds = createSound();
     if (!pGame->sounds)
