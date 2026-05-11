@@ -50,6 +50,7 @@ int main(int argc, char **argv)
     if (argc >= 2) serverIp = argv[1];
 
     ClientGame game;
+    ClientPacket clientPacket;
     ServerPacket serverPacket;
 
     if (!initClient(&game, serverIp)) {
@@ -178,6 +179,7 @@ int main(int argc, char **argv)
             renderLobby(&game);
         }
         else if (game.clientState == CLIENT_PLAYING_STATE) {
+            prepareClientPacket(&game, &clientPacket);
             sendInput(&game, &clientPacket);
             recieveStatus(&game, &serverPacket, &clientPacket);
             render(&game);
@@ -414,7 +416,7 @@ static void sendInput(ClientGame *game, ClientPacket *clientPacket)
         return;
     }
 
-    ClientPacket inputPacket;
+    /*ClientPacket inputPacket;
     memset(&inputPacket, 0, sizeof(inputPacket));
 
     const Uint8 *keys = SDL_GetKeyboardState(NULL);
@@ -453,10 +455,10 @@ static void sendInput(ClientGame *game, ClientPacket *clientPacket)
     inputPacket.playerId = game->playerId;
     inputPacket.input = input;
     inputPacket.mouseX = mouseX;
-    inputPacket.mouseY = mouseY;
+    inputPacket.mouseY = mouseY;*/
 
-    memcpy(game->sendPacket->data, &inputPacket, sizeof(inputPacket));
-    game->sendPacket->len = sizeof(inputPacket);
+    memcpy(game->sendPacket->data, clientPacket, sizeof(*clientPacket));
+    game->sendPacket->len = sizeof(*clientPacket);
     game->sendPacket->address = game->serverAddress;
 
     SDLNet_UDP_Send(game->socket, -1, game->sendPacket);
