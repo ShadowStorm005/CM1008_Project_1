@@ -149,10 +149,9 @@ int main(int argc, char **argv)
                     game.inGameMenu = true;
                 }
             }
-
-            recieveStatus(&game, &serverPacket, &clientPacket);
-
         }
+
+        recieveStatus(&game, &serverPacket, &clientPacket);
 
         if (game.clientState == CLIENT_MAIN_MENU_STATE) {
             renderMainMenu(game.renderer,
@@ -189,7 +188,6 @@ int main(int argc, char **argv)
         }
 
         recieveStatus(&game, &serverPacket, &clientPacket);
-        render(&game);
 
         Uint32 frameTime = SDL_GetTicks() - frameStart;
         if (frameTime < FRAME_DELAY) {
@@ -415,47 +413,6 @@ static void sendInput(ClientGame *game, ClientPacket *clientPacket)
     if (!game->hasServerAddress || game->playerId == UNKNOWN_PLAYER) {
         return;
     }
-
-    /*ClientPacket inputPacket;
-    memset(&inputPacket, 0, sizeof(inputPacket));
-
-    const Uint8 *keys = SDL_GetKeyboardState(NULL);
-    uint8_t input = INPUT_NONE;
-
-   if (keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT]) {
-    input |= INPUT_LEFT;
-    }
-
-    if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT]) {
-        input |= INPUT_RIGHT;
-    }
-
-    if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_SPACE]) {
-        input |= INPUT_JUMP;
-    }
-
-    if (keys[SDL_SCANCODE_1]) {
-        input |= INPUT_1;
-    }
-
-    if (keys[SDL_SCANCODE_2]) {
-        input |= INPUT_2;
-    }
-
-    int mouseX = 0;
-    int mouseY = 0;
-    Uint32 mouseButtons = SDL_GetMouseState(&mouseX, &mouseY);
-
-    if (mouseButtons & SDL_BUTTON(SDL_BUTTON_LEFT)) {
-        input |=  INPUT_SHOOT;
-    }
-
-    inputPacket.packetType = CLIENT_INPUT_PACKET;
-    inputPacket.clientState = CLIENT_PLAYING_STATE;
-    inputPacket.playerId = game->playerId;
-    inputPacket.input = input;
-    inputPacket.mouseX = mouseX;
-    inputPacket.mouseY = mouseY;*/
 
     memcpy(game->sendPacket->data, clientPacket, sizeof(*clientPacket));
     game->sendPacket->len = sizeof(*clientPacket);
