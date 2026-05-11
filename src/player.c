@@ -474,6 +474,8 @@ SDL_Rect getPlayerRect(Player *pPlayer)
 
 void setPlayerCord(Player *pPlayer, int x, int y)
 {
+    if (pPlayer->x < x) pPlayer->tankFlip = SDL_FLIP_NONE;
+    else if (pPlayer->x > x) pPlayer->tankFlip = SDL_FLIP_HORIZONTAL;
     pPlayer->x = x;
     pPlayer->y = y;
 }

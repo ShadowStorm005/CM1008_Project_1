@@ -12,8 +12,8 @@ static void sendJoin(ClientGame *game);
 static uint8_t getInput(const Uint8 *keys);
 static void prepareClientPacket(ClientGame *game, ClientPacket *clientPacket);
 static void sendInput(ClientGame *game, ClientPacket *clientPacket);
-static void updateGameVar(ClientGame *game, ServerPacket *serverPacket);
-static void recieveStatus(ClientGame *game, ServerPacket *serverPacket);
+static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket);
+static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket);
 static void render(ClientGame *game);
 static void closeClient(ClientGame *game);
 

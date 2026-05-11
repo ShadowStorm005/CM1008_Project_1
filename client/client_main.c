@@ -56,7 +56,7 @@ int main(int argc, char **argv)
             if (event.type == SDL_QUIT) game.clientState = CLIENT_QUIT_STATE;
         }
         sendJoin(&game);
-        recieveStatus(&game, &serverPacket);
+        recieveStatus(&game, &serverPacket, &clientPacket);
     }
 
     while (game.clientState != CLIENT_MAIN_MENU_STATE && 
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
             sendInput(&game, &clientPacket);
         }
 
-        recieveStatus(&game, &serverPacket);
+        recieveStatus(&game, &serverPacket, &clientPacket);
         render(&game);
 
         Uint32 frameTime = SDL_GetTicks() - frameStart;
@@ -273,13 +273,14 @@ static void sendInput(ClientGame *game, ClientPacket *clientPacket)
     SDLNet_UDP_Send(game->socket, -1, game->sendPacket);
 }
 
-static void updateGameVar(ClientGame *game, ServerPacket *serverPacket)
+static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket)
 {
     game->playerId = serverPacket->playerId;
 
     for (int i = 0; i < MAX_PLAYERS; i++) {
         if (!game->players[i]) continue;
         setPlayerCord(game->players[i], (int)serverPacket->players[i].x, (int)serverPacket->players[i].y);
+        steerCanon(game->players[i], clientPacket->mouseX, clientPacket->mouseY);
         updatePlayerRects(game->players[i]);
     }
 
@@ -298,7 +299,7 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket)
     }
 }
 
-static void recieveStatus(ClientGame *game, ServerPacket *serverPacket)
+static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
         memset(serverPacket, 0, sizeof(*serverPacket));
@@ -310,7 +311,7 @@ static void recieveStatus(ClientGame *game, ServerPacket *serverPacket)
                 break;
             case CLIENT_PLAYING_STATE:
                 game->clientState = CLIENT_PLAYING_STATE;
-                updateGameVar(game, serverPacket);
+                updateGameVar(game, serverPacket, clientPacket);
                 break;
             case CLIENT_INGAME_MENU_STATE:
                 game->clientState = CLIENT_INGAME_MENU_STATE;
