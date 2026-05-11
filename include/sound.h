@@ -7,6 +7,8 @@
 
 typedef struct sounds Sounds;
 
+Sounds *createSound();
+void destroySound(Sounds *sounds);
 int initSound(Sounds *sounds);
 void startIdleSound(Sounds *sounds);
 void updateMovementSound(Sounds *sounds, int isMoving);
