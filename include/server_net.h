@@ -18,5 +18,6 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket);
 static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, int clientId);
 static void sendStatus(ServerGame *game, ServerPacket *serverPacket);
 static void closeServer(ServerGame *game);
+static int connectedClientCount(ServerGame *game);
 
 #endif

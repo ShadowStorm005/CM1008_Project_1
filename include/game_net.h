@@ -4,12 +4,16 @@
 #include <stdint.h>
 
 #define SERVER_PORT 1234
-#define DEFAULT_SERVER_IP "172.20.10.4"
-#define MAX_PLAYERS 4
+#define DEFAULT_SERVER_IP "192.168.1.73"
+
+#define MAX_PLAYERS 2
 #define MAX_TILE_CHANGES 128
 #define UNKNOWN_PLAYER 255
 #define FPS 60
 #define FRAME_DELAY (1000 / FPS)
+
+#define IP_TEXT_MAX 64
+#define JOINS_SEND_INTERVAL_MS 500
 
 typedef enum {
     CLIENT_JOIN_PACKET,
@@ -29,6 +33,8 @@ typedef enum {
 
 typedef enum {
     CLIENT_MAIN_MENU_STATE,
+    CLIENT_CONNECT_STATE,
+    CLIENT_OPTIONS_STATE,
     CLIENT_LOBBY_STATE,
     CLIENT_PLAYING_STATE,
     CLIENT_INGAME_MENU_STATE,

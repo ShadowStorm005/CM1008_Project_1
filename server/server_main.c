@@ -42,7 +42,9 @@ int main(int argc, char **argv)
         Uint32 frameStart = SDL_GetTicks();
         memset(&serverPacket, 0, sizeof(serverPacket));
         receiveInputs(&game);
-        updateWorld(&game, &serverPacket);
+        if(connectedClientCount(&game) >=2){
+            updateWorld(&game, &serverPacket);
+        }
         sendStatus(&game, &serverPacket);
 
         Uint32 frameTime = SDL_GetTicks() - frameStart;
@@ -145,6 +147,19 @@ static void receiveInputs(ServerGame *game)
     }
 }
 
+static int connectedClientCount(ServerGame *game)
+{
+    int count = 0;
+
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        if (game->clients[i].connected) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
 static void handleInput(ServerGame *game, ServerClient *client)
 {
     if (client->input & INPUT_LEFT) moveLeft(client->player);
@@ -171,18 +186,35 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) updateProjectile(game->projectiles[i], game->map, serverPacket->tileChanges, &serverPacket->tileChangeCount);
+        if (isActive(game->projectiles[i])) 
+            updateProjectile(game->projectiles[i], 
+                            game->map, 
+                            serverPacket->tileChanges, 
+                            &serverPacket->tileChangeCount);
     }
 }
 
 static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, int clientId)
 {
-    serverPacket->serverState = SERVER_RUN_STATE;
-    serverPacket->clientState  = CLIENT_PLAYING_STATE;
+    int connectedCount = connectedClientCount(game);
+
     serverPacket->playerId = (uint8_t)clientId;
 
+    if (connectedCount < 2) {
+        serverPacket->serverState = SERVER_MENU_STATE;
+        serverPacket->clientState = CLIENT_LOBBY_STATE;
+    }
+    else {
+        serverPacket->serverState = SERVER_RUN_STATE;
+        serverPacket->clientState = CLIENT_PLAYING_STATE;
+    }
+
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (!game->clients[i].connected || !game->clients[i].player) continue;
+        if (!game->clients[i].connected || !game->clients[i].player)
+        {
+            continue;
+        }
+        
         serverPacket->players[i].x = getPlayerX(game->clients[i].player);
         serverPacket->players[i].y = getPlayerY(game->clients[i].player);
         serverPacket->players[i].mouseX = game->clients[i].mouseX;
@@ -190,7 +222,11 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (!isActive(game->projectiles[i])) continue;
+        if (!isActive(game->projectiles[i]))
+        {
+            continue;
+        }
+
         serverPacket->projectiles[i].x = getBulletX(game->projectiles[i]);
         serverPacket->projectiles[i].y = getBulletY(game->projectiles[i]);
         serverPacket->projectiles[i].angle = getBulletAngle(game->projectiles[i]);
@@ -200,8 +236,11 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
 static void sendStatus(ServerGame *game, ServerPacket *serverPacket)
 {
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (!game->clients[i].connected) continue;
-
+        if (!game->clients[i].connected)
+        {
+            continue;
+        }
+        
         prepareClientPacket(game, serverPacket, i);
         memcpy(game->sendPacket->data, serverPacket, sizeof(*serverPacket));
         game->sendPacket->len = sizeof(*serverPacket);

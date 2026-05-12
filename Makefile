@@ -7,7 +7,7 @@ CFLAGS   = -g $(INCLUDE) -c
 LDFLAGS  = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_net -mwindows -mconsole -lm
 
 SERVER_OBJ = $(OBJDIR)/server_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
-CLIENT_OBJ = $(OBJDIR)/client_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
+CLIENT_OBJ = $(OBJDIR)/client_main.o $(OBJDIR)/menu.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
 
 all: server.exe client.exe
 
@@ -20,8 +20,11 @@ client.exe: $(CLIENT_OBJ)
 $(OBJDIR)/server_main.o: server/server_main.c $(INCDIR)/server_net.h $(INCDIR)/game_net.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # server compiler
 	gcc $(CFLAGS) server/server_main.c -o $(OBJDIR)/server_main.o
 
-$(OBJDIR)/client_main.o: client/client_main.c $(INCDIR)/client_net.h $(INCDIR)/game_net.h | $(OBJDIR) # client compiler
+$(OBJDIR)/client_main.o: client/client_main.c $(INCDIR)/client_net.h $(INCDIR)/game_net.h $(INCDIR)/menu.h | $(OBJDIR) # client compiler
 	gcc $(CFLAGS) client/client_main.c -o $(OBJDIR)/client_main.o
+
+$(OBJDIR)/menu.o: $(SRCDIR)/menu.c $(INCDIR)/menu.h $(INCDIR)/map.h| $(OBJDIR) # physics compiler
+	gcc $(CFLAGS) $(SRCDIR)/menu.c -o $(OBJDIR)/menu.o
 
 $(OBJDIR)/map.o: $(SRCDIR)/map.c $(INCDIR)/map.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # map compiler
 	gcc $(CFLAGS) $(SRCDIR)/map.c -o $(OBJDIR)/map.o
@@ -41,6 +44,7 @@ $(OBJDIR):
 clean:
 	del $(OBJDIR)\server_main.o
 	del $(OBJDIR)\client_main.o
+	del $(UBJDIR)\menu.o
 	del $(OBJDIR)\map.o
 	del $(OBJDIR)\physics.o
 	del $(OBJDIR)\player.o
