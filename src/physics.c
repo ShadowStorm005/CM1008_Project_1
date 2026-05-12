@@ -78,6 +78,7 @@ void triggerBulletExplosion(Map *pMap, int x, int y, int radius, NetTile tileCha
     for (int i = minX; i <= maxX; i++){
         if (i <= x){
             for (int j = y - (i-minX); j <= y + (i-minX); j++){
+                if(i < 0 || j < 0 ) continue;
                 if (!isTileActive(pMap, i, j)) continue;
                 if (hypotf(x-i, y-j) < 1.2f) {
                     inactivateTile(pMap, i, j);
@@ -107,6 +108,7 @@ void triggerBulletExplosion(Map *pMap, int x, int y, int radius, NetTile tileCha
         }
         else{
             for (int j = y - (maxX-i); j <= y + (maxX-i); j++){
+                if(i < 0 || j < 0 ) continue;
                 if (!isTileActive(pMap, i, j)) continue;
                 if (hypotf(i-x, y-j) < 1.2f) {
                     inactivateTile(pMap, i, j);
