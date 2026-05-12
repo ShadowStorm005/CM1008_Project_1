@@ -163,48 +163,6 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
         return NULL;
     }
 
-    if (!pPlayer->pTurretTx) 
-    {
-        printf("Error creating turret texture: %s\n", SDL_GetError());
-        free(pPlayer);
-        return NULL;
-    }
-    
-    if (!pPlayer->pCanonTx) 
-    {
-        printf("Error creating canon texture: %s\n", SDL_GetError());
-        free(pPlayer);
-        return NULL;
-    }
-
-    if (!pPlayer->pTurretTx) 
-    {
-        printf("Error creating turret texture: %s\n", SDL_GetError());
-        free(pPlayer);
-        return NULL;
-    }
-    
-    if (!pPlayer->pCanonTx) 
-    {
-        printf("Error creating canon texture: %s\n", SDL_GetError());
-        free(pPlayer);
-        return NULL;
-    }
-
-    if (!pPlayer->pTurretTx) 
-    {
-        printf("Error creating turret texture: %s\n", SDL_GetError());
-        free(pPlayer);
-        return NULL;
-    }
-    
-    if (!pPlayer->pCanonTx) 
-    {
-        printf("Error creating canon texture: %s\n", SDL_GetError());
-        free(pPlayer);
-        return NULL;
-    }
-
     SDL_QueryTexture(pPlayer->pHullTx, NULL, NULL, &pPlayer->hullRect.w, &pPlayer->hullRect.h);
     SDL_QueryTexture(pPlayer->pTurretTx, NULL, NULL, &pPlayer->turretRect.w, &pPlayer->turretRect.h);
     SDL_QueryTexture(pPlayer->pCanonTx, NULL, NULL, &pPlayer->canonRect.w, &pPlayer->canonRect.h);

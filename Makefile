@@ -38,14 +38,9 @@ $(OBJDIR)/weapon.o: $(SRCDIR)/weapon.c $(INCDIR)/weapon.h $(INCDIR)/server_creat
 $(OBJDIR):
 	if not exist $(OBJDIR) mkdir $(OBJDIR)
 
-sound.o: $(SRCDIR)\sound.c $(INCDIR)\sound.h
-	gcc $(CFLAGS) $(SRCDIR)\sound.c
+$(OBJDIR)/sound.o: $(SRCDIR)/sound.c $(INCDIR)/sound.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # weapon compiler
+	gcc $(CFLAGS) $(SRCDIR)/sound.c -o $(OBJDIR)/sound.o
 
-sound.o: $(SRCDIR)\sound.c $(INCDIR)\sound.h
-	gcc $(CFLAGS) $(SRCDIR)\sound.c
-
-sound.o: $(SRCDIR)\sound.c $(INCDIR)\sound.h
-	gcc $(CFLAGS) $(SRCDIR)\sound.c
 
 clean:
 	del $(OBJDIR)\server_main.o
@@ -54,5 +49,6 @@ clean:
 	del $(OBJDIR)\physics.o
 	del $(OBJDIR)\player.o
 	del $(OBJDIR)\weapon.o
+	del $(OBJDIR)\sound.o
 	del server.exe
 	del client.exe
