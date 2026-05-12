@@ -1,9 +1,13 @@
 #ifndef WEAPON_H
 #define WEAPON_H
+
 #define MAX_BULLETS 50
 #define PI 3.141592653589f
 #define PROJECTILE_GRAVITY 0.15f
 #define BULLET_SIZE 20
+#define STANDARD_BULLET_DAMAGE 15
+#define LARGE_BULLET_DAMAGE 40
+#define DART_BULLET_DAMAGE 90
 
 #include <SDL.h>
 #include "game_net.h"

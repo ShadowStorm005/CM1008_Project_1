@@ -278,6 +278,18 @@ int getBulletSize(Player *pPlayer)
     }
 }
 
+int getBulletDamage(Player *pPlayer)
+{
+    switch (pPlayer->canonMode){
+        case 1:
+            return STANDARD_BULLET_DAMAGE;
+        case 2:
+            return LARGE_BULLET_DAMAGE;
+        case 3:
+            return DART_BULLET_DAMAGE;
+    }
+}
+
 void drawCircle(SDL_Renderer * renderer, int centerX, int centerY, float rad, int opacity)
 {
     int outline = 70;
@@ -511,4 +523,9 @@ void destroyPlayer(Player *pPlayer)
     if (pPlayer->pCanonTx) SDL_DestroyTexture(pPlayer->pCanonTx);
     if (pPlayer->pTurretTx) SDL_DestroyTexture(pPlayer->pTurretTx);
     free(pPlayer);
+}
+
+void takeDamage(Player *pPlayer, int damage)
+{
+    pPlayer->health -= damage;
 }

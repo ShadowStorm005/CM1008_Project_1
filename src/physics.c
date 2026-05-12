@@ -144,3 +144,8 @@ void addChangedTile(NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCo
     tileChanges[*tileChangeCount].selectedTexture = newTexture;
     *tileChangeCount += 1;
 }
+
+void checkBulletPlayerCollision(Projectile *pProjectile, Player *pPlayer, Map *pMap)
+{
+    
+}
