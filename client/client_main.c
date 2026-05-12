@@ -455,20 +455,16 @@ static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPa
 
         switch (serverPacket->clientState) {
             case CLIENT_LOBBY_STATE:
-                printf("lobby state\n");
                 game->clientState = CLIENT_LOBBY_STATE;
                 break;
             case CLIENT_PLAYING_STATE:
-                printf("playing state\n");
                 updateGameVar(game, serverPacket, clientPacket);
                 game->clientState = CLIENT_PLAYING_STATE;
                 break;
             case CLIENT_INGAME_MENU_STATE:
-                printf("ingame menu state\n");
                 game->clientState = CLIENT_DEAD_STATE;
                 break;
             case CLIENT_DEAD_STATE:
-                printf("dead state\n");
                 game->clientState = CLIENT_QUIT_STATE;
                 break;
             case CLIENT_QUIT_STATE:
