@@ -242,7 +242,6 @@ static void sendStatus(ServerGame *game, ServerPacket *serverPacket)
         }
         
         prepareClientPacket(game, serverPacket, i);
-        printf("Sending to client %d: serverState=%d clientState=%d\n", i, serverPacket->serverState, serverPacket->clientState);
         memcpy(game->sendPacket->data, serverPacket, sizeof(*serverPacket));
         game->sendPacket->len = sizeof(*serverPacket);
         game->sendPacket->address = game->clients[i].ipaddress;
