@@ -278,18 +278,6 @@ int getBulletSize(Player *pPlayer)
     }
 }
 
-int getBulletDamage(Player *pPlayer)
-{
-    switch (pPlayer->canonMode){
-        case 1:
-            return STANDARD_BULLET_DAMAGE;
-        case 2:
-            return LARGE_BULLET_DAMAGE;
-        case 3:
-            return DART_BULLET_DAMAGE;
-    }
-}
-
 void drawCircle(SDL_Renderer * renderer, int centerX, int centerY, float rad, int opacity)
 {
     int outline = 70;

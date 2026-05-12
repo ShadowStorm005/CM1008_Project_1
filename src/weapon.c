@@ -20,6 +20,7 @@ typedef struct projectile
     int active;
     float speed;
     float gravity;
+    int damage;
 
     SDL_Texture *pTexture;
     SDL_Renderer *pRenderer;
@@ -127,7 +128,7 @@ void drawProjectile(Projectile *pProjectile)
     SDL_RenderCopyEx(pProjectile->pRenderer, pProjectile->pTexture, NULL /**/, &pProjectile->projectile_rect, pProjectile->angle*180/PI, &center, SDL_FLIP_NONE);
 }
 
-void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, float angle)
+void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, float angle, int canonMode)
 {
     for(int i = 0; i < MAX_BULLETS; i++)
     {
@@ -146,6 +147,18 @@ void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, f
             pProjectile[i]->speed = speed;
             pProjectile[i]->velX = pProjectile[i]->speed * cos(pProjectile[i]->angle);
             pProjectile[i]->velY = pProjectile[i]->speed * sin(pProjectile[i]->angle);
+
+            switch (canonMode) {
+                case 1: 
+                    pProjectile[i]->damage = STANDARD_BULLET_DAMAGE;
+                    break;
+                case 2:
+                    pProjectile[i]->damage = LARGE_BULLET_DAMAGE;
+                    break;
+                case 3:
+                    pProjectile[i]->damage = DART_BULLET_DAMAGE;
+                    break;
+            }
 
             break;
         }
@@ -182,4 +195,9 @@ float getBulletY(Projectile *pProjectile)
 float getBulletAngle(Projectile *pProjectile)
 {
     return pProjectile->angle;
+}
+
+int getBulletDamage(Projectile *pProjectile)
+{
+    return pProjectile->damage;
 }

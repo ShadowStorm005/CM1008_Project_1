@@ -19,7 +19,6 @@ int canShoot(Player *pPlayer);
 
 float getBulletSpeed(Player *pPlayer);
 int getBulletSize(Player *pPlayer);
-int getBulletDamage(Player *pPlayer);
 
 void setTriggerState(Player *pPlayer, int enable);
 
