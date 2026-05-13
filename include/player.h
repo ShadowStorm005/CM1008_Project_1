@@ -10,6 +10,7 @@ typedef struct player Player;
 void updatePlayerRects(Player *pPlayer);
 static void initPlayerDefaults(Player *pPlayer, float x, float y, int windows_width, int window_height);
 Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height);
+void changePlayerSkin(Player *pPlayer, int skin);
 float getPlayerX(Player *pPlayer);
 float getPlayerY(Player *pPlayer);
 float getCanonX(Player *pPlayer);

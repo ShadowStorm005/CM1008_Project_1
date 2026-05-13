@@ -15,6 +15,7 @@ struct serverclient {
     IPaddress ipaddress;
     Player *player;
     uint8_t input;
+    uint8_t tankSkin;
     int mouseX;
     int mouseY;
 };
@@ -41,7 +42,7 @@ int main(int argc, char **argv)
     while (running) {
         Uint32 frameStart = SDL_GetTicks();
         memset(&serverPacket, 0, sizeof(serverPacket));
-        receiveInputs(&game);
+        receivePacket(&game);
         if(connectedClientCount(&game) >=2){
             updateWorld(&game, &serverPacket);
         }
@@ -124,7 +125,7 @@ static int addClient(ServerGame *game, IPaddress *address)
     return -1;
 }
 
-static void receiveInputs(ServerGame *game)
+static void receivePacket(ServerGame *game)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
         ClientPacket clientPacket;
@@ -144,7 +145,21 @@ static void receiveInputs(ServerGame *game)
         game->clients[id].input = clientPacket.input;
         game->clients[id].mouseX = clientPacket.mouseX;
         game->clients[id].mouseY = clientPacket.mouseY;
+        game->clients[id].tankSkin = clientPacket.tankSkin;
     }
+}
+
+static int connectedClientCount(ServerGame *game)
+{
+    int count = 0;
+
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        if (game->clients[i].connected) {
+            count++;
+        }
+    }
+
+    return count;
 }
 
 static int connectedClientCount(ServerGame *game)
@@ -219,6 +234,7 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
         serverPacket->players[i].y = getPlayerY(game->clients[i].player);
         serverPacket->players[i].mouseX = game->clients[i].mouseX;
         serverPacket->players[i].mouseY = game->clients[i].mouseY;
+        serverPacket->players[i].tankSkin = game->clients[i].tankSkin;
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {

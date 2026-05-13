@@ -23,6 +23,7 @@ struct player {
     int isGrounded;
     int isTouchingWall;
     int canonMode;
+    int tankSkin;
 
     int window_width, window_height;
 
@@ -35,21 +36,56 @@ struct player {
 
     SDL_Renderer *pRenderer;
 
-    SDL_Rect hullRect;
     SDL_Rect hitbox;
+
+    SDL_Rect hullRect;
+    SDL_Rect hullSrcRect;
+
     SDL_Rect canonRect;
+    SDL_Rect canonSrcRect;
+
     SDL_Rect turretRect;
+    SDL_Rect turretSrcRect;
 
     SDL_RendererFlip tankFlip;
     SDL_RendererFlip turretFlip;
 };
 
+void updatePlayerSkin(Player *pPlayer)
+{
+    switch (pPlayer->tankSkin)
+    {
+    case SKIN_SWEDEN:
+        pPlayer->hullSrcRect.y = 0;
+        pPlayer->turretSrcRect.y = 0;
+        pPlayer->canonSrcRect.y = 0;
+        break;
+    case SKIN_DENMARK:
+        pPlayer->hullSrcRect.y = 52*pPlayer->tankSkin;
+        pPlayer->turretSrcRect.y = 40*pPlayer->tankSkin;
+        pPlayer->canonSrcRect.y = 45*pPlayer->tankSkin/* +15*tankCanon */;
+        break;
+    case SKIN_DEUTSCH:
+        pPlayer->hullSrcRect.y = 52*pPlayer->tankSkin;
+        pPlayer->turretSrcRect.y = 40*pPlayer->tankSkin;
+        pPlayer->canonSrcRect.y = 45*pPlayer->tankSkin/* +15*tankCanon */;      
+        break;
+    case SKIN_RUSSIA:
+        pPlayer->hullSrcRect.y = 52*pPlayer->tankSkin;
+        pPlayer->turretSrcRect.y = 40*pPlayer->tankSkin;
+        pPlayer->canonSrcRect.y = 45*pPlayer->tankSkin/* +15*tankCanon */;
+        break;
+    }
+}
+
 void updatePlayerRects(Player *pPlayer)
 {
+    updatePlayerSkin(pPlayer);
+
     pPlayer->hullRect.x = (int)pPlayer->x;
     pPlayer->hullRect.y = (int)pPlayer->y;
 
-    pPlayer->turretRect.y = (int)pPlayer->y - 7*(pPlayer->hullRect.h)/6;
+    pPlayer->turretRect.y = (int)pPlayer->y - pPlayer->turretRect.h;
     pPlayer->canonRect.y = (int)pPlayer->y - 3*(pPlayer->hullRect.h)/5;
 
     if(pPlayer->turretFlip == SDL_FLIP_NONE)
@@ -76,6 +112,7 @@ static void initPlayerDefaults(Player *pPlayer, float x, float y, int window_wid
     pPlayer->window_width = window_width;
     pPlayer->window_height = window_height;
     pPlayer->health = 100;
+    pPlayer->tankSkin = SKIN_SWEDEN;
     pPlayer->canFire = 1;
 
     pPlayer->velX = 0.0f;
@@ -90,11 +127,29 @@ static void initPlayerDefaults(Player *pPlayer, float x, float y, int window_wid
     pPlayer->hullRect.w = 77*1.2f;
     pPlayer->hullRect.h = 26*1.2f;
 
+    pPlayer->hullSrcRect.x = 0;
+    pPlayer->hullSrcRect.y = 0; //26
+
+    pPlayer->hullSrcRect.w = 77;
+    pPlayer->hullSrcRect.h = 26;
+
     pPlayer->turretRect.w = 49*1.2f;
-    pPlayer->turretRect.h = 30*1.2f;   
+    pPlayer->turretRect.h = 40*1.2f; 
+
+    pPlayer->turretSrcRect.x = 0;
+    pPlayer->turretSrcRect.y = 0; // 40 
+
+    pPlayer->turretSrcRect.w = 49;
+    pPlayer->turretSrcRect.h = 40; 
 
     pPlayer->canonRect.w = 54*1.2f;
     pPlayer->canonRect.h = 15*1.2f;
+
+    pPlayer->canonSrcRect.x = 0;
+    pPlayer->canonSrcRect.y = 0;
+
+    pPlayer->canonSrcRect.w = 54;
+    pPlayer->canonSrcRect.h = 15;
 
     pPlayer->x = x - pPlayer->hullRect.w / 2.0f;
     pPlayer->y = y - pPlayer->hullRect.h / 2.0f;
@@ -107,10 +162,10 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     Player *pPlayer = malloc(sizeof(struct player));
     if (!pPlayer) return NULL;
 
-    SDL_Surface *pSurface = IMG_Load("Resources/Sprite-tankHull.png");
+    SDL_Surface *pSurface = IMG_Load("Resources/Sprite-tankHulls.png");
     if (!pSurface) 
     {
-        printf("Error loading Sprite-tankHull.png: %s\n", IMG_GetError());
+        printf("Error loading Sprite-tankHulls.png: %s\n", IMG_GetError());
         free(pPlayer);
         return NULL;
     }
@@ -118,20 +173,20 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->pRenderer = pRenderer;
     pPlayer->pHullTx = SDL_CreateTextureFromSurface(pRenderer, pSurface);
 
-    pSurface = IMG_Load("Resources/Sprite-tankTurret.png");
+    pSurface = IMG_Load("Resources/Sprite-tankTurrets.png");
     if (!pSurface)
     {
-        printf("Error loading Sprite-tankTurret.png: %s\n", IMG_GetError());
+        printf("Error loading Sprite-tankTurrets.png: %s\n", IMG_GetError());
         free(pPlayer);
         return NULL;
     }
 
     pPlayer->pTurretTx = SDL_CreateTextureFromSurface(pRenderer, pSurface);
 
-    pSurface = IMG_Load("Resources/Sprite-tankBarrel.png");
+    pSurface = IMG_Load("Resources/Sprite-barrels.png");
     if (!pSurface)
     {
-        printf("Error loading Sprite-tankBarrel.png: %s\n", IMG_GetError());
+        printf("Error loading Sprite-barrels.png: %s\n", IMG_GetError());
         free(pPlayer);
         return NULL;
     }
@@ -177,6 +232,12 @@ Player *createServerPlayer(float x, float y, int window_width, int window_height
 
     initPlayerDefaults(pPlayer, x, y, window_width, window_height);
     return pPlayer;
+}
+
+void changePlayerSkin(Player *pPlayer, int skin)
+{
+    pPlayer->tankSkin = skin;
+    updatePlayerRects(pPlayer);
 }
 
 void moveLeft(Player *pPlayer)
@@ -456,9 +517,9 @@ void drawPlayer(Player *pPlayer)
 {
     SDL_Point canonCenter = {0, pPlayer->canonRect.h / 2};
 
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pHullTx, NULL, &pPlayer->hullRect, 0.0, NULL, pPlayer->tankFlip);
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pCanonTx, NULL, &pPlayer->canonRect, pPlayer->canonAngle*180/3.141f, &canonCenter, SDL_FLIP_NONE);
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTurretTx, NULL, &pPlayer->turretRect, 0.0, NULL, pPlayer->turretFlip);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pHullTx, &pPlayer->hullSrcRect, &pPlayer->hullRect, 0.0, NULL, pPlayer->tankFlip);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pCanonTx, &pPlayer->canonSrcRect, &pPlayer->canonRect, pPlayer->canonAngle*180/3.141f, &canonCenter, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTurretTx, &pPlayer->turretSrcRect, &pPlayer->turretRect, 0.0, NULL, pPlayer->turretFlip);
     
 }
 
