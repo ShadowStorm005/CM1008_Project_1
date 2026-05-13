@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define SERVER_PORT 1234
-#define DEFAULT_SERVER_IP "172.20.10.4"
+#define DEFAULT_SERVER_IP "10.22.15.226"
 #define MAX_PLAYERS 4
 #define MAX_TILE_CHANGES 128
 #define UNKNOWN_PLAYER 255
@@ -16,6 +16,13 @@ typedef enum {
     CLIENT_IDLE_PACKET,
     CLIENT_INPUT_PACKET
 } ClientPacketTypes;
+
+typedef enum {
+    SKIN_SWEDEN,
+    SKIN_DENMARK,
+    SKIN_DEUTSCH,
+    SKIN_RUSSIA
+} TankSkins;
 
 typedef enum {
     INPUT_NONE = 0,
@@ -43,6 +50,7 @@ typedef struct {
     ClientState clientState;
     uint8_t input;
     uint8_t playerId;
+    uint8_t tankSkin;
 } ClientPacket;
 
 typedef enum {
@@ -56,6 +64,7 @@ typedef struct {
     float y;
     int32_t mouseX;
     int32_t mouseY;
+    uint8_t tankSkin;
 } NetPlayer;
 
 typedef struct {

@@ -263,6 +263,7 @@ static void prepareClientPacket(ClientGame *game, ClientPacket *clientPacket)
     clientPacket->input = getInput(keys);
     clientPacket->mouseX = mouseX;
     clientPacket->mouseY = mouseY;
+    clientPacket->tankSkin = SKIN_DENMARK; // Change Skin Here
 }
 
 static void sendInput(ClientGame *game, ClientPacket *clientPacket)
@@ -325,6 +326,10 @@ static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPa
         }
         game->serverState = serverPacket->serverState;
         game->playerId = serverPacket->playerId;
+        for(int i = 0; i < MAX_PLAYERS; i++)
+        {
+            changePlayerSkin(game->players[i], serverPacket->players[i].tankSkin);
+        }
     }
 }
 
