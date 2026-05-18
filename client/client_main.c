@@ -29,6 +29,7 @@ struct clientgame{
     Player *players[MAX_PLAYERS];
     Projectile *projectiles[MAX_BULLETS];
     Map *map;
+    Sounds *sounds;
 
     bool inGameMenu;
     SDL_Texture *resumeButton;
@@ -221,6 +222,10 @@ static int initClient(ClientGame *game, const char *serverIp)
         printf("SDL_Init failed: %s\n", SDL_GetError());
         return 0;
     }
+    game->sounds = createSound();
+    if (!game->sounds) return 0;
+    if (!initSound(game->sounds)) return 0;
+    startIdleSound(game->sounds);
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
         printf("IMG_Init failed: %s\n", IMG_GetError());
         return 0;
