@@ -6,6 +6,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "physics.h"
+#include "server_creation_functions.h"
 
 #define MAX_VELY_SPEED 15.0f
 
@@ -22,6 +23,7 @@ struct player {
     int isGrounded;
     int isTouchingWall;
     int canonMode;
+    int tankSkin;
 
     int window_width, window_height;
 
@@ -34,21 +36,56 @@ struct player {
 
     SDL_Renderer *pRenderer;
 
-    SDL_Rect hullRect;
     SDL_Rect hitbox;
+
+    SDL_Rect hullRect;
+    SDL_Rect hullSrcRect;
+
     SDL_Rect canonRect;
+    SDL_Rect canonSrcRect;
+
     SDL_Rect turretRect;
+    SDL_Rect turretSrcRect;
 
     SDL_RendererFlip tankFlip;
     SDL_RendererFlip turretFlip;
 };
 
+void updatePlayerSkin(Player *pPlayer)
+{
+    switch (pPlayer->tankSkin)
+    {
+    case SKIN_SWEDEN:
+        pPlayer->hullSrcRect.y = 0;
+        pPlayer->turretSrcRect.y = 0;
+        pPlayer->canonSrcRect.y = 0;
+        break;
+    case SKIN_DENMARK:
+        pPlayer->hullSrcRect.y = 52*pPlayer->tankSkin;
+        pPlayer->turretSrcRect.y = 40*pPlayer->tankSkin;
+        pPlayer->canonSrcRect.y = 45*pPlayer->tankSkin/* +15*tankCanon */;
+        break;
+    case SKIN_DEUTSCH:
+        pPlayer->hullSrcRect.y = 52*pPlayer->tankSkin;
+        pPlayer->turretSrcRect.y = 40*pPlayer->tankSkin;
+        pPlayer->canonSrcRect.y = 45*pPlayer->tankSkin/* +15*tankCanon */;      
+        break;
+    case SKIN_RUSSIA:
+        pPlayer->hullSrcRect.y = 52*pPlayer->tankSkin;
+        pPlayer->turretSrcRect.y = 40*pPlayer->tankSkin;
+        pPlayer->canonSrcRect.y = 45*pPlayer->tankSkin/* +15*tankCanon */;
+        break;
+    }
+}
+
 void updatePlayerRects(Player *pPlayer)
 {
+    updatePlayerSkin(pPlayer);
+
     pPlayer->hullRect.x = (int)pPlayer->x;
     pPlayer->hullRect.y = (int)pPlayer->y;
 
-    pPlayer->turretRect.y = (int)pPlayer->y - 7*(pPlayer->hullRect.h)/6;
+    pPlayer->turretRect.y = (int)pPlayer->y - pPlayer->turretRect.h;
     pPlayer->canonRect.y = (int)pPlayer->y - 3*(pPlayer->hullRect.h)/5;
 
     if(pPlayer->turretFlip == SDL_FLIP_NONE)
@@ -70,14 +107,12 @@ void updatePlayerRects(Player *pPlayer)
     pPlayer->hitbox.h = pPlayer->hullRect.h;
 }
 
-Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height)
+static void initPlayerDefaults(Player *pPlayer, float x, float y, int window_width, int window_height)
 {
-    Player *pPlayer = malloc(sizeof(struct player));
-    if (!pPlayer) return NULL;
-
     pPlayer->window_width = window_width;
     pPlayer->window_height = window_height;
     pPlayer->health = 100;
+    pPlayer->tankSkin = SKIN_SWEDEN;
     pPlayer->canFire = 1;
 
     pPlayer->velX = 0.0f;
@@ -89,10 +124,48 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->isTouchingWall = 0;
     pPlayer->canonMode = 1;
 
-    SDL_Surface *pSurface = IMG_Load("Resources/Sprite-tankHull.png");
+    pPlayer->hullRect.w = 77*1.2f;
+    pPlayer->hullRect.h = 26*1.2f;
+
+    pPlayer->hullSrcRect.x = 0;
+    pPlayer->hullSrcRect.y = 0; //26
+
+    pPlayer->hullSrcRect.w = 77;
+    pPlayer->hullSrcRect.h = 26;
+
+    pPlayer->turretRect.w = 49*1.2f;
+    pPlayer->turretRect.h = 40*1.2f; 
+
+    pPlayer->turretSrcRect.x = 0;
+    pPlayer->turretSrcRect.y = 0; // 40 
+
+    pPlayer->turretSrcRect.w = 49;
+    pPlayer->turretSrcRect.h = 40; 
+
+    pPlayer->canonRect.w = 54*1.2f;
+    pPlayer->canonRect.h = 15*1.2f;
+
+    pPlayer->canonSrcRect.x = 0;
+    pPlayer->canonSrcRect.y = 0;
+
+    pPlayer->canonSrcRect.w = 54;
+    pPlayer->canonSrcRect.h = 15;
+
+    pPlayer->x = x - pPlayer->hullRect.w / 2.0f;
+    pPlayer->y = y - pPlayer->hullRect.h / 2.0f;
+
+    pPlayer->tankFlip = SDL_FLIP_NONE;
+}
+
+Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height)
+{
+    Player *pPlayer = malloc(sizeof(struct player));
+    if (!pPlayer) return NULL;
+
+    SDL_Surface *pSurface = IMG_Load("Resources/Sprite-tankHulls.png");
     if (!pSurface) 
     {
-        printf("Error loading Sprite-tankHull.png: %s\n", IMG_GetError());
+        printf("Error loading Sprite-tankHulls.png: %s\n", IMG_GetError());
         free(pPlayer);
         return NULL;
     }
@@ -100,20 +173,20 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     pPlayer->pRenderer = pRenderer;
     pPlayer->pHullTx = SDL_CreateTextureFromSurface(pRenderer, pSurface);
 
-    pSurface = IMG_Load("Resources/Sprite-tankTurret.png");
+    pSurface = IMG_Load("Resources/Sprite-tankTurrets.png");
     if (!pSurface)
     {
-        printf("Error loading Sprite-tankTurret.png: %s\n", IMG_GetError());
+        printf("Error loading Sprite-tankTurrets.png: %s\n", IMG_GetError());
         free(pPlayer);
         return NULL;
     }
 
     pPlayer->pTurretTx = SDL_CreateTextureFromSurface(pRenderer, pSurface);
 
-    pSurface = IMG_Load("Resources/Sprite-tankBarrel.png");
+    pSurface = IMG_Load("Resources/Sprite-barrels.png");
     if (!pSurface)
     {
-        printf("Error loading Sprite-tankBarrel.png: %s\n", IMG_GetError());
+        printf("Error loading Sprite-barrels.png: %s\n", IMG_GetError());
         free(pPlayer);
         return NULL;
     }
@@ -146,22 +219,25 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     SDL_QueryTexture(pPlayer->pTurretTx, NULL, NULL, &pPlayer->turretRect.w, &pPlayer->turretRect.h);
     SDL_QueryTexture(pPlayer->pCanonTx, NULL, NULL, &pPlayer->canonRect.w, &pPlayer->canonRect.h);
 
-    pPlayer->hullRect.w = 77*1.2f;
-    pPlayer->hullRect.h = 26*1.2f;
-
-    pPlayer->turretRect.w = 49*1.2f;
-    pPlayer->turretRect.h = 30*1.2f;   
-
-    pPlayer->canonRect.w = 54*1.2f;
-    pPlayer->canonRect.h = 15*1.2f;
-
-    pPlayer->x = x - pPlayer->hullRect.w / 2.0f;
-    pPlayer->y = y - pPlayer->hullRect.h / 2.0f;
-
-    pPlayer->tankFlip = SDL_FLIP_NONE;
+    initPlayerDefaults(pPlayer, x, y, window_width, window_height);
 
     updatePlayerRects(pPlayer);
     return pPlayer;
+}
+
+Player *createServerPlayer(float x, float y, int window_width, int window_height)
+{
+    Player *pPlayer = malloc(sizeof(struct player));
+    if (!pPlayer) return NULL;
+
+    initPlayerDefaults(pPlayer, x, y, window_width, window_height);
+    return pPlayer;
+}
+
+void changePlayerSkin(Player *pPlayer, int skin)
+{
+    pPlayer->tankSkin = skin;
+    updatePlayerRects(pPlayer);
 }
 
 void moveLeft(Player *pPlayer)
@@ -195,14 +271,14 @@ int getCanonMode(Player *pPlayer)
     return pPlayer->canonMode;
 }
 
-float getXCord(Player *pPlayer)
+float getPlayerX(Player *pPlayer)
 {
-    return pPlayer->canonRect.x;
+    return pPlayer->x;
 }
 
-float getYCord(Player *pPlayer)
+float getPlayerY(Player *pPlayer)
 {
-    return pPlayer->canonRect.y;
+    return pPlayer->y;
 }
 
 float getCanonX(Player *pPlayer)
@@ -325,7 +401,7 @@ void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
     }
 }
 
-void enableTrigger(Player *pPlayer, int enable)
+void setTriggerState(Player *pPlayer, int enable)
 {
     if(enable)
     {
@@ -374,29 +450,11 @@ static void flipCanon(Player *pPlayer)
     }
 }
 
-void updatePlayer(Player *pPlayer, Map *pMap)
+void steerCanon(Player *pPlayer, int mousePosX, int mousePosY)
 {
-    int mousePosx, mousePosy;
     float diffAngle;
-    Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
-    SDL_Rect previousHitbox = pPlayer->hitbox;
-
-    deaccelerate(pPlayer);
-
-    pPlayer->velY += pPlayer->gravity;
-    if (pPlayer->velY > MAX_VELY_SPEED) pPlayer->velY = MAX_VELY_SPEED;
-    else if (pPlayer->velY < -MAX_VELY_SPEED) pPlayer->velY = -MAX_VELY_SPEED;
-
-    pPlayer->x += pPlayer->velX;
-    pPlayer->y += pPlayer->velY;
-
-    updatePlayerRects(pPlayer);
-    pPlayer->isGrounded = 0;
-    
-    checkForPlayerCollision(pPlayer, pMap);
-
-    float dx = mousePosx - pPlayer->x - (pPlayer->hullRect.w)/2;
-    float dy = mousePosy - pPlayer->y + (pPlayer->hullRect.h)/2;
+    float dx = mousePosX - pPlayer->x - (pPlayer->hullRect.w)/2;
+    float dy = mousePosY - pPlayer->y + (pPlayer->hullRect.h)/2;
 
     pPlayer->targetAngle = atan2(dy, dx);
 
@@ -415,6 +473,25 @@ void updatePlayer(Player *pPlayer, Map *pMap)
     }
     else pPlayer->canonAngle = pPlayer->targetAngle;
     restrictCanonAngle(pPlayer);
+}
+
+void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
+{
+    SDL_Rect previousHitbox = pPlayer->hitbox;
+
+    deaccelerate(pPlayer);
+
+    pPlayer->velY += pPlayer->gravity;
+    if (pPlayer->velY > MAX_VELY_SPEED) pPlayer->velY = MAX_VELY_SPEED;
+    else if (pPlayer->velY < -MAX_VELY_SPEED) pPlayer->velY = -MAX_VELY_SPEED;
+
+    pPlayer->x += pPlayer->velX;
+    pPlayer->y += pPlayer->velY;
+
+    updatePlayerRects(pPlayer);
+    pPlayer->isGrounded = 0;
+    
+    checkForPlayerCollision(pPlayer, pMap);
     
     if (pPlayer->x < 0) pPlayer->x = 0;
     if (pPlayer->x + pPlayer->hullRect.w > pPlayer->window_width)
@@ -440,9 +517,9 @@ void drawPlayer(Player *pPlayer)
 {
     SDL_Point canonCenter = {0, pPlayer->canonRect.h / 2};
 
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pHullTx, NULL, &pPlayer->hullRect, 0.0, NULL, pPlayer->tankFlip);
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pCanonTx, NULL, &pPlayer->canonRect, pPlayer->canonAngle*180/3.141f, &canonCenter, SDL_FLIP_NONE);
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTurretTx, NULL, &pPlayer->turretRect, 0.0, NULL, pPlayer->turretFlip);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pHullTx, &pPlayer->hullSrcRect, &pPlayer->hullRect, 0.0, NULL, pPlayer->tankFlip);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pCanonTx, &pPlayer->canonSrcRect, &pPlayer->canonRect, pPlayer->canonAngle*180/3.141f, &canonCenter, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTurretTx, &pPlayer->turretSrcRect, &pPlayer->turretRect, 0.0, NULL, pPlayer->turretFlip);
     
 }
 
@@ -458,6 +535,8 @@ SDL_Rect getPlayerRect(Player *pPlayer)
 
 void setPlayerCord(Player *pPlayer, int x, int y)
 {
+    if (pPlayer->x < x) pPlayer->tankFlip = SDL_FLIP_NONE;
+    else if (pPlayer->x > x) pPlayer->tankFlip = SDL_FLIP_HORIZONTAL;
     pPlayer->x = x;
     pPlayer->y = y;
 }
@@ -493,4 +572,9 @@ void destroyPlayer(Player *pPlayer)
     if (pPlayer->pCanonTx) SDL_DestroyTexture(pPlayer->pCanonTx);
     if (pPlayer->pTurretTx) SDL_DestroyTexture(pPlayer->pTurretTx);
     free(pPlayer);
+}
+
+void takeDamage(Player *pPlayer, int damage)
+{
+    pPlayer->health -= damage;
 }

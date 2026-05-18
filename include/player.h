@@ -8,22 +8,36 @@
 typedef struct player Player;
 
 void updatePlayerRects(Player *pPlayer);
+static void initPlayerDefaults(Player *pPlayer, float x, float y, int windows_width, int window_height);
 Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height);
-float getXCord(Player *pPlayer);
-float getYCord(Player *pPlayer);
+void changePlayerSkin(Player *pPlayer, int skin);
+float getPlayerX(Player *pPlayer);
+float getPlayerY(Player *pPlayer);
 float getCanonX(Player *pPlayer);
 float getCanonY(Player *pPlayer);
 float getAngle(Player *pPlayer);
 int canShoot(Player *pPlayer);
-void enableTrigger(Player *pPlayer, int enable);
+
+float getBulletSpeed(Player *pPlayer);
+int getBulletSize(Player *pPlayer);
+
+void setTriggerState(Player *pPlayer, int enable);
+
 void moveLeft(Player *pPlayer);
 void moveRight(Player *pPlayer);
 void jump(Player *pPlayer);
+
 void setCanonMode(Player *pPlayer, int mode);
 int getCanonMode(Player *pPlayer);
 void deaccelerate(Player *pPlayer);
-void updatePlayer(Player *pPlayer, Map *tiles);
+static void restrictCanonAngle(Player *pPlayer);
+static void flipCanon(Player *pPlayer);
+void steerCanon(Player *pPlayer, int mousePosX, int mousePosY);
+void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY);
 void drawPlayer(Player *pPlayer);
+void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap);
+int getBulletSize(Player *pPlayer);
+float getBulletSpeed(Player *pPlayer);
 SDL_Rect getPlayerHitbox(Player *pPlayer);
 SDL_Rect getPlayerRect(Player *pPlayer);
 void setPlayerCord(Player *pPlayer, int x, int y);
@@ -32,5 +46,9 @@ void stopVelY(Player *pPlayer);
 void stopVelX(Player *pPlayer);
 void touchingWall(Player *pPlayer);
 void destroyPlayer(Player *pPlayer);
+
+void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap);
+
+void takeDamage(Player *pPlayer, int damage);
 
 #endif

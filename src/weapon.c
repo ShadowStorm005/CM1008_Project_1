@@ -7,6 +7,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "physics.h"
+#include "server_creation_functions.h"
 
 #define BULLET_ASPECT 1
 
@@ -19,6 +20,7 @@ typedef struct projectile
     int active;
     float speed;
     float gravity;
+    int damage;
 
     SDL_Texture *pTexture;
     SDL_Renderer *pRenderer;
@@ -57,6 +59,28 @@ Projectile *createProjectile(SDL_Renderer *pRenderer)
     return pProjectile;
 }
 
+Projectile *createServerProjectile(void)
+{
+    Projectile *pProjectile = malloc(sizeof(Projectile));
+    if(!pProjectile) return NULL;
+
+    pProjectile->x = 0.0f;
+    pProjectile->y = 0.0f;
+    pProjectile->velX = 0.0f;
+    pProjectile->velY = 0.0f;
+    pProjectile->angle = 0.0f;
+    pProjectile->active = 0;
+    pProjectile->speed = 10.0f;
+    pProjectile->gravity = 0.15f;
+    pProjectile->pTexture = NULL;
+    pProjectile->pRenderer = NULL;
+    pProjectile->projectile_rect.x = (int)pProjectile->x;
+    pProjectile->projectile_rect.y = (int)pProjectile->y;
+    pProjectile->projectile_rect.w = BULLET_SIZE * BULLET_ASPECT;
+    pProjectile->projectile_rect.h = BULLET_SIZE;
+    return pProjectile;
+}
+
 int isActive(Projectile *pProjectile)
 {
     return pProjectile->active;
@@ -68,7 +92,7 @@ void updateProjectileRect(Projectile *pProjectile)
     pProjectile->projectile_rect.y = (int)(pProjectile->y - pProjectile->projectile_rect.h / 2);
 }
 
-void updateProjectile(Projectile *pProjectile, Map *pMap)
+void updateProjectile(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount)
 {
     pProjectile->velY += pProjectile->gravity;
 
@@ -77,7 +101,7 @@ void updateProjectile(Projectile *pProjectile, Map *pMap)
 
     updateProjectileRect(pProjectile);
 
-    checkForBulletCollision(pProjectile, pMap);
+    checkForBulletCollision(pProjectile, pMap, tileChanges, tileChangeCount);
 
     pProjectile->angle = atan2(pProjectile->velY, pProjectile->velX);
 
@@ -87,6 +111,16 @@ void updateProjectile(Projectile *pProjectile, Map *pMap)
     }
 }
 
+void setProjectileVar(Projectile *pProjectile, int active, float x, float y, float angle)
+{
+    pProjectile->active = active;
+    pProjectile->x = x;
+    pProjectile->y = y;
+    pProjectile->angle = angle;
+    pProjectile->projectile_rect.w = BULLET_SIZE * BULLET_ASPECT;
+    pProjectile->projectile_rect.h = BULLET_SIZE;
+}
+
 void drawProjectile(Projectile *pProjectile)
 {
     if(!pProjectile->active) return;
@@ -94,7 +128,7 @@ void drawProjectile(Projectile *pProjectile)
     SDL_RenderCopyEx(pProjectile->pRenderer, pProjectile->pTexture, NULL /**/, &pProjectile->projectile_rect, pProjectile->angle*180/PI, &center, SDL_FLIP_NONE);
 }
 
-void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, float angle)
+void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, float angle, int canonMode)
 {
     for(int i = 0; i < MAX_BULLETS; i++)
     {
@@ -109,11 +143,22 @@ void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, f
             pProjectile[i]->y = y;
 
             updateProjectileRect(pProjectile[i]);
-
             pProjectile[i]->angle = angle;
             pProjectile[i]->speed = speed;
             pProjectile[i]->velX = pProjectile[i]->speed * cos(pProjectile[i]->angle);
             pProjectile[i]->velY = pProjectile[i]->speed * sin(pProjectile[i]->angle);
+
+            switch (canonMode) {
+                case 1: 
+                    pProjectile[i]->damage = STANDARD_BULLET_DAMAGE;
+                    break;
+                case 2:
+                    pProjectile[i]->damage = LARGE_BULLET_DAMAGE;
+                    break;
+                case 3:
+                    pProjectile[i]->damage = DART_BULLET_DAMAGE;
+                    break;
+            }
 
             break;
         }
@@ -135,4 +180,24 @@ void destroyProjectile(Projectile *pProjectile)
     if(!pProjectile) return;
     if(pProjectile->pTexture) SDL_DestroyTexture(pProjectile->pTexture);
     free(pProjectile);
+}
+
+float getBulletX(Projectile *pProjectile)
+{
+    return pProjectile->x;
+}
+
+float getBulletY(Projectile *pProjectile)
+{
+    return pProjectile->y;
+}
+
+float getBulletAngle(Projectile *pProjectile)
+{
+    return pProjectile->angle;
+}
+
+int getBulletDamage(Projectile *pProjectile)
+{
+    return pProjectile->damage;
 }
