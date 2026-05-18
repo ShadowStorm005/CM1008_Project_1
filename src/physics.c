@@ -146,3 +146,14 @@ void addChangedTile(NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCo
     tileChanges[*tileChangeCount].selectedTexture = newTexture;
     *tileChangeCount += 1;
 }
+
+void checkBulletPlayerCollision(Projectile *pProjectile, Player *pPlayer)
+{
+    SDL_Rect bulletRect = getBulletRect(pProjectile);
+    SDL_Rect playerRect = getPlayerRect(pPlayer);
+    if (SDL_HasIntersection(&bulletRect, &playerRect)){
+        takeDamage(pPlayer, getBulletDamage(pProjectile));
+        inactivateBullet(pProjectile);
+        printf("Player took damage\n");
+    }
+}

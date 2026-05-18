@@ -62,6 +62,7 @@ typedef struct {
     float y;
     int32_t mouseX;
     int32_t mouseY;
+    uint8_t health;
 } NetPlayer;
 
 typedef struct {
