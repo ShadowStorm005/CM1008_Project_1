@@ -13,6 +13,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 void changePlayerSkin(Player *pPlayer, int skin);
 float getPlayerX(Player *pPlayer);
 float getPlayerY(Player *pPlayer);
+int getPlayerHealth(Player *pPlayer);
 float getCanonX(Player *pPlayer);
 float getCanonY(Player *pPlayer);
 float getAngle(Player *pPlayer);

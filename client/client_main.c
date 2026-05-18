@@ -183,6 +183,10 @@ int main(int argc, char **argv)
             recieveStatus(&game, &serverPacket, &clientPacket);
             render(&game);
         }
+        else if (game.clientState == CLIENT_DEAD_STATE) {
+            recieveStatus(&game, &serverPacket, &clientPacket);
+            render(&game);
+        }
         else if (game.clientState == CLIENT_QUIT_STATE) {
             running = 0;
         }
@@ -376,7 +380,15 @@ static void sendJoin(ClientGame *game)
     game->sendPacket->len = sizeof(joinPacket);
     game->sendPacket->address = game->serverAddress;
 
-    SDLNet_UDP_Send(game->socket, -1, game->sendPacket);
+    // SDLNet_UDP_Send(game->socket, -1, game->sendPacket);
+
+    int sent = SDLNet_UDP_Send(game->socket, -1, game->sendPacket);
+
+    if (!sent) {
+        printf("Failed to send join packet: %s\n", SDLNet_GetError());
+    } else {
+        printf("Join packet sent to server\n");
+    }
 }
 
 static uint8_t getInput(const Uint8 *keys)
@@ -466,7 +478,8 @@ static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPa
                 game->clientState = CLIENT_DEAD_STATE;
                 break;
             case CLIENT_DEAD_STATE:
-                game->clientState = CLIENT_QUIT_STATE;
+                updateGameVar(game, serverPacket, clientPacket);
+                game->clientState = CLIENT_DEAD_STATE;
                 break;
             case CLIENT_QUIT_STATE:
                 printf("Ignoring invalid clientState from server: %d\n",
