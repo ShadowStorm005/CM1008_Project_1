@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include <SDL_net.h>
-
+#include "sound.h"
 #include "player.h"
 #include "weapon.h"
 #include "map.h"
@@ -26,6 +26,7 @@ struct servergame{
     ServerClient clients[MAX_PLAYERS];
     Map *map;
     Projectile *projectiles[MAX_BULLETS];
+    Sounds *sounds;
 };
 
 int main(int argc, char **argv)
@@ -171,7 +172,7 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) updateProjectile(game->projectiles[i], game->map, serverPacket->tileChanges, &serverPacket->tileChangeCount);
+        if (isActive(game->projectiles[i])) updateProjectile(game->projectiles[i], game->map, game->sounds, serverPacket->tileChanges, &serverPacket->tileChangeCount);
     }
 }
 

@@ -4,10 +4,10 @@ OBJDIR  = OBJ_FILES
 
 INCLUDE  = -IC:/msys64/mingw64/include/SDL2 -I$(INCDIR)
 CFLAGS   = -g $(INCLUDE) -c
-LDFLAGS  = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_net -mwindows -mconsole -lm
+LDFLAGS  = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_net -lSDL2_mixer -mwindows -mconsole -lm
 
-SERVER_OBJ = $(OBJDIR)/server_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
-CLIENT_OBJ = $(OBJDIR)/client_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
+SERVER_OBJ = $(OBJDIR)/server_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o $(OBJDIR)/sound.o
+CLIENT_OBJ = $(OBJDIR)/client_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o $(OBJDIR)/sound.o
 
 all: server.exe client.exe
 

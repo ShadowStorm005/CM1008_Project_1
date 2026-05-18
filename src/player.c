@@ -35,9 +35,6 @@ struct player {
 
     SDL_Renderer *pRenderer;
 
-    SDL_Texture *pCanonTx;
-    SDL_Renderer *pCanonRn;
-
     SDL_Rect hullRect;
     SDL_Rect hitbox;
     SDL_Rect canonRect;
@@ -213,16 +210,6 @@ int getCanonMode(Player *pPlayer)
     return pPlayer->canonMode;
 }
 
-void setCanonMode(Player *pPlayer, int mode)
-{
-    pPlayer->canonMode = mode;
-}
-
-int getCanonMode(Player *pPlayer)
-{
-    return pPlayer->canonMode;
-}
-
 float getPlayerX(Player *pPlayer)
 {
     return pPlayer->x;
@@ -230,67 +217,7 @@ float getPlayerX(Player *pPlayer)
 
 float getPlayerY(Player *pPlayer)
 {
-    return pPlayer->canonRect.y;
-}
-
-float getCanonX(Player *pPlayer)
-{
-    return pPlayer->canonRect.x + (pPlayer->canonRect.w-5)*cos(pPlayer->canonAngle);
-}
-
-float getCanonY(Player *pPlayer)
-{
-    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2 + (pPlayer->canonRect.w-5)*sin(pPlayer->canonAngle);
-}
-
-float getAngle(Player *pPlayer)
-{
-    return pPlayer->canonAngle;
-}
-
-float getCanonX(Player *pPlayer)
-{
-    return pPlayer->canonRect.x + (pPlayer->canonRect.w-5)*cos(pPlayer->canonAngle);
-}
-
-float getCanonY(Player *pPlayer)
-{
-    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2 + (pPlayer->canonRect.w-5)*sin(pPlayer->canonAngle);
-}
-
-float getAngle(Player *pPlayer)
-{
-    return pPlayer->canonAngle;
-}
-
-float getCanonX(Player *pPlayer)
-{
-    return pPlayer->canonRect.x + (pPlayer->canonRect.w-5)*cos(pPlayer->canonAngle);
-}
-
-float getCanonY(Player *pPlayer)
-{
-    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2 + (pPlayer->canonRect.w-5)*sin(pPlayer->canonAngle);
-}
-
-float getAngle(Player *pPlayer)
-{
-    return pPlayer->canonAngle;
-}
-
-float getCanonX(Player *pPlayer)
-{
-    return pPlayer->canonRect.x + (pPlayer->canonRect.w-5)*cos(pPlayer->canonAngle);
-}
-
-float getCanonY(Player *pPlayer)
-{
-    return pPlayer->canonRect.y + (pPlayer->canonRect.h)/2 + (pPlayer->canonRect.w-5)*sin(pPlayer->canonAngle);
-}
-
-float getAngle(Player *pPlayer)
-{
-    return pPlayer->canonAngle;
+    return pPlayer->y;
 }
 
 float getCanonX(Player *pPlayer)
@@ -317,100 +244,6 @@ void deaccelerate(Player *pPlayer)
 int canShoot(Player *pPlayer)
 {
     return pPlayer->canFire;
-}
-
-float getBulletSpeed(Player *pPlayer)
-{
-    switch(pPlayer->canonMode)
-    {
-    case 1:
-        return 10.0f;
-        break;
-    case 2:
-        return 16.0f;
-        break;
-    default:
-        return 10.0f;
-        break;
-    }
-}
-
-int getBulletSize(Player *pPlayer)
-{
-    switch(pPlayer->canonMode)
-    {
-    case 1:
-        return 30;
-        break;
-    case 2:
-        return 15;
-        break;
-    default:
-        return 30;
-        break;
-    }
-}
-
-void drawCircle(SDL_Renderer * renderer, int centerX, int centerY, float rad, int opacity)
-{
-    int outline = 70;
-    int fill = 255;
-    for(int x = -rad; x <= rad; x++)
-    {
-        for(int y = -rad; y <= rad; y++)
-        {
-            float dist = x*x + y*y;
-            float rad2 = rad * rad;
-            if(fabsf(dist - rad2) < rad) 
-            {
-                SDL_SetRenderDrawColor(renderer, outline, outline, outline, opacity);
-                SDL_RenderDrawPoint(renderer, centerX + x, centerY + y);
-            }
-            else if(dist <= rad2) 
-            {
-                SDL_SetRenderDrawColor(renderer, fill, fill, fill, opacity);
-                SDL_RenderDrawPoint(renderer, centerX + x, centerY + y);
-            }
-        }
-    }
-}
-
-void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap)
-{
-    if(pPlayer->velX || pPlayer->velX) return;
-    
-    float x = getCanonX(pPlayer);
-    float y = getCanonY(pPlayer);
-
-    float vx = initialSpeed * cos(pPlayer->canonAngle);
-    float vy = initialSpeed * sin(pPlayer->canonAngle);
-    float dt = 0.1f;
-    float rad = 3.0f;
-
-    for(int i = 0; i < 255; i++)
-    {
-        float prevX = x;
-        float prevY = y;
-
-        vy += PROJECTILE_GRAVITY * dt;
-        x += vx * dt;
-        y += vy * dt;
-        int x1 = (int)prevX, x2 = (int)x, y1 = (int)prevY, y2 = (int)y;
-        SDL_SetRenderDrawBlendMode(pPlayer->pRenderer, SDL_BLENDMODE_BLEND);
-        if((i+1)%20 == 0) 
-            {
-                for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++)
-                {
-                    for (int j = 0; j < AMOUNT_OF_TILES_VERTICAL; j++)
-                    {
-                        SDL_Rect tileRect = getTileRect(pMap, i, j);
-                        if (isTileActive(pMap, i, j))
-                            if(SDL_IntersectRectAndLine(&tileRect, &x1, &y1, &x2, &y2)) return;
-                    }
-                }
-                drawCircle(pPlayer->pRenderer, (int)x, (int)y, rad, 255-i);
-            }
-    }
 }
 
 float getBulletSpeed(Player *pPlayer)
@@ -556,7 +389,7 @@ static void flipCanon(Player *pPlayer)
     }
 }
 
-void updatePlayer(Player *pPlayer, Map *pMap)
+void steerCanon(Player *pPlayer, int mousePosX, int mousePosY)
 {
     float diffAngle;
     float dx = mousePosX - pPlayer->x - (pPlayer->hullRect.w)/2;
@@ -583,34 +416,6 @@ void updatePlayer(Player *pPlayer, Map *pMap)
 
 void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
 {
-    float diffAngle;
-    float dx = mousePosX - pPlayer->x - (pPlayer->hullRect.w)/2;
-    float dy = mousePosY - pPlayer->y + (pPlayer->hullRect.h)/2;
-
-    pPlayer->targetAngle = atan2(dy, dx);
-
-    flipCanon(pPlayer);
-
-    if(pPlayer->turretFlip == SDL_FLIP_HORIZONTAL)
-    {
-        if(pPlayer->targetAngle < 0) pPlayer->targetAngle += 2*PI;
-    }
-    diffAngle = pPlayer->targetAngle - pPlayer->canonAngle;
-
-    if(fabs(diffAngle) > 0.05f)
-    {
-        if(diffAngle > 0) pPlayer->canonAngle += 0.05f;
-        else pPlayer->canonAngle += -0.05f;
-    }
-    else pPlayer->canonAngle = pPlayer->targetAngle;
-    restrictCanonAngle(pPlayer);
-}
-
-void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
-{
-    int mousePosx, mousePosy;
-    float diffAngle;
-    Uint32 buttons = SDL_GetMouseState(&mousePosx, &mousePosy);
     SDL_Rect previousHitbox = pPlayer->hitbox;
 
     deaccelerate(pPlayer);
