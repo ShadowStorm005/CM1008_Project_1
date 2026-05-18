@@ -50,5 +50,6 @@ clean:
 	del $(OBJDIR)\physics.o
 	del $(OBJDIR)\player.o
 	del $(OBJDIR)\weapon.o
+	del $(OBJDIR)\sound.o
 	del server.exe
 	del client.exe
