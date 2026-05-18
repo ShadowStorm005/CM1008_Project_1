@@ -71,6 +71,7 @@ typedef struct {
     int32_t mouseX;
     int32_t mouseY;
     uint8_t tankSkin;
+    uint8_t health;
 } NetPlayer;
 
 typedef struct {

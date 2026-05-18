@@ -6,6 +6,7 @@
 #include "player.h"
 #include "weapon.h"
 #include "map.h"
+#include "physics.h"
 #include "server_net.h"
 #include "game_net.h"
 #include "server_creation_functions.h"
@@ -183,7 +184,7 @@ static void handleInput(ServerGame *game, ServerClient *client)
     
     steerCanon(client->player, client->mouseX, client->mouseY);
     if ((client->input & INPUT_SHOOT) && canShoot(client->player)) {
-        shoot(game->projectiles, getBulletSize(client->player), getBulletSpeed(client->player), getCanonX(client->player), getCanonY(client->player), getAngle(client->player));
+        shoot(game->projectiles, getBulletSize(client->player), getBulletSpeed(client->player), getCanonX(client->player), getCanonY(client->player), getAngle(client->player), getCanonMode(client->player));
         setTriggerState(client->player, 0);
     }
     else if (!(client->input & INPUT_SHOOT) && !canShoot(client->player)){
@@ -206,6 +207,15 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
                             game->map, 
                             serverPacket->tileChanges, 
                             &serverPacket->tileChangeCount);
+    }
+
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        ServerClient *client = &game->clients[i];
+        if (!client->connected || !client->player) continue;
+        for (int j = 0; j < MAX_BULLETS; j++) {
+            if (!isActive(game->projectiles[i])) continue;
+            checkBulletPlayerCollision(game->projectiles[j], client->player);
+        }
     }
 }
 

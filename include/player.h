@@ -17,12 +17,16 @@ float getCanonX(Player *pPlayer);
 float getCanonY(Player *pPlayer);
 float getAngle(Player *pPlayer);
 int canShoot(Player *pPlayer);
+
 float getBulletSpeed(Player *pPlayer);
 int getBulletSize(Player *pPlayer);
+
 void setTriggerState(Player *pPlayer, int enable);
+
 void moveLeft(Player *pPlayer);
 void moveRight(Player *pPlayer);
 void jump(Player *pPlayer);
+
 void setCanonMode(Player *pPlayer, int mode);
 int getCanonMode(Player *pPlayer);
 void deaccelerate(Player *pPlayer);
@@ -44,5 +48,7 @@ void touchingWall(Player *pPlayer);
 void destroyPlayer(Player *pPlayer);
 
 void drawTrajectory(Player *pPlayer, float initialSpeed, Map *pMap);
+
+void takeDamage(Player *pPlayer, int damage);
 
 #endif

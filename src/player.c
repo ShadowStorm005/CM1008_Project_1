@@ -573,3 +573,8 @@ void destroyPlayer(Player *pPlayer)
     if (pPlayer->pTurretTx) SDL_DestroyTexture(pPlayer->pTurretTx);
     free(pPlayer);
 }
+
+void takeDamage(Player *pPlayer, int damage)
+{
+    pPlayer->health -= damage;
+}
