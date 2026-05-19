@@ -163,19 +163,6 @@ static int connectedClientCount(ServerGame *game)
     return count;
 }
 
-static int connectedClientCount(ServerGame *game)
-{
-    int count = 0;
-
-    for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (game->clients[i].connected) {
-            count++;
-        }
-    }
-
-    return count;
-}
-
 static void handleInput(ServerGame *game, ServerClient *client)
 {
     if (client->input & INPUT_LEFT) moveLeft(client->player);
