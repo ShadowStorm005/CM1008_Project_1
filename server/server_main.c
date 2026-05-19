@@ -129,6 +129,7 @@ static int addClient(ServerGame *game, IPaddress *address)
 static void receivePacket(ServerGame *game)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
+        printf("Server received a packet\n");
         ClientPacket clientPacket;
         memcpy(&clientPacket, game->recvPacket->data, sizeof(clientPacket));
 
@@ -165,6 +166,10 @@ static int connectedClientCount(ServerGame *game)
 
 static void handleInput(ServerGame *game, ServerClient *client)
 {
+    if (getPlayerHealth(client->player) <= 0) {
+        client->input = INPUT_NONE;
+        return;
+    }
     if (client->input & INPUT_LEFT) moveLeft(client->player);
     if (client->input & INPUT_RIGHT) moveRight(client->player);
     if (client->input & INPUT_JUMP) jump(client->player);
@@ -185,7 +190,10 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
         ServerClient *client = &game->clients[i];
         if (!client->connected || !client->player) continue;
         handleInput(game, client);
-        updatePlayer(client->player, game->map, client->mouseX, client->mouseY);
+        if (getPlayerHealth(client->player) > 0) {
+            updatePlayer(client->player, game->map, client->mouseX, client->mouseY);
+        }
+        
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
@@ -218,7 +226,13 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
     }
     else {
         serverPacket->serverState = SERVER_RUN_STATE;
-        serverPacket->clientState = CLIENT_PLAYING_STATE;
+        
+        if (getPlayerHealth(game->clients[clientId].player) <= 0) {
+        serverPacket->clientState = CLIENT_DEAD_STATE;
+        }
+        else {
+            serverPacket->clientState = CLIENT_PLAYING_STATE;
+        }
     }
 
     for (int i = 0; i < MAX_PLAYERS; i++) {

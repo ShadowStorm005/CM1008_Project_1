@@ -281,6 +281,11 @@ float getPlayerY(Player *pPlayer)
     return pPlayer->y;
 }
 
+int getPlayerHealth(Player *pPlayer)
+{
+    return pPlayer->health;
+}
+
 float getCanonX(Player *pPlayer)
 {
     return pPlayer->canonRect.x + (pPlayer->canonRect.w-5)*cos(pPlayer->canonAngle);
