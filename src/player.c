@@ -32,6 +32,7 @@ struct player {
 
     int smokeTimerEnd;
     int serverTime;
+    int smokeTimer;
 
     SDL_Texture *pHullTx;
     SDL_Texture *pCanonTx;
@@ -43,6 +44,7 @@ struct player {
     SDL_Rect hitbox;
 
     SDL_Rect barrelSmokeRect;
+    SDL_Rect barrelSmokeSrcRect;
 
     SDL_Rect hullRect;
     SDL_Rect hullSrcRect;
@@ -115,6 +117,15 @@ void updatePlayerRects(Player *pPlayer)
 
     if(pPlayer->serverTime < pPlayer->smokeTimerEnd)
     {
+        int timeLeft = pPlayer->smokeTimerEnd - pPlayer->serverTime;
+
+        if(timeLeft > pPlayer->smokeTimer * 0.9f) pPlayer->barrelSmokeSrcRect.y = 0;
+        else if(timeLeft > pPlayer->smokeTimer * 0.75f) pPlayer->barrelSmokeSrcRect.y = 64;
+        else if(timeLeft > pPlayer->smokeTimer * 0.55f) pPlayer->barrelSmokeSrcRect.y = 64*2;
+        else if(timeLeft > pPlayer->smokeTimer * 0.35f) pPlayer->barrelSmokeSrcRect.y = 64*3;
+        else if(timeLeft > pPlayer->smokeTimer * 0.15f) pPlayer->barrelSmokeSrcRect.y = 64*4;
+        else if(timeLeft > 0) pPlayer->barrelSmokeSrcRect.y = 64*5;
+
         pPlayer->barrelSmokeRect.w = 220;
         pPlayer->barrelSmokeRect.h = 64;
     }
@@ -146,9 +157,16 @@ static void initPlayerDefaults(Player *pPlayer, float x, float y, int window_wid
     pPlayer->isGrounded = 0;
     pPlayer->isTouchingWall = 0;
     pPlayer->canonMode = 1;
+    pPlayer->smokeTimer = 600;
 
     pPlayer->barrelSmokeRect.w = 220;
     pPlayer->barrelSmokeRect.h = 64;
+
+    pPlayer->barrelSmokeSrcRect.x = 0;
+    pPlayer->barrelSmokeSrcRect.y = 0;
+
+    pPlayer->barrelSmokeSrcRect.w = 220;
+    pPlayer->barrelSmokeSrcRect.h = 64;
 
     pPlayer->hullRect.w = 77;
     pPlayer->hullRect.h = 26;
@@ -219,7 +237,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     pPlayer->pCanonTx = SDL_CreateTextureFromSurface(pRenderer, pSurface);
 
-    pSurface = IMG_Load("Resources/Sprite-barrelSmokePart.png");
+    pSurface = IMG_Load("Resources/Sprite-barrelSmoke.png");
     if (!pSurface)
     {
         printf("Error loading Sprite-barrelSmoke.png: %s\n", IMG_GetError());
@@ -461,7 +479,7 @@ void receiveServerTime(Player *pPlayer, int serverTime)
 
 void setSmokeTimer(Player *pPlayer, int startTime)
 {
-    pPlayer->smokeTimerEnd = startTime + 600;
+    pPlayer->smokeTimerEnd = startTime + pPlayer->smokeTimer;
 }
 
 static void restrictCanonAngle(Player *pPlayer)
@@ -573,7 +591,7 @@ void drawPlayer(Player *pPlayer)
     SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pHullTx, &pPlayer->hullSrcRect, &pPlayer->hullRect, 0.0, NULL, pPlayer->tankFlip);
     SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pCanonTx, &pPlayer->canonSrcRect, &pPlayer->canonRect, pPlayer->canonAngle*180/3.141f, &canonCenter, SDL_FLIP_NONE);
     SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTurretTx, &pPlayer->turretSrcRect, &pPlayer->turretRect, 0.0, NULL, pPlayer->turretFlip);
-    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pBarrelSmoke, NULL, &pPlayer->barrelSmokeRect, pPlayer->canonAngle*180/3.141f, &smokeCenter, pPlayer->smokeFlip); 
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pBarrelSmoke, &pPlayer->barrelSmokeSrcRect, &pPlayer->barrelSmokeRect, pPlayer->canonAngle*180/3.141f, &smokeCenter, pPlayer->smokeFlip); 
 }
 
 SDL_Rect getPlayerHitbox(Player *pPlayer)
