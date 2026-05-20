@@ -30,13 +30,19 @@ struct player {
     float canonAngle;
     float targetAngle;
 
+    int smokeTimerEnd;
+    int serverTime;
+
     SDL_Texture *pHullTx;
     SDL_Texture *pCanonTx;
     SDL_Texture *pTurretTx;
+    SDL_Texture *pBarrelSmoke;
 
     SDL_Renderer *pRenderer;
 
     SDL_Rect hitbox;
+
+    SDL_Rect barrelSmokeRect;
 
     SDL_Rect hullRect;
     SDL_Rect hullSrcRect;
@@ -49,6 +55,7 @@ struct player {
 
     SDL_RendererFlip tankFlip;
     SDL_RendererFlip turretFlip;
+    SDL_RendererFlip smokeFlip;
 };
 
 void updatePlayerSkin(Player *pPlayer)
@@ -91,14 +98,30 @@ void updatePlayerRects(Player *pPlayer)
     if(pPlayer->turretFlip == SDL_FLIP_NONE)
     {
         pPlayer->turretRect.x = (int)pPlayer->x + (pPlayer->hullRect.w)/10;
-
         pPlayer->canonRect.x = (int)pPlayer->x + 2*(pPlayer->hullRect.w)/3;
+
+        pPlayer->smokeFlip = SDL_FLIP_NONE;
     }
     else
     {
         pPlayer->turretRect.x = (int)pPlayer->x + (pPlayer->hullRect.w)/3.7f;
-
         pPlayer->canonRect.x = (int)pPlayer->x + (pPlayer->hullRect.w)/3;
+
+        pPlayer->smokeFlip = SDL_FLIP_VERTICAL;
+    }
+
+    pPlayer->barrelSmokeRect.x = getCanonX(pPlayer);
+    pPlayer->barrelSmokeRect.y = getCanonY(pPlayer) - pPlayer->barrelSmokeRect.h / 2;
+
+    if(pPlayer->serverTime < pPlayer->smokeTimerEnd)
+    {
+        pPlayer->barrelSmokeRect.w = 220;
+        pPlayer->barrelSmokeRect.h = 64;
+    }
+    else
+    {
+        pPlayer->barrelSmokeRect.w = 0;
+        pPlayer->barrelSmokeRect.h = 0;
     }
 
     pPlayer->hitbox.x = pPlayer->hullRect.x;
@@ -124,8 +147,11 @@ static void initPlayerDefaults(Player *pPlayer, float x, float y, int window_wid
     pPlayer->isTouchingWall = 0;
     pPlayer->canonMode = 1;
 
-    pPlayer->hullRect.w = 77*1.2f;
-    pPlayer->hullRect.h = 26*1.2f;
+    pPlayer->barrelSmokeRect.w = 220;
+    pPlayer->barrelSmokeRect.h = 64;
+
+    pPlayer->hullRect.w = 77;
+    pPlayer->hullRect.h = 26;
 
     pPlayer->hullSrcRect.x = 0;
     pPlayer->hullSrcRect.y = 0; //26
@@ -133,8 +159,8 @@ static void initPlayerDefaults(Player *pPlayer, float x, float y, int window_wid
     pPlayer->hullSrcRect.w = 77;
     pPlayer->hullSrcRect.h = 26;
 
-    pPlayer->turretRect.w = 49*1.2f;
-    pPlayer->turretRect.h = 40*1.2f; 
+    pPlayer->turretRect.w = 49;
+    pPlayer->turretRect.h = 40; 
 
     pPlayer->turretSrcRect.x = 0;
     pPlayer->turretSrcRect.y = 0; // 40 
@@ -142,8 +168,8 @@ static void initPlayerDefaults(Player *pPlayer, float x, float y, int window_wid
     pPlayer->turretSrcRect.w = 49;
     pPlayer->turretSrcRect.h = 40; 
 
-    pPlayer->canonRect.w = 54*1.2f;
-    pPlayer->canonRect.h = 15*1.2f;
+    pPlayer->canonRect.w = 54;
+    pPlayer->canonRect.h = 15;
 
     pPlayer->canonSrcRect.x = 0;
     pPlayer->canonSrcRect.y = 0;
@@ -192,6 +218,15 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     }
 
     pPlayer->pCanonTx = SDL_CreateTextureFromSurface(pRenderer, pSurface);
+
+    pSurface = IMG_Load("Resources/Sprite-barrelSmokePart.png");
+    if (!pSurface)
+    {
+        printf("Error loading Sprite-barrelSmoke.png: %s\n", IMG_GetError());
+        free(pPlayer);
+        return NULL;
+    }
+    pPlayer->pBarrelSmoke = SDL_CreateTextureFromSurface(pRenderer, pSurface);
     free(pSurface);
 
     if (!pPlayer->pHullTx) 
@@ -218,6 +253,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
     SDL_QueryTexture(pPlayer->pHullTx, NULL, NULL, &pPlayer->hullRect.w, &pPlayer->hullRect.h);
     SDL_QueryTexture(pPlayer->pTurretTx, NULL, NULL, &pPlayer->turretRect.w, &pPlayer->turretRect.h);
     SDL_QueryTexture(pPlayer->pCanonTx, NULL, NULL, &pPlayer->canonRect.w, &pPlayer->canonRect.h);
+    SDL_QueryTexture(pPlayer->pBarrelSmoke, NULL, NULL, &pPlayer->barrelSmokeRect.w, &pPlayer->barrelSmokeRect.h);
 
     initPlayerDefaults(pPlayer, x, y, window_width, window_height);
 
@@ -418,6 +454,16 @@ void setTriggerState(Player *pPlayer, int enable)
     }
 }
 
+void receiveServerTime(Player *pPlayer, int serverTime)
+{
+    pPlayer->serverTime = serverTime;
+}
+
+void setSmokeTimer(Player *pPlayer, int startTime)
+{
+    pPlayer->smokeTimerEnd = startTime + 600;
+}
+
 static void restrictCanonAngle(Player *pPlayer)
 {
     if(pPlayer->turretFlip == SDL_FLIP_NONE)
@@ -520,12 +566,14 @@ void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
 
 void drawPlayer(Player *pPlayer)
 {
-    SDL_Point canonCenter = {0, pPlayer->canonRect.h / 2};
+    SDL_Point canonCenter = {0, pPlayer->canonRect.h/2};
+    SDL_Point smokeCenter = {0, pPlayer->barrelSmokeRect.h/2};
+
 
     SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pHullTx, &pPlayer->hullSrcRect, &pPlayer->hullRect, 0.0, NULL, pPlayer->tankFlip);
     SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pCanonTx, &pPlayer->canonSrcRect, &pPlayer->canonRect, pPlayer->canonAngle*180/3.141f, &canonCenter, SDL_FLIP_NONE);
     SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pTurretTx, &pPlayer->turretSrcRect, &pPlayer->turretRect, 0.0, NULL, pPlayer->turretFlip);
-    
+    SDL_RenderCopyEx(pPlayer->pRenderer, pPlayer->pBarrelSmoke, NULL, &pPlayer->barrelSmokeRect, pPlayer->canonAngle*180/3.141f, &smokeCenter, pPlayer->smokeFlip); 
 }
 
 SDL_Rect getPlayerHitbox(Player *pPlayer)
@@ -576,6 +624,7 @@ void destroyPlayer(Player *pPlayer)
     if (pPlayer->pHullTx) SDL_DestroyTexture(pPlayer->pHullTx);
     if (pPlayer->pCanonTx) SDL_DestroyTexture(pPlayer->pCanonTx);
     if (pPlayer->pTurretTx) SDL_DestroyTexture(pPlayer->pTurretTx);
+    if (pPlayer->pBarrelSmoke) SDL_DestroyTexture(pPlayer->pBarrelSmoke);
     free(pPlayer);
 }
 

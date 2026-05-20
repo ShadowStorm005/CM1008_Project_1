@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define SERVER_PORT 1234
-#define DEFAULT_SERVER_IP "192.168.1.73"
+#define DEFAULT_SERVER_IP "10.22.15.226"
 
 #define MAX_PLAYERS 2
 #define MAX_TILE_CHANGES 128
@@ -70,6 +70,8 @@ typedef struct {
     float y;
     int32_t mouseX;
     int32_t mouseY;
+    uint32_t smokeTimer;
+    uint32_t serverTime;
     uint8_t tankSkin;
     uint8_t health;
 } NetPlayer;

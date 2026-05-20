@@ -15,6 +15,7 @@ struct serverclient {
     bool connected;
     IPaddress ipaddress;
     Player *player;
+    uint32_t smokeTimer;
     uint8_t input;
     uint8_t tankSkin;
     int mouseX;
@@ -119,7 +120,7 @@ static int addClient(ServerGame *game, IPaddress *address)
             float spawnX = WINDOW_WIDTH / 2.0f + (float)(i * 80);
             float spawnY = WINDOW_HEIGHT / 2.0f;
             game->clients[i].player = createServerPlayer(spawnX, spawnY, WINDOW_WIDTH, WINDOW_HEIGHT);
-            printf("Client %d joined, ipaddress: %d\n", i, game->clients[i].ipaddress);
+            printf("Client %d joined, ipaddress: %d\n", i, game->clients[i].ipaddress.host);
             return i;
         }
     }
@@ -129,7 +130,7 @@ static int addClient(ServerGame *game, IPaddress *address)
 static void receivePacket(ServerGame *game)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
-        printf("Server received a packet\n");
+        //printf("Server received a packet\n");
         ClientPacket clientPacket;
         memcpy(&clientPacket, game->recvPacket->data, sizeof(clientPacket));
 
@@ -173,9 +174,9 @@ static void handleInput(ServerGame *game, ServerClient *client)
     if (client->input & INPUT_LEFT) moveLeft(client->player);
     if (client->input & INPUT_RIGHT) moveRight(client->player);
     if (client->input & INPUT_JUMP) jump(client->player);
-    
     steerCanon(client->player, client->mouseX, client->mouseY);
     if ((client->input & INPUT_SHOOT) && canShoot(client->player)) {
+        client->smokeTimer = SDL_GetTicks();
         shoot(game->projectiles, getBulletSize(client->player), getBulletSpeed(client->player), getCanonX(client->player), getCanonY(client->player), getAngle(client->player), getCanonMode(client->player));
         setTriggerState(client->player, 0);
     }
@@ -246,6 +247,8 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
         serverPacket->players[i].mouseX = game->clients[i].mouseX;
         serverPacket->players[i].mouseY = game->clients[i].mouseY;
         serverPacket->players[i].tankSkin = game->clients[i].tankSkin;
+        serverPacket->players[i].smokeTimer = game->clients[i].smokeTimer;
+        serverPacket->players[i].serverTime = SDL_GetTicks();
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {

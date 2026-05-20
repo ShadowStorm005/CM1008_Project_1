@@ -23,9 +23,9 @@ typedef struct projectile
     int damage;
 
     SDL_Texture *pTexture;
-    SDL_Renderer *pRenderer;
-
     SDL_Rect projectile_rect;
+
+    SDL_Renderer *pRenderer;
 } Projectile;
 
 Projectile *createProjectile(SDL_Renderer *pRenderer)

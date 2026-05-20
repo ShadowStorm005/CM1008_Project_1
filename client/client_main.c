@@ -491,6 +491,8 @@ static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPa
         for(int i = 0; i < MAX_PLAYERS; i++)
         {
             changePlayerSkin(game->players[i], serverPacket->players[i].tankSkin);
+            setSmokeTimer(game->players[i], serverPacket->players[i].smokeTimer);
+            receiveServerTime(game->players[i], serverPacket->players[i].serverTime);
         }
     }
 }
