@@ -28,6 +28,7 @@ struct servergame{
     ServerClient clients[MAX_PLAYERS];
     Map *map;
     Projectile *projectiles[MAX_BULLETS];
+    ServerState serverState;
 };
 
 int main(int argc, char **argv)
@@ -44,22 +45,34 @@ int main(int argc, char **argv)
         Uint32 frameStart = SDL_GetTicks();
         memset(&serverPacket, 0, sizeof(serverPacket));
         receivePacket(&game);
-        if(connectedClientCount(&game) >=4){
-            updateWorld(&game, &serverPacket);
-        }
-        sendStatus(&game, &serverPacket);
 
-        Uint32 frameTime = SDL_GetTicks() - frameStart;
-        if (frameTime < FRAME_DELAY) SDL_Delay(FRAME_DELAY - frameTime);
+    if (game.serverState == SERVER_MENU_STATE && connectedClientCount(&game) >= 4) {
+        game.serverState = SERVER_RUN_STATE;
     }
 
-    closeServer(&game);
-    return 0;
+    if (game.serverState == SERVER_RUN_STATE) {
+        updateWorld(&game, &serverPacket);
+
+        if (aliveClientCount(&game) <= 1 && connectedClientCount(&game) >= 2) {
+            game.serverState = SERVER_END_STATE;
+        }
+    }
+
+    sendStatus(&game, &serverPacket);
+
+            Uint32 frameTime = SDL_GetTicks() - frameStart;
+            if (frameTime < FRAME_DELAY) SDL_Delay(FRAME_DELAY - frameTime);
+        }
+
+        closeServer(&game);
+        return 0;
 }
 
 static int initServer(ServerGame *game)
 {
     memset(game, 0, sizeof(*game));
+
+    game->serverState = SERVER_MENU_STATE;
 
     if (SDL_Init(SDL_INIT_TIMER) != 0) {
         printf("SDL_Init failed: %s\n", SDL_GetError());
@@ -149,6 +162,25 @@ static void receivePacket(ServerGame *game)
         memcpy(&clientPacket, game->recvPacket->data, sizeof(clientPacket));
 
         int id = findClientId(game, &game->recvPacket->address);
+
+        if (clientPacket.packetType == CLIENT_DISCONNECT_PACKET) {
+            if (id >= 0) {
+                game->clients[id].connected = false;
+                game->clients[id].input = INPUT_NONE;
+
+                if (game->clients[id].player) {
+                    destroyPlayer(game->clients[id].player);
+                    game->clients[id].player = NULL;
+                }
+            }
+            continue;
+        }
+        if (clientPacket.packetType == CLIENT_REPLAY_PACKET) {
+            if (game->serverState == SERVER_END_STATE) {
+                resetRound(game);
+            }
+            continue;
+        }
         if (clientPacket.packetType == CLIENT_JOIN_PACKET) {
             if (id < 0) {
                 addClient(game, &game->recvPacket->address);
@@ -158,6 +190,8 @@ static void receivePacket(ServerGame *game)
 
         if (id < 0) id = addClient(game, &game->recvPacket->address);
         if (id < 0) continue;
+
+        if (game->serverState != SERVER_RUN_STATE) continue;
 
         game->clients[id].input = clientPacket.input;
         game->clients[id].mouseX = clientPacket.mouseX;
@@ -179,6 +213,80 @@ static int connectedClientCount(ServerGame *game)
     return count;
 }
 
+static int aliveClientCount(ServerGame *game)
+{
+    int count = 0;
+
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        if (game->clients[i].connected &&
+            game->clients[i].player &&
+            getPlayerHealth(game->clients[i].player) > 0) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+
+static void resetRound(ServerGame *game)
+{
+    float spawnX[4] = {
+        180.0f,
+        1010.0f,
+        180.0f,
+        1010.0f
+    };
+
+    float spawnY[4] = {
+        735.0f,
+        360.0f,
+        210.0f,
+        770.0f
+    };
+
+    if (game->map) {
+        destroyTiles(game->map);
+    }
+
+    game->map = createServerMap(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (game->projectiles[i]) {
+            inactivateBullet(game->projectiles[i]);
+        }
+    }
+
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        if (!game->clients[i].connected) {
+            continue;
+        }
+
+        if (game->clients[i].player) {
+            destroyPlayer(game->clients[i].player);
+        }
+
+        game->clients[i].player = createServerPlayer(spawnX[i], spawnY[i], WINDOW_WIDTH, WINDOW_HEIGHT);
+        game->clients[i].input = INPUT_NONE;
+        game->clients[i].mouseX = 0;
+        game->clients[i].mouseY = 0;
+    }
+
+    game->serverState = SERVER_MENU_STATE;
+}
+
+static int getWinnerId(ServerGame *game)
+{
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        if (game->clients[i].connected &&
+            game->clients[i].player &&
+            getPlayerHealth(game->clients[i].player) > 0) {
+            return i;
+        }
+    }
+
+    return UNKNOWN_PLAYER;
+}
 static void handleInput(ServerGame *game, ServerClient *client)
 {
     if (getPlayerHealth(client->player) <= 0) {
@@ -204,26 +312,29 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
     for (int i = 0; i < MAX_PLAYERS; i++) {
         ServerClient *client = &game->clients[i];
         if (!client->connected || !client->player) continue;
+
         handleInput(game, client);
+
         if (getPlayerHealth(client->player) > 0) {
             updatePlayer(client->player, game->map, client->mouseX, client->mouseY);
         }
-        
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) 
-            updateProjectile(game->projectiles[i], 
-                            game->map, 
-                            serverPacket->tileChanges, 
-                            &serverPacket->tileChangeCount);
+        if (isActive(game->projectiles[i])) {
+            updateProjectile(game->projectiles[i],
+                             game->map,
+                             serverPacket->tileChanges,
+                             &serverPacket->tileChangeCount);
+        }
     }
 
     for (int i = 0; i < MAX_PLAYERS; i++) {
         ServerClient *client = &game->clients[i];
         if (!client->connected || !client->player) continue;
+
         for (int j = 0; j < MAX_BULLETS; j++) {
-            if (!isActive(game->projectiles[i])) continue;
+            if (!isActive(game->projectiles[j])) continue;
             checkBulletPlayerCollision(game->projectiles[j], client->player);
         }
     }
@@ -234,8 +345,14 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
     int connectedCount = connectedClientCount(game);
 
     serverPacket->playerId = (uint8_t)clientId;
-
-    if (connectedCount < 4) {
+    serverPacket->serverState = game->serverState;
+    serverPacket->winnerId = UNKNOWN_PLAYER;
+    
+    if (game->serverState == SERVER_END_STATE) {
+        serverPacket->clientState = CLIENT_END_STATE;
+        serverPacket->winnerId = (uint8_t)getWinnerId(game);
+    }
+    else if (connectedCount < 4) {
         serverPacket->serverState = SERVER_MENU_STATE;
         serverPacket->clientState = CLIENT_LOBBY_STATE;
     }
@@ -251,16 +368,19 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
     }
 
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (!game->clients[i].connected || !game->clients[i].player)
-        {
-            continue;
-        }
-        
+        if (!game->clients[i].connected || !game->clients[i].player) continue;
+
         serverPacket->players[i].x = getPlayerX(game->clients[i].player);
         serverPacket->players[i].y = getPlayerY(game->clients[i].player);
         serverPacket->players[i].mouseX = game->clients[i].mouseX;
         serverPacket->players[i].mouseY = game->clients[i].mouseY;
         serverPacket->players[i].tankSkin = game->clients[i].tankSkin;
+        int health = getPlayerHealth(game->clients[i].player);
+
+        if (health < 0) health = 0;
+
+        serverPacket->players[i].health = (uint8_t)health;
+       
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {

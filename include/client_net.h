@@ -20,5 +20,8 @@ static int connectToServer(ClientGame *game, const char *serverIp);
 static void renderConnectMenu(ClientGame *game);
 static void renderLobby(ClientGame *game);
 static void drawText(ClientGame *game, const char *text, int x, int y, SDL_Color color);
+static void sendReplay(ClientGame *game);
+static void sendDisconnect(ClientGame *game);
+static void renderEndScreen(ClientGame *game, ServerPacket *serverPacket);
 
 #endif
