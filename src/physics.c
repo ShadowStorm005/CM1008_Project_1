@@ -149,6 +149,8 @@ void addChangedTile(NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCo
 
 void checkBulletPlayerCollision(Projectile *pProjectile, Player *pPlayer)
 {
+    if (getPlayerHealth(pPlayer) <= 0) return;
+
     SDL_Rect bulletRect = getBulletRect(pProjectile);
     SDL_Rect playerRect = getPlayerRect(pPlayer);
     if (SDL_HasIntersection(&bulletRect, &playerRect)){

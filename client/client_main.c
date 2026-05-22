@@ -47,7 +47,7 @@ struct clientgame{
 int main(int argc, char **argv)
 {
     const char *serverIp = DEFAULT_SERVER_IP;
-    if (argc >= 2) serverIp = argv[1];
+    if (argc >= 4) serverIp = argv[1];
 
     ClientGame game;
     ClientPacket clientPacket;
@@ -264,9 +264,21 @@ static int initClient(ClientGame *game, const char *serverIp)
     if (!game->map) return 0;
 
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        float spawnX = WINDOW_WIDTH / 2.0f + (float)(i * 80);
-        float spawnY = WINDOW_HEIGHT / 2.0f;
-        game->players[i] = createPlayer(spawnX, spawnY, game->renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+        float spawnX[4] = {
+            180.0f,
+            1010.0f,
+            180.0f,
+            1010.0f
+        };
+
+        float spawnY[4] = {
+            735.0f,
+            360.0f,
+            210.0f,
+            770.0f
+        };
+
+        game->players[i] = createPlayer(spawnX[i], spawnY[i], game->renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
         if (!game->players[i]) return 0;
     }
 

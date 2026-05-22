@@ -44,7 +44,7 @@ int main(int argc, char **argv)
         Uint32 frameStart = SDL_GetTicks();
         memset(&serverPacket, 0, sizeof(serverPacket));
         receivePacket(&game);
-        if(connectedClientCount(&game) >=2){
+        if(connectedClientCount(&game) >=4){
             updateWorld(&game, &serverPacket);
         }
         sendStatus(&game, &serverPacket);
@@ -108,6 +108,20 @@ static int findClientId(ServerGame *game, IPaddress *ipaddress)
 
 static int addClient(ServerGame *game, IPaddress *address)
 {
+    float spawnX[4] = {
+        180.0f,
+        1010.0f,
+        180.0f,
+        1010.0f
+    };
+
+    float spawnY[4] = {
+        735.0f,
+        360.0f,
+        210.0f,
+        770.0f
+    };
+
     for (int i = 0; i < MAX_PLAYERS; i++) {
         if (!game->clients[i].connected) {
             game->clients[i].connected = 1;
@@ -115,14 +129,15 @@ static int addClient(ServerGame *game, IPaddress *address)
             game->clients[i].input = INPUT_NONE;
             game->clients[i].mouseX = 0;
             game->clients[i].mouseY = 0;
+            game->clients[i].tankSkin = SKIN_SWEDEN;
 
-            float spawnX = WINDOW_WIDTH / 2.0f + (float)(i * 80);
-            float spawnY = WINDOW_HEIGHT / 2.0f;
-            game->clients[i].player = createServerPlayer(spawnX, spawnY, WINDOW_WIDTH, WINDOW_HEIGHT);
-            printf("Client %d joined, ipaddress: %d\n", i, game->clients[i].ipaddress);
+            game->clients[i].player = createServerPlayer(spawnX[i], spawnY[i], WINDOW_WIDTH, WINDOW_HEIGHT);
+
+            printf("Client %d joined, ipaddress: %d\n", i, game->clients[i].ipaddress.host);
             return i;
         }
     }
+
     return -1;
 }
 
@@ -220,7 +235,7 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
 
     serverPacket->playerId = (uint8_t)clientId;
 
-    if (connectedCount < 2) {
+    if (connectedCount < 4) {
         serverPacket->serverState = SERVER_MENU_STATE;
         serverPacket->clientState = CLIENT_LOBBY_STATE;
     }
