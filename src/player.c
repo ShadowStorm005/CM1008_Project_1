@@ -6,6 +6,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "physics.h"
+#include "explosions.h"
 #include "server_creation_functions.h"
 
 #define MAX_VELY_SPEED 15.0f
@@ -87,6 +88,29 @@ void updatePlayerSkin(Player *pPlayer)
     }
 }
 
+void updateBarrelSmoke(Player *pPlayer)
+{
+    if(pPlayer->serverTime < pPlayer->smokeTimerEnd)
+    {
+        int timeLeft = pPlayer->smokeTimerEnd - pPlayer->serverTime;
+
+        if(timeLeft > pPlayer->smokeTimer * 0.9f) pPlayer->barrelSmokeSrcRect.y = 0;
+        else if(timeLeft > pPlayer->smokeTimer * 0.75f) pPlayer->barrelSmokeSrcRect.y = 64;
+        else if(timeLeft > pPlayer->smokeTimer * 0.55f) pPlayer->barrelSmokeSrcRect.y = 64*2;
+        else if(timeLeft > pPlayer->smokeTimer * 0.35f) pPlayer->barrelSmokeSrcRect.y = 64*3;
+        else if(timeLeft > pPlayer->smokeTimer * 0.15f) pPlayer->barrelSmokeSrcRect.y = 64*4;
+        else if(timeLeft > 0) pPlayer->barrelSmokeSrcRect.y = 64*5;
+
+        pPlayer->barrelSmokeRect.w = 220;
+        pPlayer->barrelSmokeRect.h = 64;
+    }
+    else
+    {
+        pPlayer->barrelSmokeRect.w = 0;
+        pPlayer->barrelSmokeRect.h = 0;
+    }
+}
+
 void updatePlayerRects(Player *pPlayer)
 {
     updatePlayerSkin(pPlayer);
@@ -115,25 +139,7 @@ void updatePlayerRects(Player *pPlayer)
     pPlayer->barrelSmokeRect.x = getCanonX(pPlayer);
     pPlayer->barrelSmokeRect.y = getCanonY(pPlayer) - pPlayer->barrelSmokeRect.h / 2;
 
-    if(pPlayer->serverTime < pPlayer->smokeTimerEnd)
-    {
-        int timeLeft = pPlayer->smokeTimerEnd - pPlayer->serverTime;
-
-        if(timeLeft > pPlayer->smokeTimer * 0.9f) pPlayer->barrelSmokeSrcRect.y = 0;
-        else if(timeLeft > pPlayer->smokeTimer * 0.75f) pPlayer->barrelSmokeSrcRect.y = 64;
-        else if(timeLeft > pPlayer->smokeTimer * 0.55f) pPlayer->barrelSmokeSrcRect.y = 64*2;
-        else if(timeLeft > pPlayer->smokeTimer * 0.35f) pPlayer->barrelSmokeSrcRect.y = 64*3;
-        else if(timeLeft > pPlayer->smokeTimer * 0.15f) pPlayer->barrelSmokeSrcRect.y = 64*4;
-        else if(timeLeft > 0) pPlayer->barrelSmokeSrcRect.y = 64*5;
-
-        pPlayer->barrelSmokeRect.w = 220;
-        pPlayer->barrelSmokeRect.h = 64;
-    }
-    else
-    {
-        pPlayer->barrelSmokeRect.w = 0;
-        pPlayer->barrelSmokeRect.h = 0;
-    }
+    updateBarrelSmoke(pPlayer);
 
     pPlayer->hitbox.x = pPlayer->hullRect.x;
     pPlayer->hitbox.y = pPlayer->hullRect.y;

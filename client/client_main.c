@@ -8,6 +8,7 @@
 
 #include "player.h"
 #include "weapon.h"
+#include "explosions.h"
 #include "map.h"
 #include "client_net.h"
 #include "game_net.h"
@@ -28,6 +29,7 @@ struct clientgame{
 
     Player *players[MAX_PLAYERS];
     Projectile *projectiles[MAX_BULLETS];
+    Explosion *explosion[MAX_BULLETS];
     Map *map;
 
     bool inGameMenu;
@@ -324,6 +326,14 @@ static int initClient(ClientGame *game, const char *serverIp)
             closeClient(game);
             return 0;
         }
+
+        game->explosion[i] = createExplosion(game->renderer);
+        if(!game->explosion[i])
+        {
+            printf("Explosion creation failed\n");
+            closeClient(game);
+            return 0;
+        }
     }
     game->socket = SDLNet_UDP_Open(0);
     if (!game->socket) {
@@ -513,7 +523,8 @@ static void render(ClientGame *game)
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) drawProjectile(game->projectiles[i]);
+        if (isActive(game->projectiles[i]))        drawProjectile(game->projectiles[i]);
+        if (isExplosionActive(game->explosion[i])) drawExplosion(game->explosion[i]);
     }
 
     SDL_RenderPresent(game->renderer);
@@ -526,20 +537,21 @@ static void closeClient(ClientGame *game)
     }
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (game->projectiles[i]) destroyProjectile(game->projectiles[i]);
+        if (game->explosion[i])   destroyExplosion(game->explosion[i]);
     }
-    if (game->map) destroyTiles(game->map);
+    if (game->map)        destroyTiles(game->map);
     if (game->background) SDL_DestroyTexture(game->background);
     if (game->sendPacket) SDLNet_FreePacket(game->sendPacket);
     if (game->recvPacket) SDLNet_FreePacket(game->recvPacket);
-    if (game->socket) SDLNet_UDP_Close(game->socket);
-    if (game->renderer) SDL_DestroyRenderer(game->renderer);
-    if (game->window) SDL_DestroyWindow(game->window);
+    if (game->socket)     SDLNet_UDP_Close(game->socket);
+    if (game->renderer)   SDL_DestroyRenderer(game->renderer);
+    if (game->window)     SDL_DestroyWindow(game->window);
 
-    if (game->resumeButton) SDL_DestroyTexture(game->resumeButton);
-    if (game->newGameButton) SDL_DestroyTexture(game->newGameButton);
+    if (game->resumeButton)   SDL_DestroyTexture(game->resumeButton);
+    if (game->newGameButton)  SDL_DestroyTexture(game->newGameButton);
     if (game->settingsButton) SDL_DestroyTexture(game->settingsButton);
     if (game->exitGameButton) SDL_DestroyTexture(game->exitGameButton);
-    if (game->backButton) SDL_DestroyTexture(game->backButton);
+    if (game->backButton)     SDL_DestroyTexture(game->backButton);
 
     SDLNet_Quit();
     IMG_Quit();

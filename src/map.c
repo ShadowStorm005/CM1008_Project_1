@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "map.h"
+#include "explosions.h"
 #include "server_creation_functions.h"
 const int mapTemplate1[AMOUNT_OF_TILES_HORIZONTAL][AMOUNT_OF_TILES_VERTICAL] = {
     {12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12},

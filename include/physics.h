@@ -5,6 +5,7 @@
 #include "player.h"
 #include "map.h"
 #include "weapon.h"
+#include "explosions.h"
 #include "game_net.h"
 
 void checkForPlayerCollision(Player *pPlayer, Map *pMap);

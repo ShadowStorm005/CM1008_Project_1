@@ -7,6 +7,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "physics.h"
+#include "explosions.h"
 #include "server_creation_functions.h"
 
 #define BULLET_ASPECT 1
@@ -23,7 +24,7 @@ typedef struct projectile
     int damage;
 
     SDL_Texture *pTexture;
-    SDL_Rect projectile_rect;
+    SDL_Rect projectileRect;
 
     SDL_Renderer *pRenderer;
 } Projectile;
@@ -33,8 +34,8 @@ Projectile *createProjectile(SDL_Renderer *pRenderer)
     Projectile *pProjectile = malloc(sizeof(Projectile));
     if(!pProjectile) return NULL;
 
-    pProjectile->projectile_rect.x = (int)pProjectile->x;
-    pProjectile->projectile_rect.y = (int)pProjectile->y;
+    pProjectile->projectileRect.x = (int)pProjectile->x;
+    pProjectile->projectileRect.y = (int)pProjectile->y;
     pProjectile->active = 0;
     pProjectile->gravity = 0.15f;
 
@@ -54,7 +55,7 @@ Projectile *createProjectile(SDL_Renderer *pRenderer)
         free(pProjectile);
         return NULL;
     }
-    SDL_QueryTexture(pProjectile->pTexture, NULL, NULL, &pProjectile->projectile_rect.w, &pProjectile->projectile_rect.h);
+    SDL_QueryTexture(pProjectile->pTexture, NULL, NULL, &pProjectile->projectileRect.w, &pProjectile->projectileRect.h);
 
     return pProjectile;
 }
@@ -74,10 +75,10 @@ Projectile *createServerProjectile(void)
     pProjectile->gravity = 0.15f;
     pProjectile->pTexture = NULL;
     pProjectile->pRenderer = NULL;
-    pProjectile->projectile_rect.x = (int)pProjectile->x;
-    pProjectile->projectile_rect.y = (int)pProjectile->y;
-    pProjectile->projectile_rect.w = BULLET_SIZE * BULLET_ASPECT;
-    pProjectile->projectile_rect.h = BULLET_SIZE;
+    pProjectile->projectileRect.x = (int)pProjectile->x;
+    pProjectile->projectileRect.y = (int)pProjectile->y;
+    pProjectile->projectileRect.w = BULLET_SIZE * BULLET_ASPECT;
+    pProjectile->projectileRect.h = BULLET_SIZE;
     return pProjectile;
 }
 
@@ -88,8 +89,8 @@ int isActive(Projectile *pProjectile)
 
 void updateProjectileRect(Projectile *pProjectile)
 {
-    pProjectile->projectile_rect.x = (int)(pProjectile->x);
-    pProjectile->projectile_rect.y = (int)(pProjectile->y - pProjectile->projectile_rect.h / 2);
+    pProjectile->projectileRect.x = (int)(pProjectile->x);
+    pProjectile->projectileRect.y = (int)(pProjectile->y - pProjectile->projectileRect.h / 2);
 }
 
 void updateProjectile(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount)
@@ -105,7 +106,7 @@ void updateProjectile(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MA
 
     pProjectile->angle = atan2(pProjectile->velY, pProjectile->velX);
 
-    if ((pProjectile->x+pProjectile->projectile_rect.w) < 0 || pProjectile->x > WINDOW_WIDTH || pProjectile->y > WINDOW_HEIGHT)
+    if ((pProjectile->x+pProjectile->projectileRect.w) < 0 || pProjectile->x > WINDOW_WIDTH || pProjectile->y > WINDOW_HEIGHT)
     {
         pProjectile->active = 0;
     }
@@ -117,15 +118,15 @@ void setProjectileVar(Projectile *pProjectile, int active, float x, float y, flo
     pProjectile->x = x;
     pProjectile->y = y;
     pProjectile->angle = angle;
-    pProjectile->projectile_rect.w = BULLET_SIZE * BULLET_ASPECT;
-    pProjectile->projectile_rect.h = BULLET_SIZE;
+    pProjectile->projectileRect.w = BULLET_SIZE * BULLET_ASPECT;
+    pProjectile->projectileRect.h = BULLET_SIZE;
 }
 
 void drawProjectile(Projectile *pProjectile)
 {
     if(!pProjectile->active) return;
-    SDL_Point center = {0, pProjectile->projectile_rect.h / 2};
-    SDL_RenderCopyEx(pProjectile->pRenderer, pProjectile->pTexture, NULL /**/, &pProjectile->projectile_rect, pProjectile->angle*180/PI, &center, SDL_FLIP_NONE);
+    SDL_Point center = {0, pProjectile->projectileRect.h / 2};
+    SDL_RenderCopyEx(pProjectile->pRenderer, pProjectile->pTexture, NULL /**/, &pProjectile->projectileRect, pProjectile->angle*180/PI, &center, SDL_FLIP_NONE);
 }
 
 void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, float angle, int canonMode)
@@ -135,8 +136,8 @@ void shoot(Projectile *pProjectile[], int size, float speed, float x, float y, f
         if(!pProjectile[i]->active)
         {
             //bullet size
-            pProjectile[i]->projectile_rect.w = size*BULLET_ASPECT;
-            pProjectile[i]->projectile_rect.h = size;
+            pProjectile[i]->projectileRect.w = size*BULLET_ASPECT;
+            pProjectile[i]->projectileRect.h = size;
 
             pProjectile[i]->active = 1;
             pProjectile[i]->x = x;
@@ -172,7 +173,7 @@ void inactivateBullet(Projectile *pProjectile)
 
 SDL_Rect getBulletRect(Projectile *pProjectile)
 {
-    return pProjectile->projectile_rect;
+    return pProjectile->projectileRect;
 }
 
 void destroyProjectile(Projectile *pProjectile)

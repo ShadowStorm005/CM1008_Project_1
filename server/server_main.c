@@ -5,6 +5,7 @@
 
 #include "player.h"
 #include "weapon.h"
+#include "explosions.h"
 #include "map.h"
 #include "physics.h"
 #include "server_net.h"
