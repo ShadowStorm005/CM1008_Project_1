@@ -27,28 +27,6 @@ typedef struct explosion
     SDL_Renderer *pRenderer;
 } Explosion;
 
-/*
-    if(pPlayer->serverTime < pPlayer->smokeTimerEnd)
-    {
-        int timeLeft = pPlayer->smokeTimerEnd - pPlayer->serverTime;
-
-        if(timeLeft > pPlayer->smokeTimer * 0.9f) pPlayer->barrelSmokeSrcRect.y = 0;
-        else if(timeLeft > pPlayer->smokeTimer * 0.75f) pPlayer->barrelSmokeSrcRect.y = 64;
-        else if(timeLeft > pPlayer->smokeTimer * 0.55f) pPlayer->barrelSmokeSrcRect.y = 64*2;
-        else if(timeLeft > pPlayer->smokeTimer * 0.35f) pPlayer->barrelSmokeSrcRect.y = 64*3;
-        else if(timeLeft > pPlayer->smokeTimer * 0.15f) pPlayer->barrelSmokeSrcRect.y = 64*4;
-        else if(timeLeft > 0) pPlayer->barrelSmokeSrcRect.y = 64*5;
-
-        pPlayer->barrelSmokeRect.w = 220;
-        pPlayer->barrelSmokeRect.h = 64;
-    }
-    else
-    {
-        pPlayer->barrelSmokeRect.w = 0;
-        pPlayer->barrelSmokeRect.h = 0;
-    }
-*/
-
 void updateExplosionTexture(Explosion *pExplosion)
 {
     if (pExplosion->serverTime < (pExplosion->explosionTimerEnd))

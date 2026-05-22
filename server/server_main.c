@@ -11,7 +11,7 @@
 #include "server_net.h"
 #include "game_net.h"
 #include "server_creation_functions.h"
-//👍👍👍👍👍👍👍👍👍
+// 👍👍👍👍👍👍👍👍👍
 
 struct serverclient {
     bool connected;
@@ -136,7 +136,7 @@ static int addClient(ServerGame *game, IPaddress *address)
 static void receivePacket(ServerGame *game)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
-        //printf("Server received a packet\n");
+        printf("Server received a packet\n");
         ClientPacket clientPacket;
         memcpy(&clientPacket, game->recvPacket->data, sizeof(clientPacket));
 

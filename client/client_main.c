@@ -153,7 +153,7 @@ int main(int argc, char **argv)
             }
         }
 
-        recieveStatus(&game, &serverPacket, &clientPacket);
+        receiveStatus(&game, &serverPacket, &clientPacket);
 
         if (game.clientState == CLIENT_MAIN_MENU_STATE) {
             renderMainMenu(game.renderer,
@@ -176,24 +176,24 @@ int main(int argc, char **argv)
                 game.lastJoinSendTime = SDL_GetTicks();
             }
 
-            recieveStatus(&game, &serverPacket, &clientPacket);
+            receiveStatus(&game, &serverPacket, &clientPacket);
             renderLobby(&game);
         }
         else if (game.clientState == CLIENT_PLAYING_STATE) {
             prepareClientPacket(&game, &clientPacket);
             sendInput(&game, &clientPacket);
-            recieveStatus(&game, &serverPacket, &clientPacket);
+            receiveStatus(&game, &serverPacket, &clientPacket);
             render(&game);
         }
         else if (game.clientState == CLIENT_DEAD_STATE) {
-            recieveStatus(&game, &serverPacket, &clientPacket);
+            receiveStatus(&game, &serverPacket, &clientPacket);
             render(&game);
         }
         else if (game.clientState == CLIENT_QUIT_STATE) {
             running = 0;
         }
 
-        recieveStatus(&game, &serverPacket, &clientPacket);
+        receiveStatus(&game, &serverPacket, &clientPacket);
 
         Uint32 frameTime = SDL_GetTicks() - frameStart;
         if (frameTime < FRAME_DELAY) {
@@ -474,7 +474,7 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPa
     }
 }
 
-static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket)
+static void receiveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
         memset(serverPacket, 0, sizeof(*serverPacket));
