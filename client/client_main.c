@@ -461,6 +461,10 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPa
                         serverPacket->projectiles[i].y,
                         serverPacket->projectiles[i].angle);
         updateProjectileRect(game->projectiles[i]);
+
+        activateExplosion(game->explosion[i], serverPacket->explosions[i].x, serverPacket->explosions[i].y, serverPacket->explosions[i].explosionTimer);
+        receiveExplosionServerTime(game->explosion[i], serverPacket->serverTime);
+        updateExplosionTexture(game->explosion[i]);
     }
     
     for (int i = 0; i < serverPacket->tileChangeCount && i < MAX_TILE_CHANGES; i++) {
@@ -502,7 +506,7 @@ static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPa
         {
             changePlayerSkin(game->players[i], serverPacket->players[i].tankSkin);
             setSmokeTimer(game->players[i], serverPacket->players[i].smokeTimer);
-            receiveServerTime(game->players[i], serverPacket->players[i].serverTime);
+            receiveServerTime(game->players[i], serverPacket->serverTime);
         }
     }
 }

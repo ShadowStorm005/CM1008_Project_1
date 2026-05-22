@@ -16,6 +16,7 @@ typedef struct explosion
 
     int serverTime;
     int explosionTimerEnd;
+    int startTime;
     int explosionTimer;
 
     SDL_Texture *pTexture;
@@ -26,22 +27,66 @@ typedef struct explosion
     SDL_Renderer *pRenderer;
 } Explosion;
 
+/*
+    if(pPlayer->serverTime < pPlayer->smokeTimerEnd)
+    {
+        int timeLeft = pPlayer->smokeTimerEnd - pPlayer->serverTime;
+
+        if(timeLeft > pPlayer->smokeTimer * 0.9f) pPlayer->barrelSmokeSrcRect.y = 0;
+        else if(timeLeft > pPlayer->smokeTimer * 0.75f) pPlayer->barrelSmokeSrcRect.y = 64;
+        else if(timeLeft > pPlayer->smokeTimer * 0.55f) pPlayer->barrelSmokeSrcRect.y = 64*2;
+        else if(timeLeft > pPlayer->smokeTimer * 0.35f) pPlayer->barrelSmokeSrcRect.y = 64*3;
+        else if(timeLeft > pPlayer->smokeTimer * 0.15f) pPlayer->barrelSmokeSrcRect.y = 64*4;
+        else if(timeLeft > 0) pPlayer->barrelSmokeSrcRect.y = 64*5;
+
+        pPlayer->barrelSmokeRect.w = 220;
+        pPlayer->barrelSmokeRect.h = 64;
+    }
+    else
+    {
+        pPlayer->barrelSmokeRect.w = 0;
+        pPlayer->barrelSmokeRect.h = 0;
+    }
+*/
+
 void updateExplosionTexture(Explosion *pExplosion)
 {
+    if (pExplosion->serverTime < (pExplosion->explosionTimerEnd))
+    {
+        int timeLeft = pExplosion->explosionTimerEnd - pExplosion->serverTime;
+        if(timeLeft > pExplosion->explosionTimer * 0.92f) pExplosion->explosionSrcRect.x = 0;
+        else if(timeLeft > pExplosion->explosionTimer * 0.85f) pExplosion->explosionSrcRect.x = 112;
+        else if(timeLeft > pExplosion->explosionTimer * 0.78f) pExplosion->explosionSrcRect.x = 112*2;
+        else if(timeLeft > pExplosion->explosionTimer * 0.70f) pExplosion->explosionSrcRect.x = 112*3;
 
+        else if(timeLeft > pExplosion->explosionTimer * 0.60f)
+        {
+            pExplosion->explosionSrcRect.y = 112;
+            pExplosion->explosionSrcRect.x = 0;
+        }
+        else if(timeLeft > pExplosion->explosionTimer * 0.45f) pExplosion->explosionSrcRect.x = 112;
+        else if(timeLeft > pExplosion->explosionTimer * 0.20f) pExplosion->explosionSrcRect.x = 112*2;
+        else if(timeLeft > 0) pExplosion->explosionSrcRect.x = 112*3;
+    }
+    else
+    {
+        pExplosion->explosionSrcRect.y = 0;
+        pExplosion->explosionSrcRect.x = 0;
+        pExplosion->active = 0;
+    }
 }
 
 void updateExplosionRects(Explosion *pExplosion)
 {
-    pExplosion->explosionRect.x = pExplosion->x;
-    pExplosion->explosionRect.y = pExplosion->y;
+    pExplosion->explosionRect.x = pExplosion->x - pExplosion->explosionRect.w / 2;
+    pExplosion->explosionRect.y = pExplosion->y - pExplosion->explosionRect.h / 2;
     updateExplosionTexture(pExplosion);
 }
 
 void initExplosionDefaults(Explosion *pExplosion)
 {
-    pExplosion->x = 100;
-    pExplosion->y = 100;
+    pExplosion->x = 0;
+    pExplosion->y = 0;
 
     pExplosion->explosionRect.x = pExplosion->x;
     pExplosion->explosionRect.y = pExplosion->y;
@@ -55,8 +100,8 @@ void initExplosionDefaults(Explosion *pExplosion)
     pExplosion->explosionSrcRect.w = 112;
     pExplosion->explosionSrcRect.h = 112;
 
-    pExplosion->active = 1;
-    pExplosion->explosionTimer = 600;
+    pExplosion->active = 0;
+    pExplosion->explosionTimer = 750;
 }
 
 Explosion *createExplosion(SDL_Renderer *pRenderer)
@@ -98,15 +143,38 @@ Explosion *createServerExplosion(void)
     return pExplosion;
 }
 
+void receiveExplosionServerTime(Explosion *pExplosion, int serverTime)
+{
+    pExplosion->serverTime = serverTime;
+}
+
 int isExplosionActive(Explosion *pExplosion)
 {
     return pExplosion->active;
 }
 
-void activateExplosion(Explosion *pExplosion, int x, int y)
+int getExplosionCordX(Explosion *pExplosion)
 {
+    return pExplosion->x;
+}
+
+int getExplosionCordY(Explosion *pExplosion)
+{  
+    return pExplosion->y;
+}
+
+int getStartTime(Explosion *pExplosion)
+{
+    return pExplosion->startTime;
+}
+
+void activateExplosion(Explosion *pExplosion, int x, int y, int startTime)
+{
+    pExplosion->active = 1;
     pExplosion->x = x;
     pExplosion->y = y;
+    pExplosion->startTime = startTime;
+    pExplosion->explosionTimerEnd = startTime + pExplosion->explosionTimer;
     updateExplosionRects(pExplosion);
 }
 

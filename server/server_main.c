@@ -11,6 +11,7 @@
 #include "server_net.h"
 #include "game_net.h"
 #include "server_creation_functions.h"
+//👍👍👍👍👍👍👍👍👍
 
 struct serverclient {
     bool connected;
@@ -23,13 +24,14 @@ struct serverclient {
     int mouseY;
 };
 
-struct servergame{
+struct servergame {
     UDPsocket socket;
     UDPpacket *recvPacket;
     UDPpacket *sendPacket;
     ServerClient clients[MAX_PLAYERS];
     Map *map;
     Projectile *projectiles[MAX_BULLETS];
+    Explosion *explosions[MAX_BULLETS];
 };
 
 int main(int argc, char **argv)
@@ -88,6 +90,9 @@ static int initServer(ServerGame *game)
     for (int i = 0; i < MAX_BULLETS; i++) {
         game->projectiles[i] = createServerProjectile();
         if (!game->projectiles[i]) return 0;
+
+        game->explosions[i] = createServerExplosion();
+        if (!game->explosions[i]) return 0;
     }
 
     //rememberMap(game);
@@ -197,11 +202,18 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
         }
         
     }
+    int nextExplosion;
+    for (int i = 0; i < MAX_BULLETS; i++)
+    {
+        if(!isExplosionActive(game->explosions[i])) nextExplosion = i;
+    }
 
-    for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) 
+    for (int i = 0; i < MAX_BULLETS; i++) 
+    {
+        if (isActive(game->projectiles[i]))
             updateProjectile(game->projectiles[i], 
-                            game->map, 
+                            game->map,
+                            game->explosions[nextExplosion],
                             serverPacket->tileChanges, 
                             &serverPacket->tileChangeCount);
     }
@@ -211,7 +223,7 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
         if (!client->connected || !client->player) continue;
         for (int j = 0; j < MAX_BULLETS; j++) {
             if (!isActive(game->projectiles[i])) continue;
-            checkBulletPlayerCollision(game->projectiles[j], client->player);
+            checkBulletPlayerCollision(game->projectiles[j], client->player, game->explosions[nextExplosion]);
         }
     }
 }
@@ -228,6 +240,7 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
     }
     else {
         serverPacket->serverState = SERVER_RUN_STATE;
+        serverPacket->serverTime = SDL_GetTicks();
         
         if (getPlayerHealth(game->clients[clientId].player) <= 0) {
         serverPacket->clientState = CLIENT_DEAD_STATE;
@@ -249,10 +262,10 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
         serverPacket->players[i].mouseY = game->clients[i].mouseY;
         serverPacket->players[i].tankSkin = game->clients[i].tankSkin;
         serverPacket->players[i].smokeTimer = game->clients[i].smokeTimer;
-        serverPacket->players[i].serverTime = SDL_GetTicks();
     }
 
-    for (int i = 0; i < MAX_BULLETS; i++) {
+    for (int i = 0; i < MAX_BULLETS; i++) 
+    {
         if (!isActive(game->projectiles[i]))
         {
             continue;
@@ -261,6 +274,16 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
         serverPacket->projectiles[i].x = getBulletX(game->projectiles[i]);
         serverPacket->projectiles[i].y = getBulletY(game->projectiles[i]);
         serverPacket->projectiles[i].angle = getBulletAngle(game->projectiles[i]);
+    }
+    for (int i = 0; i < MAX_BULLETS; i++)
+    {
+        if (!isExplosionActive(game->explosions[i]))
+        {
+            continue;
+        }
+        serverPacket->explosions[i].x = getExplosionCordX(game->explosions[i]);
+        serverPacket->explosions[i].y = getExplosionCordY(game->explosions[i]);
+        serverPacket->explosions[i].explosionTimer = getStartTime(game->explosions[i]);
     }
 }
 
@@ -287,6 +310,7 @@ static void closeServer(ServerGame *game)
     }
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (game->projectiles[i]) destroyProjectile(game->projectiles[i]);
+        if (game->explosions[i])  destroyExplosion(game->explosions[i]);
     }
     if (game->map) destroyTiles(game->map);
     if (game->recvPacket) SDLNet_FreePacket(game->recvPacket);

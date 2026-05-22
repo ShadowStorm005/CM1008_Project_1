@@ -71,7 +71,6 @@ typedef struct {
     int32_t mouseX;
     int32_t mouseY;
     uint32_t smokeTimer;
-    uint32_t serverTime;
     uint8_t tankSkin;
     uint8_t health;
 } NetPlayer;
@@ -83,6 +82,12 @@ typedef struct {
 } NetProjectile;
 
 typedef struct {
+    int x;
+    int y;
+    uint32_t explosionTimer;
+} NetExplosion;
+
+typedef struct {
     int8_t x;
     int8_t y;
     int8_t selectedTexture;
@@ -91,7 +96,9 @@ typedef struct {
 typedef struct {
     NetTile tileChanges[MAX_TILE_CHANGES];
     NetProjectile projectiles[MAX_BULLETS];
+    NetExplosion explosions[MAX_BULLETS];
     NetPlayer players[MAX_PLAYERS];
+    uint32_t serverTime;
     ServerState serverState;
     ClientState clientState;
     uint8_t playerId;
