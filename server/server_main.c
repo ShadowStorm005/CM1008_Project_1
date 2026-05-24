@@ -42,38 +42,42 @@ int main(int argc, char **argv)
 
     ServerGame game;
     ServerPacket serverPacket;
-    if (!initServer(&game)) return 1;
+
+    if (!initServer(&game)) {
+        return 1;
+    }
 
     int running = 1;
+
     while (running) {
         Uint32 frameStart = SDL_GetTicks();
+
         memset(&serverPacket, 0, sizeof(serverPacket));
+
         receivePacket(&game);
-        if (connectedClientCount(&game) >= MAX_PLAYERS) {
-            updateWorld(&game, &serverPacket);
+
+        if (game.serverState == SERVER_MENU_STATE && connectedClientCount(&game) >= MAX_PLAYERS) {
+            game.serverState = SERVER_RUN_STATE;
         }
+
+        if (game.serverState == SERVER_RUN_STATE) {
+            updateWorld(&game, &serverPacket);
+
+            if (aliveClientCount(&game) <= 1 && connectedClientCount(&game) >= 2) {
+                game.serverState = SERVER_END_STATE;
+            }
+        }
+
         sendStatus(&game, &serverPacket);
 
-    if (game.serverState == SERVER_MENU_STATE && connectedClientCount(&game) >= 4) {
-        game.serverState = SERVER_RUN_STATE;
-    }
-
-    if (game.serverState == SERVER_RUN_STATE) {
-        updateWorld(&game, &serverPacket);
-
-        if (aliveClientCount(&game) <= 1 && connectedClientCount(&game) >= 2) {
-            game.serverState = SERVER_END_STATE;
+        Uint32 frameTime = SDL_GetTicks() - frameStart;
+        if (frameTime < FRAME_DELAY) {
+            SDL_Delay(FRAME_DELAY - frameTime);
         }
     }
 
-    sendStatus(&game, &serverPacket);
-
-            Uint32 frameTime = SDL_GetTicks() - frameStart;
-            if (frameTime < FRAME_DELAY) SDL_Delay(FRAME_DELAY - frameTime);
-        }
-
-        closeServer(&game);
-        return 0;
+    closeServer(&game);
+    return 0;
 }
 
 static int initServer(ServerGame *game)
@@ -157,9 +161,6 @@ static int addClient(ServerGame *game, IPaddress *address)
 
             game->clients[i].player = createServerPlayer(spawnX[i], spawnY[i], WINDOW_WIDTH, WINDOW_HEIGHT);
 
-            float spawnX = WINDOW_WIDTH / 2.0f + (float)(i * 80);
-            float spawnY = WINDOW_HEIGHT / 2.0f;
-            game->clients[i].player = createServerPlayer(spawnX, spawnY, WINDOW_WIDTH, WINDOW_HEIGHT);
             printf("Client %d joined, ipaddress: %d\n", i, game->clients[i].ipaddress.host);
             return i;
         }
@@ -376,7 +377,7 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
         serverPacket->clientState = CLIENT_END_STATE;
         serverPacket->winnerId = (uint8_t)getWinnerId(game);
     }
-    else if (connectedCount < 4) {
+    else if (connectedCount < MAX_PLAYERS) {
         serverPacket->serverState = SERVER_MENU_STATE;
         serverPacket->clientState = CLIENT_LOBBY_STATE;
     }

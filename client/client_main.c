@@ -245,7 +245,7 @@ int main(int argc, char **argv)
             render(&game);
         }
         else if (game.clientState == CLIENT_END_STATE) {
-            recieveStatus(&game, &serverPacket, &clientPacket);
+            receiveStatus(&game, &serverPacket, &clientPacket);
             renderEndScreen(&game, &serverPacket);
         }
         else if (game.clientState == CLIENT_QUIT_STATE) {
@@ -392,6 +392,9 @@ static int initClient(ClientGame *game, const char *serverIp)
     if (!resumeGameButton) {
         printf("Error loading resumeGame.png: %s\n", IMG_GetError());
         free(resumeGameButton);
+        return 0;
+    }
+
     game->swedenSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-swedenSkinButton.png");
     if (!game->swedenSkinButton) {
         printf("Error loading swedenSkinButton.png: %s\n", IMG_GetError());
@@ -419,7 +422,7 @@ static int initClient(ClientGame *game, const char *serverIp)
         free(game->russiaSkinButton);
         return 0;
     }
-
+    
     for(int i = 0; i < MAX_BULLETS; i++)
     {
         game->projectiles[i] = createProjectile(game->renderer);
