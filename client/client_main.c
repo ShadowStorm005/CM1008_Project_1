@@ -111,7 +111,7 @@ int main(int argc, char **argv)
                     }
                 }
                 else if (action == MENU_ACTION_SELECT_GERMANY) {
-                    game.selectedSkin = SKIN_DEUTSCH;
+                    game.selectedSkin = SKIN_GERMANY;
                     if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
                         changePlayerSkin(game.players[game.playerId], game.selectedSkin);
                     }

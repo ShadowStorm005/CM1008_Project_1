@@ -24,7 +24,7 @@ typedef enum {
 typedef enum {
     SKIN_SWEDEN,
     SKIN_DENMARK,
-    SKIN_DEUTSCH,
+    SKIN_GERMANY,
     SKIN_RUSSIA
 } TankSkins;
 

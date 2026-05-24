@@ -75,7 +75,7 @@ void updatePlayerSkin(Player *pPlayer)
         pPlayer->turretSrcRect.y = 40*pPlayer->tankSkin;
         pPlayer->canonSrcRect.y = 45*pPlayer->tankSkin/* +15*tankCanon */;
         break;
-    case SKIN_DEUTSCH:
+    case SKIN_GERMANY:
         pPlayer->hullSrcRect.y = 52*pPlayer->tankSkin;
         pPlayer->turretSrcRect.y = 40*pPlayer->tankSkin;
         pPlayer->canonSrcRect.y = 45*pPlayer->tankSkin/* +15*tankCanon */;      
