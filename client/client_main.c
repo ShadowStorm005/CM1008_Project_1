@@ -442,7 +442,7 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPa
         if (!game->players[i]) continue;
         setPlayerCord(game->players[i], (int)serverPacket->players[i].x, (int)serverPacket->players[i].y);
         steerCanon(game->players[i], serverPacket->players[i].mouseX, serverPacket->players[i].mouseY);
-        updatePlayerRects(game->players[i]);
+        updatePlayerRects(game->players[i], serverPacket->players[i].playerState);
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
@@ -490,7 +490,7 @@ static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPa
         game->playerId = serverPacket->playerId;
         for(int i = 0; i < MAX_PLAYERS; i++)
         {
-            changePlayerSkin(game->players[i], serverPacket->players[i].tankSkin);
+            changePlayerSkin(game->players[i], serverPacket->players[i].tankSkin, serverPacket->players[i].playerState);
         }
     }
 }

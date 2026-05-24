@@ -44,7 +44,7 @@ $(OBJDIR):
 clean:
 	del $(OBJDIR)\server_main.o
 	del $(OBJDIR)\client_main.o
-	del $(UBJDIR)\menu.o
+	del $(OBJDIR)\menu.o
 	del $(OBJDIR)\map.o
 	del $(OBJDIR)\physics.o
 	del $(OBJDIR)\player.o

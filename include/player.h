@@ -7,10 +7,11 @@
 
 typedef struct player Player;
 
-void updatePlayerRects(Player *pPlayer);
+void updatePlayerSkin(Player *pPlayer, ClientState playerState);
+void updatePlayerRects(Player *pPlayer, ClientState playerState);
 static void initPlayerDefaults(Player *pPlayer, float x, float y, int windows_width, int window_height);
 Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width, int window_height);
-void changePlayerSkin(Player *pPlayer, int skin);
+void changePlayerSkin(Player *pPlayer, int skin, ClientState playerState);
 float getPlayerX(Player *pPlayer);
 float getPlayerY(Player *pPlayer);
 int getPlayerHealth(Player *pPlayer);

@@ -7,6 +7,7 @@
 #include "map.h"
 #include "physics.h"
 #include "server_creation_functions.h"
+#include "game_net.h"
 
 #define MAX_VELY_SPEED 15.0f
 
@@ -51,7 +52,7 @@ struct player {
     SDL_RendererFlip turretFlip;
 };
 
-void updatePlayerSkin(Player *pPlayer)
+void updatePlayerSkin(Player *pPlayer, ClientState playerState)
 {
     switch (pPlayer->tankSkin)
     {
@@ -76,11 +77,16 @@ void updatePlayerSkin(Player *pPlayer)
         pPlayer->canonSrcRect.y = 45*pPlayer->tankSkin/* +15*tankCanon */;
         break;
     }
+    if (playerState == CLIENT_DEAD_STATE) {
+        pPlayer->hullSrcRect.x = 77;
+        pPlayer->turretSrcRect.x = 49;
+        pPlayer->canonSrcRect.x = 54;
+    }
 }
 
-void updatePlayerRects(Player *pPlayer)
+void updatePlayerRects(Player *pPlayer, ClientState playerState)
 {
-    updatePlayerSkin(pPlayer);
+    updatePlayerSkin(pPlayer, playerState);
 
     pPlayer->hullRect.x = (int)pPlayer->x;
     pPlayer->hullRect.y = (int)pPlayer->y;
@@ -221,7 +227,7 @@ Player *createPlayer(float x, float y, SDL_Renderer *pRenderer, int window_width
 
     initPlayerDefaults(pPlayer, x, y, window_width, window_height);
 
-    updatePlayerRects(pPlayer);
+    updatePlayerRects(pPlayer, CLIENT_MAIN_MENU_STATE);
     return pPlayer;
 }
 
@@ -234,10 +240,10 @@ Player *createServerPlayer(float x, float y, int window_width, int window_height
     return pPlayer;
 }
 
-void changePlayerSkin(Player *pPlayer, int skin)
+void changePlayerSkin(Player *pPlayer, int skin, ClientState playerState)
 {
     pPlayer->tankSkin = skin;
-    updatePlayerRects(pPlayer);
+    updatePlayerRects(pPlayer, playerState);
 }
 
 void moveLeft(Player *pPlayer)
@@ -493,7 +499,7 @@ void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
     pPlayer->x += pPlayer->velX;
     pPlayer->y += pPlayer->velY;
 
-    updatePlayerRects(pPlayer);
+    updatePlayerRects(pPlayer, CLIENT_PLAYING_STATE);
     pPlayer->isGrounded = 0;
     
     checkForPlayerCollision(pPlayer, pMap);
@@ -515,7 +521,7 @@ void updatePlayer(Player *pPlayer, Map *pMap, int mouseX, int mouseY)
         pPlayer->velY = 0.0f;
     }
 
-    updatePlayerRects(pPlayer);
+    updatePlayerRects(pPlayer, CLIENT_PLAYING_STATE);
 }
 
 void drawPlayer(Player *pPlayer)

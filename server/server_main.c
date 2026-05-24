@@ -88,7 +88,6 @@ static int initServer(ServerGame *game)
         if (!game->projectiles[i]) return 0;
     }
 
-    //rememberMap(game);
     printf("Server running on UDP port %d\n", SERVER_PORT);
     return 1;
 }
@@ -129,7 +128,6 @@ static int addClient(ServerGame *game, IPaddress *address)
 static void receivePacket(ServerGame *game)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
-        printf("Server received a packet\n");
         ClientPacket clientPacket;
         memcpy(&clientPacket, game->recvPacket->data, sizeof(clientPacket));
 
