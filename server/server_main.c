@@ -240,7 +240,7 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
         ServerClient *client = &game->clients[i];
         if (!client->connected || !client->player) continue;
         for (int j = 0; j < MAX_BULLETS; j++) {
-            if (!isActive(game->projectiles[i])) continue;
+            if (!isActive(game->projectiles[j])) continue;
             checkBulletPlayerCollision(game->projectiles[j], client->player, game->explosions[nextExplosion]);
         }
     }
