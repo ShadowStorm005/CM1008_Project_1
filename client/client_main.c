@@ -8,6 +8,7 @@
 
 #include "player.h"
 #include "weapon.h"
+#include "explosions.h"
 #include "map.h"
 #include "client_net.h"
 #include "game_net.h"
@@ -28,6 +29,7 @@ struct clientgame{
 
     Player *players[MAX_PLAYERS];
     Projectile *projectiles[MAX_BULLETS];
+    Explosion *explosion[MAX_BULLETS];
     Map *map;
 
     bool inGameMenu;
@@ -38,10 +40,15 @@ struct clientgame{
     SDL_Texture *newGameButton;
     SDL_Texture *winnerTexture;
     SDL_Texture *loserTexture;
+    SDL_Texture *swedenSkinButton;
+    SDL_Texture *denmarkSkinButton;
+    SDL_Texture *germanySkinButton;
+    SDL_Texture *russiaSkinButton;
 
     char serverIpText[IP_TEXT_MAX];
 
     uint8_t playerId;
+    uint8_t selectedSkin;
     ClientState clientState;
     ServerState serverState;
 };
@@ -98,6 +105,30 @@ int main(int argc, char **argv)
                 else if (action == MENU_ACTION_EXIT) {
                     game.clientState = CLIENT_QUIT_STATE;
                     running = 0;
+                }
+                else if (action == MENU_ACTION_SELECT_SWEDEN) {
+                    game.selectedSkin = SKIN_SWEDEN;
+                    if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
+                        changePlayerSkin(game.players[game.playerId], game.selectedSkin);
+                    }
+                }
+                else if (action == MENU_ACTION_SELECT_GERMANY) {
+                    game.selectedSkin = SKIN_GERMANY;
+                    if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
+                        changePlayerSkin(game.players[game.playerId], game.selectedSkin);
+                    }
+                }
+                else if (action == MENU_ACTION_SELECT_RUSSIA) {
+                    game.selectedSkin = SKIN_RUSSIA;
+                    if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
+                        changePlayerSkin(game.players[game.playerId], game.selectedSkin);
+                    }
+                }
+                else if (action == MENU_ACTION_SELECT_DENMARK) {
+                    game.selectedSkin = SKIN_DENMARK;
+                    if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
+                        changePlayerSkin(game.players[game.playerId], game.selectedSkin);
+                    }
                 }
             }
 
@@ -170,7 +201,7 @@ int main(int argc, char **argv)
             }
         }
 
-        recieveStatus(&game, &serverPacket, &clientPacket);
+        receiveStatus(&game, &serverPacket, &clientPacket);
 
         if (game.clientState == CLIENT_MAIN_MENU_STATE) {
             renderMainMenu(game.renderer,
@@ -181,7 +212,14 @@ int main(int argc, char **argv)
         }
 
         else if (game.clientState == CLIENT_OPTIONS_STATE) {
-            renderSettingsMenu(game.renderer, game.background, game.backButton);
+            renderSettingsMenu(game.renderer,
+                               game.background,
+                               game.backButton,
+                               game.swedenSkinButton,
+                               game.germanySkinButton,
+                               game.russiaSkinButton,
+                               game.denmarkSkinButton
+                            );
         }
 
         else if (game.clientState == CLIENT_CONNECT_STATE) {
@@ -193,17 +231,17 @@ int main(int argc, char **argv)
                 game.lastJoinSendTime = SDL_GetTicks();
             }
 
-            recieveStatus(&game, &serverPacket, &clientPacket);
+            receiveStatus(&game, &serverPacket, &clientPacket);
             renderLobby(&game);
         }
         else if (game.clientState == CLIENT_PLAYING_STATE) {
             prepareClientPacket(&game, &clientPacket);
             sendInput(&game, &clientPacket);
-            recieveStatus(&game, &serverPacket, &clientPacket);
+            receiveStatus(&game, &serverPacket, &clientPacket);
             render(&game);
         }
         else if (game.clientState == CLIENT_DEAD_STATE) {
-            recieveStatus(&game, &serverPacket, &clientPacket);
+            receiveStatus(&game, &serverPacket, &clientPacket);
             render(&game);
         }
         else if (game.clientState == CLIENT_END_STATE) {
@@ -214,7 +252,7 @@ int main(int argc, char **argv)
             running = 0;
         }
 
-        recieveStatus(&game, &serverPacket, &clientPacket);
+        receiveStatus(&game, &serverPacket, &clientPacket);
 
         Uint32 frameTime = SDL_GetTicks() - frameStart;
         if (frameTime < FRAME_DELAY) {
@@ -305,9 +343,6 @@ static int initClient(ClientGame *game, const char *serverIp)
         if (!game->players[i]) return 0;
     }
 
-    /*game->resumeButton = loadTexture(game->renderer, "Resources/firsttank.png");
-    if (!game->resumeButton) return 0;*/
-
     game->resumeButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-backButton.png");
     if (!game->resumeButton) {
         printf("Error loading resumeButton.png: %s\n", IMG_GetError());
@@ -322,7 +357,7 @@ static int initClient(ClientGame *game, const char *serverIp)
         return 0;
     }
 
-    game->settingsButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-settingsButton.png");
+    game->settingsButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-changeSkinsButton.png");
     if (!game->settingsButton) {
         printf("Error loading settings.png: %s\n", IMG_GetError());
         free(game->settingsButton);
@@ -357,6 +392,31 @@ static int initClient(ClientGame *game, const char *serverIp)
     if (!resumeGameButton) {
         printf("Error loading resumeGame.png: %s\n", IMG_GetError());
         free(resumeGameButton);
+    game->swedenSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-swedenSkinButton.png");
+    if (!game->swedenSkinButton) {
+        printf("Error loading swedenSkinButton.png: %s\n", IMG_GetError());
+        free(game->swedenSkinButton);
+        return 0;
+    }
+
+    game->denmarkSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-denmarkSkinButton.png");
+    if (!game->denmarkSkinButton) {
+        printf("Error loading denmarkSkinButton.png: %s\n", IMG_GetError());
+        free(game->denmarkSkinButton);
+        return 0;
+    }
+
+    game->germanySkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-germanySkinButton.png");
+    if (!game->germanySkinButton) {
+        printf("Error loading germanySkinButton.png: %s\n", IMG_GetError());
+        free(game->germanySkinButton);
+        return 0;
+    }
+
+    game->russiaSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-russiaSkinButton.png");
+    if (!game->russiaSkinButton) {
+        printf("Error loading russiaSkinButton.png: %s\n", IMG_GetError());
+        free(game->russiaSkinButton);
         return 0;
     }
 
@@ -366,6 +426,14 @@ static int initClient(ClientGame *game, const char *serverIp)
         if (!game->projectiles[i])
         {
             printf("Projectile creation failed\n");
+            closeClient(game);
+            return 0;
+        }
+
+        game->explosion[i] = createExplosion(game->renderer);
+        if(!game->explosion[i])
+        {
+            printf("Explosion creation failed\n");
             closeClient(game);
             return 0;
         }
@@ -463,7 +531,7 @@ static void prepareClientPacket(ClientGame *game, ClientPacket *clientPacket)
     clientPacket->input = getInput(keys);
     clientPacket->mouseX = mouseX;
     clientPacket->mouseY = mouseY;
-    clientPacket->tankSkin = SKIN_DENMARK; // Change Skin Here
+    clientPacket->tankSkin = game->selectedSkin;
 }
 
 static void sendInput(ClientGame *game, ClientPacket *clientPacket)
@@ -527,6 +595,10 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPa
                         serverPacket->projectiles[i].y,
                         serverPacket->projectiles[i].angle);
         updateProjectileRect(game->projectiles[i]);
+
+        activateExplosion(game->explosion[i], serverPacket->explosions[i].x, serverPacket->explosions[i].y, serverPacket->explosions[i].explosionTimer);
+        receiveExplosionServerTime(game->explosion[i], serverPacket->serverTime);
+        updateExplosionTexture(game->explosion[i]);
     }
     
     for (int i = 0; i < serverPacket->tileChangeCount && i < MAX_TILE_CHANGES; i++) {
@@ -536,7 +608,7 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPa
     }
 }
 
-static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket)
+static void receiveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
         memset(serverPacket, 0, sizeof(*serverPacket));
@@ -571,6 +643,8 @@ static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPa
         for(int i = 0; i < MAX_PLAYERS; i++)
         {
             changePlayerSkin(game->players[i], serverPacket->players[i].tankSkin);
+            setSmokeTimer(game->players[i], serverPacket->players[i].smokeTimer);
+            receiveServerTime(game->players[i], serverPacket->serverTime);
         }
     }
 }
@@ -591,7 +665,8 @@ static void render(ClientGame *game)
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) drawProjectile(game->projectiles[i]);
+        if (isActive(game->projectiles[i]))        drawProjectile(game->projectiles[i]);
+        if (isExplosionActive(game->explosion[i])) drawExplosion(game->explosion[i]);
     }
 
     SDL_RenderPresent(game->renderer);
@@ -604,22 +679,28 @@ static void closeClient(ClientGame *game)
     }
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (game->projectiles[i]) destroyProjectile(game->projectiles[i]);
+        if (game->explosion[i])   destroyExplosion(game->explosion[i]);
     }
-    if (game->map) destroyTiles(game->map);
+    if (game->map)        destroyTiles(game->map);
     if (game->background) SDL_DestroyTexture(game->background);
     if (game->sendPacket) SDLNet_FreePacket(game->sendPacket);
     if (game->recvPacket) SDLNet_FreePacket(game->recvPacket);
-    if (game->socket) SDLNet_UDP_Close(game->socket);
-    if (game->renderer) SDL_DestroyRenderer(game->renderer);
-    if (game->window) SDL_DestroyWindow(game->window);
+    if (game->socket)     SDLNet_UDP_Close(game->socket);
+    if (game->renderer)   SDL_DestroyRenderer(game->renderer);
+    if (game->window)     SDL_DestroyWindow(game->window);
 
-    if (game->resumeButton) SDL_DestroyTexture(game->resumeButton);
-    if (game->newGameButton) SDL_DestroyTexture(game->newGameButton);
+    if (game->resumeButton)   SDL_DestroyTexture(game->resumeButton);
+    if (game->newGameButton)  SDL_DestroyTexture(game->newGameButton);
     if (game->settingsButton) SDL_DestroyTexture(game->settingsButton);
     if (game->exitGameButton) SDL_DestroyTexture(game->exitGameButton);
     if (game->backButton) SDL_DestroyTexture(game->backButton);
     if (game->winnerTexture) SDL_DestroyTexture(game->winnerTexture);
     if (game->loserTexture) SDL_DestroyTexture(game->loserTexture);
+    if (game->backButton)     SDL_DestroyTexture(game->backButton);
+    if (game->swedenSkinButton) SDL_DestroyTexture(game->swedenSkinButton);
+    if (game->denmarkSkinButton) SDL_DestroyTexture(game->denmarkSkinButton);
+    if (game->germanySkinButton) SDL_DestroyTexture(game->germanySkinButton);
+    if (game->russiaSkinButton) SDL_DestroyTexture(game->russiaSkinButton);
 
     SDLNet_Quit();
     IMG_Quit();

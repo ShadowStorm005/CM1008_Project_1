@@ -5,23 +5,26 @@
 
 #include "player.h"
 #include "weapon.h"
+#include "explosions.h"
 #include "map.h"
 #include "physics.h"
 #include "server_net.h"
 #include "game_net.h"
 #include "server_creation_functions.h"
+// 👍👍👍👍👍👍👍👍👍
 
 struct serverclient {
     bool connected;
     IPaddress ipaddress;
     Player *player;
+    uint32_t smokeTimer;
     uint8_t input;
     uint8_t tankSkin;
     int mouseX;
     int mouseY;
 };
 
-struct servergame{
+struct servergame {
     UDPsocket socket;
     UDPpacket *recvPacket;
     UDPpacket *sendPacket;
@@ -29,6 +32,7 @@ struct servergame{
     Map *map;
     Projectile *projectiles[MAX_BULLETS];
     ServerState serverState;
+    Explosion *explosions[MAX_BULLETS];
 };
 
 int main(int argc, char **argv)
@@ -45,6 +49,10 @@ int main(int argc, char **argv)
         Uint32 frameStart = SDL_GetTicks();
         memset(&serverPacket, 0, sizeof(serverPacket));
         receivePacket(&game);
+        if (connectedClientCount(&game) >= MAX_PLAYERS) {
+            updateWorld(&game, &serverPacket);
+        }
+        sendStatus(&game, &serverPacket);
 
     if (game.serverState == SERVER_MENU_STATE && connectedClientCount(&game) >= 4) {
         game.serverState = SERVER_RUN_STATE;
@@ -99,6 +107,9 @@ static int initServer(ServerGame *game)
     for (int i = 0; i < MAX_BULLETS; i++) {
         game->projectiles[i] = createServerProjectile();
         if (!game->projectiles[i]) return 0;
+
+        game->explosions[i] = createServerExplosion();
+        if (!game->explosions[i]) return 0;
     }
 
     //rememberMap(game);
@@ -146,6 +157,9 @@ static int addClient(ServerGame *game, IPaddress *address)
 
             game->clients[i].player = createServerPlayer(spawnX[i], spawnY[i], WINDOW_WIDTH, WINDOW_HEIGHT);
 
+            float spawnX = WINDOW_WIDTH / 2.0f + (float)(i * 80);
+            float spawnY = WINDOW_HEIGHT / 2.0f;
+            game->clients[i].player = createServerPlayer(spawnX, spawnY, WINDOW_WIDTH, WINDOW_HEIGHT);
             printf("Client %d joined, ipaddress: %d\n", i, game->clients[i].ipaddress.host);
             return i;
         }
@@ -183,7 +197,11 @@ static void receivePacket(ServerGame *game)
         }
         if (clientPacket.packetType == CLIENT_JOIN_PACKET) {
             if (id < 0) {
-                addClient(game, &game->recvPacket->address);
+                id = addClient(game, &game->recvPacket->address);
+            }
+
+            if (id >= 0) {
+                game->clients[id].tankSkin = clientPacket.tankSkin;
             }
             continue;
         }
@@ -296,9 +314,9 @@ static void handleInput(ServerGame *game, ServerClient *client)
     if (client->input & INPUT_LEFT) moveLeft(client->player);
     if (client->input & INPUT_RIGHT) moveRight(client->player);
     if (client->input & INPUT_JUMP) jump(client->player);
-    
     steerCanon(client->player, client->mouseX, client->mouseY);
     if ((client->input & INPUT_SHOOT) && canShoot(client->player)) {
+        client->smokeTimer = SDL_GetTicks();
         shoot(game->projectiles, getBulletSize(client->player), getBulletSpeed(client->player), getCanonX(client->player), getCanonY(client->player), getAngle(client->player), getCanonMode(client->player));
         setTriggerState(client->player, 0);
     }
@@ -319,14 +337,20 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
             updatePlayer(client->player, game->map, client->mouseX, client->mouseY);
         }
     }
+    int nextExplosion;
+    for (int i = 0; i < MAX_BULLETS; i++)
+    {
+        if(!isExplosionActive(game->explosions[i])) nextExplosion = i;
+    }
 
-    for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) {
-            updateProjectile(game->projectiles[i],
-                             game->map,
-                             serverPacket->tileChanges,
-                             &serverPacket->tileChangeCount);
-        }
+    for (int i = 0; i < MAX_BULLETS; i++) 
+    {
+        if (isActive(game->projectiles[i]))
+            updateProjectile(game->projectiles[i], 
+                            game->map,
+                            game->explosions[nextExplosion],
+                            serverPacket->tileChanges, 
+                            &serverPacket->tileChangeCount);
     }
 
     for (int i = 0; i < MAX_PLAYERS; i++) {
@@ -335,7 +359,7 @@ static void updateWorld(ServerGame *game, ServerPacket *serverPacket)
 
         for (int j = 0; j < MAX_BULLETS; j++) {
             if (!isActive(game->projectiles[j])) continue;
-            checkBulletPlayerCollision(game->projectiles[j], client->player);
+            checkBulletPlayerCollision(game->projectiles[j], client->player, game->explosions[nextExplosion]);
         }
     }
 }
@@ -358,6 +382,7 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
     }
     else {
         serverPacket->serverState = SERVER_RUN_STATE;
+        serverPacket->serverTime = SDL_GetTicks();
         
         if (getPlayerHealth(game->clients[clientId].player) <= 0) {
         serverPacket->clientState = CLIENT_DEAD_STATE;
@@ -383,7 +408,8 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
        
     }
 
-    for (int i = 0; i < MAX_BULLETS; i++) {
+    for (int i = 0; i < MAX_BULLETS; i++) 
+    {
         if (!isActive(game->projectiles[i]))
         {
             continue;
@@ -392,6 +418,16 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
         serverPacket->projectiles[i].x = getBulletX(game->projectiles[i]);
         serverPacket->projectiles[i].y = getBulletY(game->projectiles[i]);
         serverPacket->projectiles[i].angle = getBulletAngle(game->projectiles[i]);
+    }
+    for (int i = 0; i < MAX_BULLETS; i++)
+    {
+        if (!isExplosionActive(game->explosions[i]))
+        {
+            continue;
+        }
+        serverPacket->explosions[i].x = getExplosionCordX(game->explosions[i]);
+        serverPacket->explosions[i].y = getExplosionCordY(game->explosions[i]);
+        serverPacket->explosions[i].explosionTimer = getStartTime(game->explosions[i]);
     }
 }
 
@@ -418,6 +454,7 @@ static void closeServer(ServerGame *game)
     }
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (game->projectiles[i]) destroyProjectile(game->projectiles[i]);
+        if (game->explosions[i])  destroyExplosion(game->explosions[i]);
     }
     if (game->map) destroyTiles(game->map);
     if (game->recvPacket) SDLNet_FreePacket(game->recvPacket);

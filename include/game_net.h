@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 #define SERVER_PORT 1234
-#define DEFAULT_SERVER_IP "192.168.0.103"
+#define DEFAULT_SERVER_IP "192.168.1.73"
 
-#define MAX_PLAYERS 4
+#define MAX_PLAYERS 2
 #define MAX_TILE_CHANGES 128
 #define UNKNOWN_PLAYER 255
 #define FPS 60
@@ -26,7 +26,7 @@ typedef enum {
 typedef enum {
     SKIN_SWEDEN,
     SKIN_DENMARK,
-    SKIN_DEUTSCH,
+    SKIN_GERMANY,
     SKIN_RUSSIA
 } TankSkins;
 
@@ -73,6 +73,7 @@ typedef struct {
     float y;
     int32_t mouseX;
     int32_t mouseY;
+    uint32_t smokeTimer;
     uint8_t tankSkin;
     uint8_t health;
 } NetPlayer;
@@ -84,6 +85,12 @@ typedef struct {
 } NetProjectile;
 
 typedef struct {
+    int x;
+    int y;
+    uint32_t explosionTimer;
+} NetExplosion;
+
+typedef struct {
     int8_t x;
     int8_t y;
     int8_t selectedTexture;
@@ -92,7 +99,9 @@ typedef struct {
 typedef struct {
     NetTile tileChanges[MAX_TILE_CHANGES];
     NetProjectile projectiles[MAX_BULLETS];
+    NetExplosion explosions[MAX_BULLETS];
     NetPlayer players[MAX_PLAYERS];
+    uint32_t serverTime;
     ServerState serverState;
     ClientState clientState;
     uint8_t playerId;

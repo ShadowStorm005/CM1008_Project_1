@@ -35,6 +35,30 @@ static SDL_Rect backRect(void)
     return rect;
 }
 
+static SDL_Rect swedenSkinRect(void)
+{
+    SDL_Rect rect = {300, 250, MENU_BUTTON_W, MENU_BUTTON_H};
+    return rect;
+}
+
+static SDL_Rect germanySkinRect(void)
+{
+    SDL_Rect rect = {300, 380, MENU_BUTTON_W, MENU_BUTTON_H};
+    return rect;
+}
+
+static SDL_Rect russiaSkinRect(void)
+{
+    SDL_Rect rect = {650, 250, MENU_BUTTON_W, MENU_BUTTON_H};
+    return rect;
+}
+
+static SDL_Rect denmarkSkinRect(void)
+{
+    SDL_Rect rect = {650, 380, MENU_BUTTON_W, MENU_BUTTON_H};
+    return rect;
+}
+
 int menuPointInRect(int x, int y, SDL_Rect rect)
 {
     return x >= rect.x && x <= rect.x + rect.w &&
@@ -82,15 +106,27 @@ MenuAction handleMainMenuEvent(SDL_Event *event)
 
 void renderSettingsMenu(SDL_Renderer *renderer,
                         SDL_Texture *background,
-                        SDL_Texture *backButton)
+                        SDL_Texture *backButton,
+                        SDL_Texture *swedenSkinButton,
+                        SDL_Texture *germanySkinButton,
+                        SDL_Texture *russiaSkinButton,
+                        SDL_Texture *denmarkSkinButton)
 {
     SDL_Rect bg = backgroundRect();
     SDL_Rect back = backRect();
+    SDL_Rect sweden = swedenSkinRect();
+    SDL_Rect germany = germanySkinRect();
+    SDL_Rect russia = russiaSkinRect();
+    SDL_Rect denmark = denmarkSkinRect();
 
     SDL_RenderClear(renderer);
 
     if (background) SDL_RenderCopy(renderer, background, NULL, &bg);
     if (backButton) SDL_RenderCopy(renderer, backButton, NULL, &back);
+    if (swedenSkinButton) SDL_RenderCopy(renderer, swedenSkinButton, NULL, &sweden);
+    if (germanySkinButton) SDL_RenderCopy(renderer, germanySkinButton, NULL, &germany);
+    if (russiaSkinButton) SDL_RenderCopy(renderer, russiaSkinButton, NULL, &russia);
+    if (denmarkSkinButton) SDL_RenderCopy(renderer, denmarkSkinButton, NULL, &denmark);
 
     SDL_RenderPresent(renderer);
 }
@@ -102,6 +138,18 @@ MenuAction handleSettingsMenuEvent(SDL_Event *event)
     }
 
     if (event->type == SDL_MOUSEBUTTONDOWN && event->button.button == SDL_BUTTON_LEFT) {
+        if (menuPointInRect(event->button.x, event->button.y, swedenSkinRect())) {
+            return MENU_ACTION_SELECT_SWEDEN;
+        }
+        if (menuPointInRect(event->button.x, event->button.y, germanySkinRect())) {
+            return MENU_ACTION_SELECT_GERMANY;
+        }
+        if (menuPointInRect(event->button.x, event->button.y, russiaSkinRect())) {
+            return MENU_ACTION_SELECT_RUSSIA;
+        }
+        if (menuPointInRect(event->button.x, event->button.y, denmarkSkinRect())) {
+            return MENU_ACTION_SELECT_DENMARK;
+        }
         if (menuPointInRect(event->button.x, event->button.y, backRect())) {
             return MENU_ACTION_BACK;
         }

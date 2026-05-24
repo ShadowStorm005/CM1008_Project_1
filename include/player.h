@@ -22,6 +22,9 @@ int canShoot(Player *pPlayer);
 float getBulletSpeed(Player *pPlayer);
 int getBulletSize(Player *pPlayer);
 
+void receiveServerTime(Player *pPlayer, int serverTime);
+
+void setSmokeTimer(Player *pPlayer, int startTime);
 void setTriggerState(Player *pPlayer, int enable);
 
 void moveLeft(Player *pPlayer);
