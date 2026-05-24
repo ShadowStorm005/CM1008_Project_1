@@ -8,6 +8,7 @@
 
 #include "player.h"
 #include "weapon.h"
+#include "explosions.h"
 #include "map.h"
 #include "client_net.h"
 #include "game_net.h"
@@ -28,6 +29,7 @@ struct clientgame{
 
     Player *players[MAX_PLAYERS];
     Projectile *projectiles[MAX_BULLETS];
+    Explosion *explosion[MAX_BULLETS];
     Map *map;
 
     bool inGameMenu;
@@ -151,7 +153,7 @@ int main(int argc, char **argv)
             }
         }
 
-        recieveStatus(&game, &serverPacket, &clientPacket);
+        receiveStatus(&game, &serverPacket, &clientPacket);
 
         if (game.clientState == CLIENT_MAIN_MENU_STATE) {
             renderMainMenu(game.renderer,
@@ -174,24 +176,24 @@ int main(int argc, char **argv)
                 game.lastJoinSendTime = SDL_GetTicks();
             }
 
-            recieveStatus(&game, &serverPacket, &clientPacket);
+            receiveStatus(&game, &serverPacket, &clientPacket);
             renderLobby(&game);
         }
         else if (game.clientState == CLIENT_PLAYING_STATE) {
             prepareClientPacket(&game, &clientPacket);
             sendInput(&game, &clientPacket);
-            recieveStatus(&game, &serverPacket, &clientPacket);
+            receiveStatus(&game, &serverPacket, &clientPacket);
             render(&game);
         }
         else if (game.clientState == CLIENT_DEAD_STATE) {
-            recieveStatus(&game, &serverPacket, &clientPacket);
+            receiveStatus(&game, &serverPacket, &clientPacket);
             render(&game);
         }
         else if (game.clientState == CLIENT_QUIT_STATE) {
             running = 0;
         }
 
-        recieveStatus(&game, &serverPacket, &clientPacket);
+        receiveStatus(&game, &serverPacket, &clientPacket);
 
         Uint32 frameTime = SDL_GetTicks() - frameStart;
         if (frameTime < FRAME_DELAY) {
@@ -336,6 +338,14 @@ static int initClient(ClientGame *game, const char *serverIp)
             closeClient(game);
             return 0;
         }
+
+        game->explosion[i] = createExplosion(game->renderer);
+        if(!game->explosion[i])
+        {
+            printf("Explosion creation failed\n");
+            closeClient(game);
+            return 0;
+        }
     }
     game->socket = SDLNet_UDP_Open(0);
     if (!game->socket) {
@@ -463,6 +473,10 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPa
                         serverPacket->projectiles[i].y,
                         serverPacket->projectiles[i].angle);
         updateProjectileRect(game->projectiles[i]);
+
+        activateExplosion(game->explosion[i], serverPacket->explosions[i].x, serverPacket->explosions[i].y, serverPacket->explosions[i].explosionTimer);
+        receiveExplosionServerTime(game->explosion[i], serverPacket->serverTime);
+        updateExplosionTexture(game->explosion[i]);
     }
     
     for (int i = 0; i < serverPacket->tileChangeCount && i < MAX_TILE_CHANGES; i++) {
@@ -472,7 +486,7 @@ static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPa
     }
 }
 
-static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket)
+static void receiveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
         memset(serverPacket, 0, sizeof(*serverPacket));
@@ -503,6 +517,8 @@ static void recieveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPa
         for(int i = 0; i < MAX_PLAYERS; i++)
         {
             changePlayerSkin(game->players[i], serverPacket->players[i].tankSkin);
+            setSmokeTimer(game->players[i], serverPacket->players[i].smokeTimer);
+            receiveServerTime(game->players[i], serverPacket->serverTime);
         }
     }
 }
@@ -523,7 +539,8 @@ static void render(ClientGame *game)
     }
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (isActive(game->projectiles[i])) drawProjectile(game->projectiles[i]);
+        if (isActive(game->projectiles[i]))        drawProjectile(game->projectiles[i]);
+        if (isExplosionActive(game->explosion[i])) drawExplosion(game->explosion[i]);
     }
 
     SDL_RenderPresent(game->renderer);
@@ -536,20 +553,21 @@ static void closeClient(ClientGame *game)
     }
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (game->projectiles[i]) destroyProjectile(game->projectiles[i]);
+        if (game->explosion[i])   destroyExplosion(game->explosion[i]);
     }
-    if (game->map) destroyTiles(game->map);
+    if (game->map)        destroyTiles(game->map);
     if (game->background) SDL_DestroyTexture(game->background);
     if (game->sendPacket) SDLNet_FreePacket(game->sendPacket);
     if (game->recvPacket) SDLNet_FreePacket(game->recvPacket);
-    if (game->socket) SDLNet_UDP_Close(game->socket);
-    if (game->renderer) SDL_DestroyRenderer(game->renderer);
-    if (game->window) SDL_DestroyWindow(game->window);
+    if (game->socket)     SDLNet_UDP_Close(game->socket);
+    if (game->renderer)   SDL_DestroyRenderer(game->renderer);
+    if (game->window)     SDL_DestroyWindow(game->window);
 
-    if (game->resumeButton) SDL_DestroyTexture(game->resumeButton);
-    if (game->newGameButton) SDL_DestroyTexture(game->newGameButton);
+    if (game->resumeButton)   SDL_DestroyTexture(game->resumeButton);
+    if (game->newGameButton)  SDL_DestroyTexture(game->newGameButton);
     if (game->settingsButton) SDL_DestroyTexture(game->settingsButton);
     if (game->exitGameButton) SDL_DestroyTexture(game->exitGameButton);
-    if (game->backButton) SDL_DestroyTexture(game->backButton);
+    if (game->backButton)     SDL_DestroyTexture(game->backButton);
 
     SDLNet_Quit();
     IMG_Quit();

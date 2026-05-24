@@ -6,8 +6,8 @@ INCLUDE  = -IC:/msys64/mingw64/include/SDL2 -I$(INCDIR)
 CFLAGS   = -g $(INCLUDE) -c
 LDFLAGS  = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_net -mwindows -mconsole -lm
 
-SERVER_OBJ = $(OBJDIR)/server_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
-CLIENT_OBJ = $(OBJDIR)/client_main.o $(OBJDIR)/menu.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o
+SERVER_OBJ = $(OBJDIR)/server_main.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o $(OBJDIR)/explosions.o
+CLIENT_OBJ = $(OBJDIR)/client_main.o $(OBJDIR)/menu.o $(OBJDIR)/map.o $(OBJDIR)/physics.o $(OBJDIR)/player.o $(OBJDIR)/weapon.o $(OBJDIR)/explosions.o
 
 all: server.exe client.exe
 
@@ -38,6 +38,9 @@ $(OBJDIR)/player.o: $(SRCDIR)/player.c $(INCDIR)/player.h $(INCDIR)/server_creat
 $(OBJDIR)/weapon.o: $(SRCDIR)/weapon.c $(INCDIR)/weapon.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # weapon compiler
 	gcc $(CFLAGS) $(SRCDIR)/weapon.c -o $(OBJDIR)/weapon.o
 
+$(OBJDIR)/explosions.o: $(SRCDIR)/explosions.c $(INCDIR)/explosions.h $(INCDIR)/server_creation_functions.h | $(OBJDIR) # explosions compiler
+	gcc $(CFLAGS) $(SRCDIR)/explosions.c -o $(OBJDIR)/explosions.o
+
 $(OBJDIR):
 	if not exist $(OBJDIR) mkdir $(OBJDIR)
 
@@ -49,5 +52,6 @@ clean:
 	del $(OBJDIR)\physics.o
 	del $(OBJDIR)\player.o
 	del $(OBJDIR)\weapon.o
+	del $(OBJDIR)\explosions.o
 	del server.exe
 	del client.exe

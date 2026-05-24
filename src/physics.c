@@ -5,6 +5,7 @@
 #include "player.h"
 #include "map.h"
 #include "weapon.h"
+#include "explosions.h"
 #include "game_net.h"
 
 void checkForPlayerCollision(Player *pPlayer, Map *pMap)
@@ -53,7 +54,7 @@ void checkForPlayerCollision(Player *pPlayer, Map *pMap)
     }
 }
 
-void checkForBulletCollision(Projectile *pProjectile, Map *pMap, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount)
+void checkForBulletCollision(Projectile *pProjectile, Map *pMap, Explosion *pExplosion, NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCount)
 {
     SDL_Rect bulletRect = getBulletRect(pProjectile);
     for (int i = 0; i < AMOUNT_OF_TILES_HORIZONTAL; i++){
@@ -63,6 +64,7 @@ void checkForBulletCollision(Projectile *pProjectile, Map *pMap, NetTile tileCha
             if (SDL_HasIntersection(&bulletRect, &tileRect)){
                 inactivateBullet(pProjectile);
                 inactivateTile(pMap, i, j);
+                activateExplosion(pExplosion, bulletRect.x, bulletRect.y, SDL_GetTicks());
                 addChangedTile(tileChanges, tileChangeCount, i, j, -1);
                 triggerBulletExplosion(pMap, i, j, 4, tileChanges, tileChangeCount);
                 return;
@@ -147,7 +149,7 @@ void addChangedTile(NetTile tileChanges[MAX_TILE_CHANGES], uint8_t *tileChangeCo
     *tileChangeCount += 1;
 }
 
-void checkBulletPlayerCollision(Projectile *pProjectile, Player *pPlayer)
+void checkBulletPlayerCollision(Projectile *pProjectile, Player *pPlayer, Explosion *pExplosion)
 {
     if (getPlayerHealth(pPlayer) <= 0) return;
 
@@ -155,6 +157,7 @@ void checkBulletPlayerCollision(Projectile *pProjectile, Player *pPlayer)
     SDL_Rect playerRect = getPlayerRect(pPlayer);
     if (SDL_HasIntersection(&bulletRect, &playerRect)){
         takeDamage(pPlayer, getBulletDamage(pProjectile));
+        activateExplosion(pExplosion, bulletRect.x, bulletRect.y, SDL_GetTicks());
         inactivateBullet(pProjectile);
         printf("Player took damage\n");
     }
