@@ -401,6 +401,7 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
         serverPacket->players[i].mouseX = game->clients[i].mouseX;
         serverPacket->players[i].mouseY = game->clients[i].mouseY;
         serverPacket->players[i].tankSkin = game->clients[i].tankSkin;
+        serverPacket->players[i].smokeTimer = game->clients[i].smokeTimer;
         int health = getPlayerHealth(game->clients[i].player);
 
         if (health < 0) health = 0;

@@ -91,7 +91,7 @@ void updatePlayerSkin(Player *pPlayer)
 void updateBarrelSmoke(Player *pPlayer)
 {
     if(pPlayer->serverTime < pPlayer->smokeTimerEnd)
-    {
+    {        
         int timeLeft = pPlayer->smokeTimerEnd - pPlayer->serverTime;
 
         if(timeLeft > pPlayer->smokeTimer * 0.9f) pPlayer->barrelSmokeSrcRect.y = 0;
