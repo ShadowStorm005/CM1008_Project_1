@@ -48,7 +48,7 @@ int main(int argc, char **argv)
         Uint32 frameStart = SDL_GetTicks();
         memset(&serverPacket, 0, sizeof(serverPacket));
         receivePacket(&game);
-        if(connectedClientCount(&game) >=4){
+        if (connectedClientCount(&game) >= MAX_PLAYERS) {
             updateWorld(&game, &serverPacket);
         }
         sendStatus(&game, &serverPacket);
@@ -161,7 +161,11 @@ static void receivePacket(ServerGame *game)
         int id = findClientId(game, &game->recvPacket->address);
         if (clientPacket.packetType == CLIENT_JOIN_PACKET) {
             if (id < 0) {
-                addClient(game, &game->recvPacket->address);
+                id = addClient(game, &game->recvPacket->address);
+            }
+
+            if (id >= 0) {
+                game->clients[id].tankSkin = clientPacket.tankSkin;
             }
             continue;
         }
@@ -252,7 +256,7 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
 
     serverPacket->playerId = (uint8_t)clientId;
 
-    if (connectedCount < 4) {
+    if (connectedCount < MAX_PLAYERS) {
         serverPacket->serverState = SERVER_MENU_STATE;
         serverPacket->clientState = CLIENT_LOBBY_STATE;
     }
