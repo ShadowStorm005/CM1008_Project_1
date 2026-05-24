@@ -38,7 +38,6 @@ struct clientgame{
     SDL_Texture *exitGameButton;
     SDL_Texture *backButton;
     SDL_Texture *newGameButton;
-    SDL_Texture *changeSkinsButton;
     SDL_Texture *swedenSkinButton;
     SDL_Texture *denmarkSkinButton;
     SDL_Texture *germanySkinButton;
@@ -47,6 +46,7 @@ struct clientgame{
     char serverIpText[IP_TEXT_MAX];
 
     uint8_t playerId;
+    uint8_t selectedSkin;
     ClientState clientState;
     ServerState serverState;
 };
@@ -103,6 +103,36 @@ int main(int argc, char **argv)
                 else if (action == MENU_ACTION_EXIT) {
                     game.clientState = CLIENT_QUIT_STATE;
                     running = 0;
+                }
+                else if (action == MENU_ACTION_SELECT_SWEDEN) {
+                    game.selectedSkin = SKIN_SWEDEN;
+                    if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
+                        changePlayerSkin(game.players[game.playerId], game.selectedSkin);
+                    }
+                }
+                else if (action == MENU_ACTION_SELECT_GERMANY) {
+                    game.selectedSkin = SKIN_DEUTSCH;
+                    if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
+                        changePlayerSkin(game.players[game.playerId], game.selectedSkin);
+                    }
+                }
+                else if (action == MENU_ACTION_SELECT_RUSSIA) {
+                    game.selectedSkin = SKIN_RUSSIA;
+                    if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
+                        changePlayerSkin(game.players[game.playerId], game.selectedSkin);
+                    }
+                }
+                else if (action == MENU_ACTION_SELECT_DENMARK) {
+                    game.selectedSkin = SKIN_DENMARK;
+                    if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
+                        changePlayerSkin(game.players[game.playerId], game.selectedSkin);
+                    }
+                }
+                else if (action == MENU_ACTION_SELECT_GERMANY) {
+                    game.selectedSkin = SKIN_DEUTSCH;
+                    if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
+                        changePlayerSkin(game.players[game.playerId], game.selectedSkin);
+                    }
                 }
             }
 
@@ -169,7 +199,13 @@ int main(int argc, char **argv)
         }
 
         else if (game.clientState == CLIENT_OPTIONS_STATE) {
-            renderSettingsMenu(game.renderer, game.background, game.backButton);
+            renderSettingsMenu(game.renderer,
+                               game.background,
+                               game.backButton,
+                               game.swedenSkinButton,
+                               game.germanySkinButton,
+                               game.russiaSkinButton,
+                               game.denmarkSkinButton);
         }
 
         else if (game.clientState == CLIENT_CONNECT_STATE) {
@@ -289,9 +325,6 @@ static int initClient(ClientGame *game, const char *serverIp)
         if (!game->players[i]) return 0;
     }
 
-    /*game->resumeButton = loadTexture(game->renderer, "Resources/firsttank.png");
-    if (!game->resumeButton) return 0;*/
-
     game->resumeButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-backButton.png");
     if (!game->resumeButton) {
         printf("Error loading resumeButton.png: %s\n", IMG_GetError());
@@ -306,7 +339,7 @@ static int initClient(ClientGame *game, const char *serverIp)
         return 0;
     }
 
-    game->settingsButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-settingsButton.png");
+    game->settingsButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-changeSkinsButton.png");
     if (!game->settingsButton) {
         printf("Error loading settings.png: %s\n", IMG_GetError());
         free(game->settingsButton);
@@ -327,45 +360,31 @@ static int initClient(ClientGame *game, const char *serverIp)
         return 0;
     }
 
-    SDL_Texture* resumeGameButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-backButton.png");
-    if (!resumeGameButton) {
-        printf("Error loading resumeGame.png: %s\n", IMG_GetError());
-        free(resumeGameButton);
-        return 0;
-    }
-
-    SDL_Texture* changeSkinsButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-changeSkinsButton.png");
-    if (!changeSkinsButton) {
-        printf("Error loading changeSkinsButton.png: %s\n", IMG_GetError());
-        free(changeSkinsButton);
-        return 0;
-    }
-
-    SDL_Texture* swedenSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-swedenSkinButton.png");
-    if (!swedenSkinButton) {
+    game->swedenSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-swedenSkinButton.png");
+    if (!game->swedenSkinButton) {
         printf("Error loading swedenSkinButton.png: %s\n", IMG_GetError());
-        free(swedenSkinButton);
+        free(game->swedenSkinButton);
         return 0;
     }
 
-    SDL_Texture* denmarkSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-denmarkSkinButton.png");
-    if (!denmarkSkinButton) {
+    game->denmarkSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-denmarkSkinButton.png");
+    if (!game->denmarkSkinButton) {
         printf("Error loading denmarkSkinButton.png: %s\n", IMG_GetError());
-        free(denmarkSkinButton);
+        free(game->denmarkSkinButton);
         return 0;
     }
 
-    SDL_Texture* germanySkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-germanySkinButton.png");
-    if (!germanySkinButton) {
+    game->germanySkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-germanySkinButton.png");
+    if (!game->germanySkinButton) {
         printf("Error loading germanySkinButton.png: %s\n", IMG_GetError());
-        free(germanySkinButton);
+        free(game->germanySkinButton);
         return 0;
     }
 
-    SDL_Texture* russiaSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-russiaSkinButton.png");
-    if (!russiaSkinButton) {
+    game->russiaSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-russiaSkinButton.png");
+    if (!game->russiaSkinButton) {
         printf("Error loading russiaSkinButton.png: %s\n", IMG_GetError());
-        free(russiaSkinButton);
+        free(game->russiaSkinButton);
         return 0;
     }
 
@@ -480,7 +499,7 @@ static void prepareClientPacket(ClientGame *game, ClientPacket *clientPacket)
     clientPacket->input = getInput(keys);
     clientPacket->mouseX = mouseX;
     clientPacket->mouseY = mouseY;
-    clientPacket->tankSkin = SKIN_DENMARK; // Change Skin Here
+    clientPacket->tankSkin = game->selectedSkin;
 }
 
 static void sendInput(ClientGame *game, ClientPacket *clientPacket)
@@ -608,7 +627,6 @@ static void closeClient(ClientGame *game)
     if (game->settingsButton) SDL_DestroyTexture(game->settingsButton);
     if (game->exitGameButton) SDL_DestroyTexture(game->exitGameButton);
     if (game->backButton)     SDL_DestroyTexture(game->backButton);
-    if (game->changeSkinsButton) SDL_DestroyTexture(game->changeSkinsButton);
     if (game->swedenSkinButton) SDL_DestroyTexture(game->swedenSkinButton);
     if (game->denmarkSkinButton) SDL_DestroyTexture(game->denmarkSkinButton);
     if (game->germanySkinButton) SDL_DestroyTexture(game->germanySkinButton);
