@@ -38,6 +38,8 @@ struct clientgame{
     SDL_Texture *exitGameButton;
     SDL_Texture *backButton;
     SDL_Texture *newGameButton;
+    SDL_Texture *winnerTexture;
+    SDL_Texture *loserTexture;
     SDL_Texture *swedenSkinButton;
     SDL_Texture *denmarkSkinButton;
     SDL_Texture *germanySkinButton;
@@ -54,7 +56,7 @@ struct clientgame{
 int main(int argc, char **argv)
 {
     const char *serverIp = DEFAULT_SERVER_IP;
-    if (argc >= 4) serverIp = argv[1];
+    if (argc >= 2) serverIp = argv[1];
 
     ClientGame game;
     ClientPacket clientPacket;
@@ -168,6 +170,23 @@ int main(int argc, char **argv)
                         game.clientState = CLIENT_MAIN_MENU_STATE;
                     }
                 }
+                
+            }
+            else if (game.clientState == CLIENT_END_STATE) {
+                if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                    SDL_Rect playAgainButton = { WINDOW_WIDTH / 2 - 170, 610, 340, 80 };
+                    SDL_Rect disconnectButton = { WINDOW_WIDTH / 2 - 170, 710, 340, 80 };
+
+                    if (menuPointInRect(event.button.x, event.button.y, playAgainButton)) {
+                        sendReplay(&game);
+                        game.clientState = CLIENT_LOBBY_STATE;
+                    }
+                    else if (menuPointInRect(event.button.x, event.button.y, disconnectButton)) {
+                        sendDisconnect(&game);
+                        game.clientState = CLIENT_QUIT_STATE;
+                        running = 0;
+                    }
+                }
             }
             else if (game.clientState == CLIENT_LOBBY_STATE) {
                 if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
@@ -224,6 +243,10 @@ int main(int argc, char **argv)
         else if (game.clientState == CLIENT_DEAD_STATE) {
             receiveStatus(&game, &serverPacket, &clientPacket);
             render(&game);
+        }
+        else if (game.clientState == CLIENT_END_STATE) {
+            recieveStatus(&game, &serverPacket, &clientPacket);
+            renderEndScreen(&game, &serverPacket);
         }
         else if (game.clientState == CLIENT_QUIT_STATE) {
             running = 0;
@@ -355,6 +378,20 @@ static int initClient(ClientGame *game, const char *serverIp)
         return 0;
     }
 
+    game->winnerTexture = IMG_LoadTexture(game->renderer, "Resources/Sprite-winnerBanner.png");
+    if (!game->winnerTexture) {
+        printf("Error loading YouWin.png: %s\n", IMG_GetError());
+    }
+
+    game->loserTexture = IMG_LoadTexture(game->renderer, "Resources/Sprite-loseBanner.png");
+    if (!game->loserTexture) {
+        printf("Error loading YouLose.png: %s\n", IMG_GetError());
+    }
+
+    SDL_Texture* resumeGameButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-backButton.png");
+    if (!resumeGameButton) {
+        printf("Error loading resumeGame.png: %s\n", IMG_GetError());
+        free(resumeGameButton);
     game->swedenSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-swedenSkinButton.png");
     if (!game->swedenSkinButton) {
         printf("Error loading swedenSkinButton.png: %s\n", IMG_GetError());
@@ -510,6 +547,37 @@ static void sendInput(ClientGame *game, ClientPacket *clientPacket)
     SDLNet_UDP_Send(game->socket, -1, game->sendPacket);
 }
 
+static void sendReplay(ClientGame *game)
+{
+    ClientPacket packet;
+    memset(&packet, 0, sizeof(packet));
+
+    packet.packetType = CLIENT_REPLAY_PACKET;
+    packet.playerId = game->playerId;
+
+    memcpy(game->sendPacket->data, &packet, sizeof(packet));
+    game->sendPacket->len = sizeof(packet);
+    game->sendPacket->address = game->serverAddress;
+
+    SDLNet_UDP_Send(game->socket, -1, game->sendPacket);
+}
+
+
+static void sendDisconnect(ClientGame *game)
+{
+    ClientPacket packet;
+    memset(&packet, 0, sizeof(packet));
+
+    packet.packetType = CLIENT_DISCONNECT_PACKET;
+    packet.playerId = game->playerId;
+
+    memcpy(game->sendPacket->data, &packet, sizeof(packet));
+    game->sendPacket->len = sizeof(packet);
+    game->sendPacket->address = game->serverAddress;
+
+    SDLNet_UDP_Send(game->socket, -1, game->sendPacket);
+}
+
 static void updateGameVar(ClientGame *game, ServerPacket *serverPacket, ClientPacket *clientPacket)
 {
     game->playerId = serverPacket->playerId;
@@ -560,6 +628,10 @@ static void receiveStatus(ClientGame *game, ServerPacket *serverPacket, ClientPa
             case CLIENT_DEAD_STATE:
                 updateGameVar(game, serverPacket, clientPacket);
                 game->clientState = CLIENT_DEAD_STATE;
+                break;
+            case CLIENT_END_STATE:
+                updateGameVar(game, serverPacket, clientPacket);
+                game->clientState = CLIENT_END_STATE;
                 break;
             case CLIENT_QUIT_STATE:
                 printf("Ignoring invalid clientState from server: %d\n",
@@ -621,6 +693,9 @@ static void closeClient(ClientGame *game)
     if (game->newGameButton)  SDL_DestroyTexture(game->newGameButton);
     if (game->settingsButton) SDL_DestroyTexture(game->settingsButton);
     if (game->exitGameButton) SDL_DestroyTexture(game->exitGameButton);
+    if (game->backButton) SDL_DestroyTexture(game->backButton);
+    if (game->winnerTexture) SDL_DestroyTexture(game->winnerTexture);
+    if (game->loserTexture) SDL_DestroyTexture(game->loserTexture);
     if (game->backButton)     SDL_DestroyTexture(game->backButton);
     if (game->swedenSkinButton) SDL_DestroyTexture(game->swedenSkinButton);
     if (game->denmarkSkinButton) SDL_DestroyTexture(game->denmarkSkinButton);
@@ -687,6 +762,65 @@ static void renderLobby(ClientGame *game)
 
     SDL_RenderPresent(game->renderer);
 }
+
+static void renderEndScreen(ClientGame *game, ServerPacket *serverPacket)
+{
+    SDL_SetWindowTitle(game->window, "Tank Turtles Client - Game Over");
+
+    SDL_RenderClear(game->renderer);
+
+    if (game->background) {
+        SDL_RenderCopy(game->renderer, game->background, NULL, NULL);
+    }
+
+    SDL_Texture *resultTexture;
+
+    if (game->playerId == serverPacket->winnerId) {
+        resultTexture = game->winnerTexture;
+    }
+    else {
+        resultTexture = game->loserTexture;
+    }
+
+    SDL_Rect resultRect = {
+        WINDOW_WIDTH / 2 - 200,
+        130,
+        400,
+        190
+    };
+
+    if (resultTexture) {
+        SDL_RenderCopy(game->renderer, resultTexture, NULL, &resultRect);
+    }
+
+    SDL_Rect playAgainButton = {
+        WINDOW_WIDTH / 2 - 170,
+        610,
+        340,
+        80
+    };
+
+    SDL_Rect disconnectButton = {
+        WINDOW_WIDTH / 2 - 170,
+        710,
+        340,
+        80
+    };
+
+    SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(game->renderer, &playAgainButton);
+    SDL_RenderFillRect(game->renderer, &disconnectButton);
+
+    SDL_SetRenderDrawColor(game->renderer, 255, 255, 255, 255);
+    SDL_RenderDrawRect(game->renderer, &playAgainButton);
+    SDL_RenderDrawRect(game->renderer, &disconnectButton);
+
+    drawText(game, "PLAY AGAIN", playAgainButton.x + 80, playAgainButton.y + 22, (SDL_Color){255, 255, 255, 255});
+    drawText(game, "DISCONNECT", disconnectButton.x + 65, disconnectButton.y + 22, (SDL_Color){255, 255, 255, 255});
+
+    SDL_RenderPresent(game->renderer);
+}
+
 
 static void drawText(ClientGame *game, const char *text, int x, int y, SDL_Color color)
 {

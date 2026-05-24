@@ -19,5 +19,8 @@ static void prepareClientPacket(ServerGame *game, ServerPacket *serverPacket, in
 static void sendStatus(ServerGame *game, ServerPacket *serverPacket);
 static void closeServer(ServerGame *game);
 static int connectedClientCount(ServerGame *game);
+static int aliveClientCount(ServerGame *game);
+static void resetRound(ServerGame *game);
+static int getWinnerId(ServerGame *game);
 
 #endif

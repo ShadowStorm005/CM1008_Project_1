@@ -18,7 +18,9 @@
 typedef enum {
     CLIENT_JOIN_PACKET,
     CLIENT_IDLE_PACKET,
-    CLIENT_INPUT_PACKET
+    CLIENT_INPUT_PACKET,
+    CLIENT_REPLAY_PACKET,
+    CLIENT_DISCONNECT_PACKET
 } ClientPacketTypes;
 
 typedef enum {
@@ -46,6 +48,7 @@ typedef enum {
     CLIENT_PLAYING_STATE,
     CLIENT_INGAME_MENU_STATE,
     CLIENT_DEAD_STATE,
+    CLIENT_END_STATE,
     CLIENT_QUIT_STATE
 } ClientState;
 
@@ -102,6 +105,7 @@ typedef struct {
     ServerState serverState;
     ClientState clientState;
     uint8_t playerId;
+    uint8_t winnerId;
     uint8_t tileChangeCount;
 } ServerPacket;
 
