@@ -38,6 +38,11 @@ struct clientgame{
     SDL_Texture *exitGameButton;
     SDL_Texture *backButton;
     SDL_Texture *newGameButton;
+    SDL_Texture *changeSkinsButton;
+    SDL_Texture *swedenSkinButton;
+    SDL_Texture *denmarkSkinButton;
+    SDL_Texture *germanySkinButton;
+    SDL_Texture *russiaSkinButton;
 
     char serverIpText[IP_TEXT_MAX];
 
@@ -329,6 +334,41 @@ static int initClient(ClientGame *game, const char *serverIp)
         return 0;
     }
 
+    SDL_Texture* changeSkinsButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-changeSkinsButton.png");
+    if (!changeSkinsButton) {
+        printf("Error loading changeSkinsButton.png: %s\n", IMG_GetError());
+        free(changeSkinsButton);
+        return 0;
+    }
+
+    SDL_Texture* swedenSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-swedenSkinButton.png");
+    if (!swedenSkinButton) {
+        printf("Error loading swedenSkinButton.png: %s\n", IMG_GetError());
+        free(swedenSkinButton);
+        return 0;
+    }
+
+    SDL_Texture* denmarkSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-denmarkSkinButton.png");
+    if (!denmarkSkinButton) {
+        printf("Error loading denmarkSkinButton.png: %s\n", IMG_GetError());
+        free(denmarkSkinButton);
+        return 0;
+    }
+
+    SDL_Texture* germanySkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-germanySkinButton.png");
+    if (!germanySkinButton) {
+        printf("Error loading germanySkinButton.png: %s\n", IMG_GetError());
+        free(germanySkinButton);
+        return 0;
+    }
+
+    SDL_Texture* russiaSkinButton = IMG_LoadTexture(game->renderer, "Resources/Sprite-russiaSkinButton.png");
+    if (!russiaSkinButton) {
+        printf("Error loading russiaSkinButton.png: %s\n", IMG_GetError());
+        free(russiaSkinButton);
+        return 0;
+    }
+
     for(int i = 0; i < MAX_BULLETS; i++)
     {
         game->projectiles[i] = createProjectile(game->renderer);
@@ -568,6 +608,11 @@ static void closeClient(ClientGame *game)
     if (game->settingsButton) SDL_DestroyTexture(game->settingsButton);
     if (game->exitGameButton) SDL_DestroyTexture(game->exitGameButton);
     if (game->backButton)     SDL_DestroyTexture(game->backButton);
+    if (game->changeSkinsButton) SDL_DestroyTexture(game->changeSkinsButton);
+    if (game->swedenSkinButton) SDL_DestroyTexture(game->swedenSkinButton);
+    if (game->denmarkSkinButton) SDL_DestroyTexture(game->denmarkSkinButton);
+    if (game->germanySkinButton) SDL_DestroyTexture(game->germanySkinButton);
+    if (game->russiaSkinButton) SDL_DestroyTexture(game->russiaSkinButton);
 
     SDLNet_Quit();
     IMG_Quit();
@@ -623,8 +668,8 @@ static void renderLobby(ClientGame *game)
     }
 
     drawText(game, "LOBBY", WINDOW_WIDTH / 2 - 70, 220, (SDL_Color){255, 255, 255, 255});
-    drawText(game, "Waiting for more players...", WINDOW_WIDTH / 2 - 230, 330, (SDL_Color){255, 255, 255, 255});
-    drawText(game, "The game starts automatically when 4 clients are connected.", WINDOW_WIDTH / 2 - 390, 390, (SDL_Color){255, 255, 255, 255});
+    drawText(game, "Waiting for another player...", WINDOW_WIDTH / 2 - 230, 330, (SDL_Color){255, 255, 255, 255});
+    drawText(game, "The game starts automatically when 2 clients are connected.", WINDOW_WIDTH / 2 - 390, 390, (SDL_Color){255, 255, 255, 255});
     drawText(game, "Press ESC to go back to menu.", WINDOW_WIDTH / 2 - 230, 480, (SDL_Color){255, 255, 255, 255});
 
     SDL_RenderPresent(game->renderer);
