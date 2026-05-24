@@ -128,12 +128,6 @@ int main(int argc, char **argv)
                         changePlayerSkin(game.players[game.playerId], game.selectedSkin);
                     }
                 }
-                else if (action == MENU_ACTION_SELECT_GERMANY) {
-                    game.selectedSkin = SKIN_DEUTSCH;
-                    if (game.playerId != UNKNOWN_PLAYER && game.players[game.playerId]) {
-                        changePlayerSkin(game.players[game.playerId], game.selectedSkin);
-                    }
-                }
             }
 
             else if (game.clientState == CLIENT_CONNECT_STATE) {
@@ -205,7 +199,8 @@ int main(int argc, char **argv)
                                game.swedenSkinButton,
                                game.germanySkinButton,
                                game.russiaSkinButton,
-                               game.denmarkSkinButton);
+                               game.denmarkSkinButton
+                            );
         }
 
         else if (game.clientState == CLIENT_CONNECT_STATE) {

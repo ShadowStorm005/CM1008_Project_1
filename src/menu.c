@@ -144,6 +144,12 @@ MenuAction handleSettingsMenuEvent(SDL_Event *event)
         if (menuPointInRect(event->button.x, event->button.y, germanySkinRect())) {
             return MENU_ACTION_SELECT_GERMANY;
         }
+        if (menuPointInRect(event->button.x, event->button.y, russiaSkinRect())) {
+            return MENU_ACTION_SELECT_RUSSIA;
+        }
+        if (menuPointInRect(event->button.x, event->button.y, denmarkSkinRect())) {
+            return MENU_ACTION_SELECT_DENMARK;
+        }
         if (menuPointInRect(event->button.x, event->button.y, backRect())) {
             return MENU_ACTION_BACK;
         }
