@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define SERVER_PORT 1234
-#define DEFAULT_SERVER_IP "192.168.0.103"
+#define DEFAULT_SERVER_IP "192.168.1.117"
 
 #define MAX_PLAYERS 4
 #define MAX_TILE_CHANGES 128

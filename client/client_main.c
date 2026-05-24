@@ -623,8 +623,8 @@ static void renderLobby(ClientGame *game)
     }
 
     drawText(game, "LOBBY", WINDOW_WIDTH / 2 - 70, 220, (SDL_Color){255, 255, 255, 255});
-    drawText(game, "Waiting for another player...", WINDOW_WIDTH / 2 - 230, 330, (SDL_Color){255, 255, 255, 255});
-    drawText(game, "The game starts automatically when 2 clients are connected.", WINDOW_WIDTH / 2 - 390, 390, (SDL_Color){255, 255, 255, 255});
+    drawText(game, "Waiting for more players...", WINDOW_WIDTH / 2 - 230, 330, (SDL_Color){255, 255, 255, 255});
+    drawText(game, "The game starts automatically when 4 clients are connected.", WINDOW_WIDTH / 2 - 390, 390, (SDL_Color){255, 255, 255, 255});
     drawText(game, "Press ESC to go back to menu.", WINDOW_WIDTH / 2 - 230, 480, (SDL_Color){255, 255, 255, 255});
 
     SDL_RenderPresent(game->renderer);
