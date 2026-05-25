@@ -172,7 +172,6 @@ static int addClient(ServerGame *game, IPaddress *address)
 static void receivePacket(ServerGame *game)
 {
     while (SDLNet_UDP_Recv(game->socket, game->recvPacket)) {
-        printf("Server received a packet\n");
         ClientPacket clientPacket;
         memcpy(&clientPacket, game->recvPacket->data, sizeof(clientPacket));
 

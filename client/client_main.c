@@ -502,9 +502,7 @@ static void sendJoin(ClientGame *game)
 
     if (!sent) {
         printf("Failed to send join packet: %s\n", SDLNet_GetError());
-    } else {
-        printf("Join packet sent to server\n");
-    }
+    } 
 }
 
 static uint8_t getInput(const Uint8 *keys)
