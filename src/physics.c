@@ -159,6 +159,5 @@ void checkBulletPlayerCollision(Projectile *pProjectile, Player *pPlayer, Explos
         takeDamage(pPlayer, getBulletDamage(pProjectile));
         activateExplosion(pExplosion, bulletRect.x, bulletRect.y, SDL_GetTicks());
         inactivateBullet(pProjectile);
-        printf("Player took damage\n");
     }
 }
